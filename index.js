@@ -13,8 +13,11 @@ app.use(express.json());
 // Routes
 const categoriesRouter = require('./routes/categories');
 const productsRouter = require('./routes/products');
+const authRouter = require('./routes/auth');
+
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/auth', authRouter);
 
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 5000,
