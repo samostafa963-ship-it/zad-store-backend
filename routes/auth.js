@@ -5,9 +5,8 @@ const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_key';
-const GOOGLE_CLIENT_ID = '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com';
 
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client();
 
 // ── Register ──
 router.post('/register', async (req, res) => {
@@ -65,31 +64,30 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ message: 'Token مطلوب' });
     }
 
-    // التحقق من الـ token مع جوجل
     const ticket = await googleClient.verifyIdToken({
       idToken,
-      audience: GOOGLE_CLIENT_ID,
+      audience: [
+        '213514981477-j42arsf7oo03eb9mvhi8liq78v2etvmh.apps.googleusercontent.com',
+        '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com',
+      ],
     });
 
     const payload = ticket.getPayload();
     const { email, name, picture, sub: googleId } = payload;
 
-    // دور المستخدم في الداتابيز
     let user = await User.findOne({ email });
 
     if (!user) {
-      // مستخدم جديد - سجله تلقائي
       user = new User({
         name,
         email,
-        password: `google_${googleId}`, // password وهمي
+        password: `google_${googleId}`,
         phone: '',
         googleId,
         avatar: picture,
       });
       await user.save();
     } else {
-      // مستخدم موجود - حدث بياناته
       user.googleId = googleId;
       user.avatar = picture;
       await user.save();
@@ -108,6 +106,7 @@ router.post('/google', async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Google Auth Error:', err.message);
     res.status(401).json({ message: 'فشل التحقق من جوجل', error: err.message });
   }
 });
