@@ -1,37 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_key';
+const GOOGLE_CLIENT_ID = '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com';
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ── Register ──
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
-
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'يرجى ملء جميع الحقول' });
     }
-
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ message: 'البريد الإلكتروني مستخدم بالفعل' });
     }
-
     const user = new User({ name, email, password, phone });
     await user.save();
-
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
-
     res.status(201).json({
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      }
+      user: { _id: user._id, name: user.name, email: user.email, phone: user.phone }
     });
   } catch (err) {
     res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
@@ -42,19 +36,63 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ message: 'يرجى إدخال البريد وكلمة المرور' });
     }
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'البريد الإلكتروني غير موجود' });
     }
-
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'كلمة المرور غلط' });
+    }
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      token,
+      user: { _id: user._id, name: user.name, email: user.email, phone: user.phone }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
+  }
+});
+
+// ── Google Sign-In ──
+router.post('/google', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ message: 'Token مطلوب' });
+    }
+
+    // التحقق من الـ token مع جوجل
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+
+    // دور المستخدم في الداتابيز
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // مستخدم جديد - سجله تلقائي
+      user = new User({
+        name,
+        email,
+        password: `google_${googleId}`, // password وهمي
+        phone: '',
+        googleId,
+        avatar: picture,
+      });
+      await user.save();
+    } else {
+      // مستخدم موجود - حدث بياناته
+      user.googleId = googleId;
+      user.avatar = picture;
+      await user.save();
     }
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
@@ -66,10 +104,11 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        avatar: user.avatar,
       }
     });
   } catch (err) {
-    res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
+    res.status(401).json({ message: 'فشل التحقق من جوجل', error: err.message });
   }
 });
 
