@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
-const mongoose = require('mongoose');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_key';
-
 const googleClient = new OAuth2Client();
 
 // ── Register ──
@@ -79,10 +78,11 @@ router.post('/google', async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
+      const hashedPassword = await bcrypt.hash(`google_${googleId}`, 10);
       user = new User({
         name,
         email,
-        password: `google_${googleId}`,
+        password: hashedPassword,
         phone: '',
         googleId,
         avatar: picture,
