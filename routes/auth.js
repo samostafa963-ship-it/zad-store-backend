@@ -113,4 +113,83 @@ router.post('/google', async (req, res) => {
   }
 });
 
+// ── Send OTP ──
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ message: 'رقم الهاتف مطلوب' });
+    }
+
+    const client = require('twilio')(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    await client.verify.v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verifications.create({
+        to: phone,
+        channel: 'sms',
+      });
+
+    res.json({ message: 'تم إرسال الكود بنجاح' });
+  } catch (err) {
+    console.error('OTP Error:', err.message);
+    res.status(500).json({ message: 'فشل إرسال الكود', error: err.message });
+  }
+});
+
+// ── Verify OTP ──
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { phone, code } = req.body;
+    if (!phone || !code) {
+      return res.status(400).json({ message: 'رقم الهاتف والكود مطلوبان' });
+    }
+
+    const client = require('twilio')(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    const verification = await client.verify.v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verificationChecks.create({
+        to: phone,
+        code,
+      });
+
+    if (verification.status !== 'approved') {
+      return res.status(400).json({ message: 'الكود غلط أو منتهي' });
+    }
+
+    let user = await User.findOne({ phone });
+    if (!user) {
+      const hashedPassword = await bcrypt.hash(`phone_${phone}`, 10);
+      user = new User({
+        name: 'مستخدم جديد',
+        email: `${phone.replace('+', '')}@zad.app`,
+        password: hashedPassword,
+        phone,
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      }
+    });
+  } catch (err) {
+    console.error('Verify OTP Error:', err.message);
+    res.status(500).json({ message: 'فشل التحقق', error: err.message });
+  }
+});
+
 module.exports = router;
