@@ -19,7 +19,8 @@ router.post('/register', async (req, res) => {
     if (existing) {
       return res.status(400).json({ message: 'البريد الإلكتروني مستخدم بالفعل' });
     }
-    const user = new User({ name, email, password, phone });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password: hashedPassword, phone });
     await user.save();
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
     res.status(201).json({
