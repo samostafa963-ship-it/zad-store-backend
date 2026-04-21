@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_key';
 
