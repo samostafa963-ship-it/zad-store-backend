@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dns = require('dns');
 const ordersRouter = require('./routes/orders'); // ← واحدة بس
+const bannersRouter = require('./routes/banners');
 
 require('dotenv').config();
 
@@ -20,6 +21,7 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/banners', bannersRouter);
 
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 5000,
