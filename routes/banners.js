@@ -21,4 +21,14 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.get('/mini', async (req, res) => {
+  try {
+    const MiniBanner = require('../models/MiniBanner');
+    const banners = await MiniBanner.find({ isActive: true }).sort({ order: 1 });
+    res.json({ success: true, banners });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
