@@ -6,4 +6,4 @@ const miniBannerSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
 }, { timestamps: true });
 
-module.exports = mongoose.model('MiniBanner', miniBannerSchema);
+module.exports = mongoose.model('MiniBanner', miniBannerSchema, 'mini_banners');
