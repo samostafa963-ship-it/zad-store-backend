@@ -11,17 +11,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/category/:key', async (req, res) => {
-  try {
-    const products = await Product.find({
-      category_key: req.params.key
-    }).sort({ order: 1 });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// ✅ الـ grouped الأول قبل /:key
 router.get('/category/:key/grouped', async (req, res) => {
   try {
     const products = await Product.aggregate([
@@ -35,6 +25,17 @@ router.get('/category/:key/grouped', async (req, res) => {
       },
       { $sort: { sub_category_order: 1 } }
     ]);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/category/:key', async (req, res) => {
+  try {
+    const products = await Product.find({
+      category_key: req.params.key
+    }).sort({ order: 1 });
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
