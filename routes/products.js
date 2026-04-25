@@ -1,3 +1,27 @@
+const express = require('express');
+const router = express.Router();
+const Product = require('../models/Product');
+
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/category/:key', async (req, res) => {
+  try {
+    const products = await Product.find({
+      category_key: req.params.key
+    }).sort({ order: 1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/category/:key/grouped', async (req, res) => {
   try {
     const products = await Product.aggregate([
@@ -16,3 +40,5 @@ router.get('/category/:key/grouped', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+module.exports = router;
