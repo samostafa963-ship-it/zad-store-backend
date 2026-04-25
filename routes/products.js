@@ -14,26 +14,26 @@ router.get('/', async (req, res) => {
 router.get('/category/:key', async (req, res) => {
   try {
     const products = await Product.find({
-      parent_category: req.params.key
-    });
+      category_key: req.params.key
+    }).sort({ order: 1 });
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ── جيب المنتجات مجمعة بالـ sub_category ──
 router.get('/category/:key/grouped', async (req, res) => {
   try {
     const products = await Product.aggregate([
-      { $match: { parent_category: req.params.key } },
+      { $match: { category_key: req.params.key } },
       {
         $group: {
-          _id: "$category",
-          products: { $push: "$$ROOT" }
+          _id: "$sub_category",
+          products: { $push: "$$ROOT" },
+          order: { $first: "$order" }
         }
       },
-      { $sort: { _id: 1 } }
+      { $sort: { order: 1 } }
     ]);
     res.json(products);
   } catch (err) {
