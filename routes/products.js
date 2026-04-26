@@ -83,10 +83,9 @@ async function processBatch() {
   if (isRunning) return;
   isRunning = true;
   try {
-    const products = await Product.find({
-      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }],
-    }).limit(BATCH_LIMIT);
-
+   const products = await Product.find({
+  $or: [{ image: '' }, { image: null }, { image: { $exists: false } }, { image: 'no_image' }],
+}).limit(BATCH_LIMIT);
     if (products.length === 0) {
       console.log('✅ كل الصور اتحطت!');
       isRunning = false;
