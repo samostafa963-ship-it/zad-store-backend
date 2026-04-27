@@ -1,412 +1,406 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>زاد - لوحة رفع الصور</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --pink: #E91E8C;
-      --pink-light: #fce4f3;
-      --pink-dark: #c01470;
-      --green: #e8f5e9;
-      --gray: #f5f5f5;
-      --dark: #1a1a2e;
-      --text: #333;
-    }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: var(--gray);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    header {
-      background: var(--pink);
-      color: white;
-      padding: 20px 30px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 4px 20px rgba(233,30,140,0.3);
-    }
-
-    header h1 { font-size: 24px; font-weight: 900; }
-    header p { font-size: 13px; opacity: 0.85; }
-
-    .logo { font-size: 36px; }
-
-    .controls {
-      padding: 20px 30px;
-      background: white;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .controls input {
-      flex: 1;
-      padding: 10px 15px;
-      border: 2px solid #eee;
-      border-radius: 10px;
-      font-family: 'Cairo', sans-serif;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .controls input:focus { border-color: var(--pink); }
-
-    .stats {
-      display: flex;
-      gap: 10px;
-      font-size: 13px;
-    }
-
-    .stat {
-      background: var(--pink-light);
-      color: var(--pink-dark);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: 700;
-    }
-
-    .stat.green {
-      background: var(--green);
-      color: #2e7d32;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      padding: 25px 30px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-
-    .card.has-image { border: 2px solid #4caf50; }
-    .card.no-image { border: 2px solid #eee; }
-
-    .img-container {
-      width: 100%;
-      height: 180px;
-      background: var(--gray);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .img-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .no-img-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      color: #bbb;
-    }
-
-    .no-img-placeholder span { font-size: 40px; }
-    .no-img-placeholder p { font-size: 12px; }
-
-    .card-body { padding: 15px; }
-
-    .product-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 4px;
-      line-height: 1.4;
-    }
-
-    .product-sub {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 12px;
-    }
-
-    .upload-btn {
-      width: 100%;
-      padding: 10px;
-      background: var(--pink);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Cairo', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .upload-btn:hover { background: var(--pink-dark); }
-    .upload-btn.success { background: #4caf50; }
-    .upload-btn.loading { background: #999; cursor: not-allowed; }
-
-    .upload-input { display: none; }
-
-    .badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #4caf50;
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 10px;
-    }
-
-    .loading-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 60vh;
-      flex-direction: column;
-      gap: 15px;
-      color: var(--pink);
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid var(--pink-light);
-      border-top-color: var(--pink);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .filter-btns {
-      display: flex;
-      gap: 8px;
-    }
-
-    .filter-btn {
-      padding: 8px 16px;
-      border: 2px solid #eee;
-      border-radius: 20px;
-      background: white;
-      font-family: 'Cairo', sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: 600;
-    }
-
-    .filter-btn.active {
-      background: var(--pink);
-      color: white;
-      border-color: var(--pink);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 600;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1000;
-    }
-
-    .toast.show { opacity: 1; }
-    .toast.success { background: #4caf50; }
-    .toast.error { background: #f44336; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>زاد - لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --pink: #E91E8C; --pink-dark: #c01470; --pink-light: #fce4f3;
+  --green: #4caf50; --red: #f44336; --orange: #ff9800;
+  --bg: #f8f9fa; --white: #fff; --text: #2d2d2d; --gray: #888;
+  --border: #eee; --sidebar: #1a1a2e;
+}
+body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: var(--sidebar); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
+.sidebar-logo .icon { font-size: 28px; }
+.sidebar-logo h2 { font-size: 20px; font-weight: 900; color: var(--pink); }
+.sidebar-logo p { font-size: 11px; opacity: 0.5; }
+.nav { flex: 1; padding: 15px 0; overflow-y: auto; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; transition: all 0.2s; border-right: 3px solid transparent; color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 600; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+.nav-item.active { background: rgba(233,30,140,0.15); color: var(--pink); border-right-color: var(--pink); }
+.nav-item .nav-icon { font-size: 20px; width: 24px; text-align: center; }
+.main { margin-right: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: var(--white); padding: 16px 30px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.page-title { font-size: 20px; font-weight: 900; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.content { padding: 25px 30px; flex: 1; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 25px; }
+.stat-card { background: var(--white); border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.stat-info h3 { font-size: 24px; font-weight: 900; }
+.stat-info p { font-size: 12px; color: var(--gray); }
+.table-card { background: var(--white); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; }
+.table-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.table-header h3 { font-size: 16px; font-weight: 700; }
+.search-box { padding: 8px 14px; border: 2px solid var(--border); border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 13px; outline: none; }
+.search-box:focus { border-color: var(--pink); }
+table { width: 100%; border-collapse: collapse; }
+th { background: var(--bg); padding: 12px 16px; text-align: right; font-size: 12px; color: var(--gray); font-weight: 700; border-bottom: 1px solid var(--border); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+.product-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
+.no-img { width: 45px; height: 45px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+.btn-primary { background: var(--pink); color: white; }
+.btn-primary:hover { background: var(--pink-dark); }
+.btn-success { background: var(--green); color: white; }
+.btn-danger { background: var(--red); color: white; }
+.btn-warning { background: var(--orange); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-success { background: #e8f5e9; color: var(--green); }
+.badge-danger { background: #ffebee; color: var(--red); }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--white); border-radius: 16px; padding: 28px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-header h3 { font-size: 18px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray); }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: var(--pink); }
+.img-upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.img-upload-area:hover { border-color: var(--pink); background: var(--pink-light); }
+.img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.img-card { background: var(--white); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid var(--border); }
+.img-card.has-img { border-color: var(--green); }
+.img-card-img { width: 100%; height: 160px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--gray); overflow: hidden; }
+.img-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.img-card-body { padding: 12px; }
+.img-card-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.img-card-sub { font-size: 11px; color: var(--gray); margin-bottom: 10px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 9999; }
+.toast.show { opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+.loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: var(--gray); flex-direction: column; gap: 12px; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--pink-light); border-top-color: var(--pink); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pagination { display: flex; gap: 8px; align-items: center; padding: 15px 20px; justify-content: flex-end; flex-wrap: wrap; }
+.page-btn { width: 34px; height: 34px; border: 2px solid var(--border); border-radius: 8px; background: var(--white); cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px; transition: all 0.2s; }
+.page-btn:hover, .page-btn.active { background: var(--pink); color: white; border-color: var(--pink); }
+</style>
 </head>
 <body>
 
-<header>
-  <div class="logo">🛒</div>
-  <div>
-    <h1>لوحة رفع الصور - زاد</h1>
-    <p>ارفع صور المنتجات بسهولة</p>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">🛒</div>
+    <div><h2>زاد</h2><p>لوحة التحكم</p></div>
   </div>
-</header>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> الرئيسية</div>
+    <div class="nav-item" onclick="showPage('products',this)"><span class="nav-icon">📦</span> المنتجات</div>
+    <div class="nav-item" onclick="showPage('images',this)"><span class="nav-icon">🖼️</span> الصور</div>
+    <div class="nav-item" onclick="showPage('categories',this)"><span class="nav-icon">🗂️</span> الأقسام</div>
+    <div class="nav-item" onclick="showPage('banners',this)"><span class="nav-icon">🎨</span> البنرات</div>
+  </nav>
+</aside>
 
-<div class="controls">
-  <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." oninput="filterProducts()">
-  <div class="filter-btns">
-    <button class="filter-btn active" onclick="setFilter('all', this)">الكل</button>
-    <button class="filter-btn" onclick="setFilter('no-image', this)">بدون صورة</button>
-    <button class="filter-btn" onclick="setFilter('has-image', this)">عندها صورة</button>
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">الرئيسية</div>
+    <div class="topbar-actions" id="topbarActions"></div>
   </div>
-  <div class="stats">
-    <span class="stat" id="totalStat">إجمالي: 0</span>
-    <span class="stat green" id="imageStat">عندها صورة: 0</span>
+  <div class="content" id="pageContent">
+    <div class="loading"><div class="spinner"></div><p>جاري التحميل...</p></div>
   </div>
 </div>
 
-<div id="content">
-  <div class="loading-screen">
-    <div class="spinner"></div>
-    <p>جاري تحميل المنتجات...</p>
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = '';
-  let allProducts = [];
-  let currentFilter = 'all';
+const API = '';
+let allProducts = [];
+let imgProducts = [];
+let productsPage = 1;
+const PER_PAGE = 20;
+let searchVal = '';
 
-  async function loadProducts() {
-    try {
-      const res = await fetch(`${API}/api/products`);
-      allProducts = await res.json();
-      updateStats();
-      renderProducts();
-    } catch (err) {
-      document.getElementById('content').innerHTML = '<div class="loading-screen"><p>❌ فشل تحميل المنتجات</p></div>';
-    }
-  }
+function showPage(page, el) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const titles = {dashboard:'الرئيسية',products:'المنتجات',images:'الصور',categories:'الأقسام',banners:'البنرات'};
+  document.getElementById('pageTitle').textContent = titles[page];
+  const actions = {
+    products: `<button class="btn btn-primary" onclick="openAddProduct()">➕ إضافة منتج</button>`,
+    banners: `<button class="btn btn-primary" onclick="openAddBanner()">➕ إضافة بنر</button>`,
+    images: `<input type="text" id="imgSearch" placeholder="🔍 بحث..." class="search-box" oninput="filterImages()" style="width:180px">
+             <select class="search-box" id="imgFilter" onchange="filterImages()">
+               <option value="all">الكل</option><option value="no-image">بدون صورة</option><option value="has-image">عندها صورة</option>
+             </select>`,
+    dashboard:'', categories:''
+  };
+  document.getElementById('topbarActions').innerHTML = actions[page] || '';
+  ({dashboard:loadDashboard,products:loadProducts,images:loadImages,categories:loadCategories,banners:loadBanners})[page]?.();
+}
 
-  function updateStats() {
-    const withImage = allProducts.filter(p => p.image && p.image !== '' && p.image !== 'no_image').length;
-    document.getElementById('totalStat').textContent = `إجمالي: ${allProducts.length}`;
-    document.getElementById('imageStat').textContent = `عندها صورة: ${withImage}`;
-  }
-
-  function setFilter(filter, btn) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderProducts();
-  }
-
-  function filterProducts() {
-    renderProducts();
-  }
-
-  function renderProducts() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    let filtered = allProducts;
-
-    if (currentFilter === 'no-image') {
-      filtered = filtered.filter(p => !p.image || p.image === '' || p.image === 'no_image');
-    } else if (currentFilter === 'has-image') {
-      filtered = filtered.filter(p => p.image && p.image !== '' && p.image !== 'no_image');
-    }
-
-    if (search) {
-      filtered = filtered.filter(p => p.name?.toLowerCase().includes(search) || p.sub_category?.toLowerCase().includes(search));
-    }
-
-    const grid = filtered.map(p => `
-      <div class="card ${p.image && p.image !== '' && p.image !== 'no_image' ? 'has-image' : 'no-image'}" id="card-${p._id}">
-        <div class="img-container">
-          ${p.image && p.image !== '' && p.image !== 'no_image'
-            ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">
-               <div class="badge">✓ صورة</div>`
-            : `<div class="no-img-placeholder">
-                <span>📷</span>
-                <p>لا توجد صورة</p>
-               </div>`
-          }
-        </div>
-        <div class="card-body">
-          <div class="product-name">${p.name || 'بدون اسم'}</div>
-          <div class="product-sub">${p.sub_category || ''} • ${p.price || 0} جنيه</div>
-          <input type="file" accept="image/*" class="upload-input" id="file-${p._id}" onchange="uploadImage('${p._id}', this)">
-          <button class="upload-btn" id="btn-${p._id}" onclick="document.getElementById('file-${p._id}').click()">
-            📤 رفع صورة
-          </button>
-        </div>
+// DASHBOARD
+async function loadDashboard() {
+  document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const [products, banners] = await Promise.all([fetch(`${API}/api/products`).then(r=>r.json()), fetch(`${API}/api/banners`).then(r=>r.json())]);
+    const withImg = products.filter(p=>p.image&&p.image!==''&&p.image!=='no_image').length;
+    document.getElementById('pageContent').innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon" style="background:#fce4f3">📦</div><div class="stat-info"><h3>${products.length}</h3><p>إجمالي المنتجات</p></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9">🖼️</div><div class="stat-info"><h3>${withImg}</h3><p>منتجات بصور</p></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#fff3e0">⚠️</div><div class="stat-info"><h3>${products.length-withImg}</h3><p>بدون صور</p></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd">🎨</div><div class="stat-info"><h3>${banners.banners?.length||0}</h3><p>البنرات</p></div></div>
       </div>
-    `).join('');
+      <div class="table-card" style="padding:20px">
+        <h3 style="margin-bottom:12px">📈 نسبة اكتمال الصور</h3>
+        <div style="background:#eee;border-radius:20px;height:16px;overflow:hidden">
+          <div style="background:var(--pink);height:100%;width:${Math.round(withImg/products.length*100)}%;border-radius:20px"></div>
+        </div>
+        <p style="margin-top:8px;font-size:13px;color:var(--gray)">${Math.round(withImg/products.length*100)}% مكتمل</p>
+      </div>`;
+  } catch(e) { document.getElementById('pageContent').innerHTML = '<div class="loading">❌ فشل التحميل</div>'; }
+}
 
-    document.getElementById('content').innerHTML = `<div class="grid">${grid || '<div style="padding:40px;text-align:center;color:#999">لا توجد منتجات</div>'}</div>`;
-  }
+// PRODUCTS
+async function loadProducts() {
+  document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const res = await fetch(`${API}/api/products`);
+  allProducts = await res.json();
+  searchVal = '';
+  productsPage = 1;
+  renderProducts();
+}
 
-  async function uploadImage(productId, input) {
-    const file = input.files[0];
-    if (!file) return;
+function renderProducts() {
+  let filtered = allProducts;
+  if (searchVal) filtered = filtered.filter(p=>p.name?.includes(searchVal)||p.sub_category?.includes(searchVal));
+  const total = filtered.length;
+  const pages = Math.ceil(total/PER_PAGE);
+  const slice = filtered.slice((productsPage-1)*PER_PAGE, productsPage*PER_PAGE);
+  const rows = slice.map(p=>`
+    <tr>
+      <td>${p.image&&p.image!==''&&p.image!=='no_image'?`<img src="${p.image}" class="product-img" onerror="this.style.display='none'">`:`<div class="no-img">📷</div>`}</td>
+      <td><strong>${p.name||'-'}</strong></td>
+      <td>${p.sub_category||'-'}</td>
+      <td>${p.category_key||'-'}</td>
+      <td><strong style="color:var(--pink)">${p.price||0} جنيه</strong></td>
+      <td><span class="badge ${p.image&&p.image!==''&&p.image!=='no_image'?'badge-success':'badge-danger'}">${p.image&&p.image!==''&&p.image!=='no_image'?'✓ صورة':'لا صورة'}</span></td>
+      <td style="display:flex;gap:5px">
+        <button class="btn btn-warning btn-sm" onclick="editProduct('${p._id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p._id}','${p.name?.replace(/'/g,"\\'")}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+  const pgs = pages > 1 ? Array.from({length:pages},(_,i)=>`<button class="page-btn ${i+1===productsPage?'active':''}" onclick="productsPage=${i+1};renderProducts()">${i+1}</button>`).join('') : '';
+  document.getElementById('pageContent').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <h3>📦 المنتجات (${total})</h3>
+        <input class="search-box" placeholder="🔍 بحث..." value="${searchVal}" oninput="searchVal=this.value;productsPage=1;renderProducts()" style="width:220px">
+      </div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>الصورة</th><th>الاسم</th><th>القسم الفرعي</th><th>القسم</th><th>السعر</th><th>الصورة</th><th>إجراءات</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </div>
+      ${pgs ? `<div class="pagination">${pgs}</div>` : ''}
+    </div>`;
+}
 
-    const btn = document.getElementById(`btn-${productId}`);
-    btn.className = 'upload-btn loading';
-    btn.textContent = '⏳ جاري الرفع...';
+function openAddProduct() {
+  document.getElementById('modalTitle').textContent = '➕ إضافة منتج';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="pName" placeholder="اسم المنتج"></div>
+    <div class="form-group"><label class="form-label">السعر</label><input class="form-input" type="number" id="pPrice" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">القسم (category_key)</label><input class="form-input" id="pCat" placeholder="مثال: grocery"></div>
+    <div class="form-group"><label class="form-label">القسم الفرعي</label><input class="form-input" id="pSub" placeholder="مثال: المعلبات"></div>
+    <div class="form-group"><label class="form-label">الترتيب</label><input class="form-input" type="number" id="pOrder" value="0"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveProduct()">💾 حفظ</button>`;
+  document.getElementById('modal').classList.add('show');
+}
 
-    const formData = new FormData();
-    formData.append('image', file);
+async function saveProduct() {
+  const body = {name:document.getElementById('pName').value,price:+document.getElementById('pPrice').value,category_key:document.getElementById('pCat').value,sub_category:document.getElementById('pSub').value,order:+document.getElementById('pOrder').value,image:''};
+  await fetch(`${API}/api/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeModal(); showToast('✅ تم إضافة المنتج','success'); loadProducts();
+}
 
-    try {
-      const res = await fetch(`${API}/api/products/${productId}/upload-image`, {
-        method: 'POST',
-        body: formData,
-      });
+function editProduct(id) {
+  const p = allProducts.find(p=>p._id===id);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = '✏️ تعديل منتج';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="pName" value="${p.name||''}"></div>
+    <div class="form-group"><label class="form-label">السعر</label><input class="form-input" type="number" id="pPrice" value="${p.price||0}"></div>
+    <div class="form-group"><label class="form-label">القسم (category_key)</label><input class="form-input" id="pCat" value="${p.category_key||''}"></div>
+    <div class="form-group"><label class="form-label">القسم الفرعي</label><input class="form-input" id="pSub" value="${p.sub_category||''}"></div>
+    <div class="form-group"><label class="form-label">الترتيب</label><input class="form-input" type="number" id="pOrder" value="${p.order||0}"></div>
+    <div class="form-group"><label class="form-label">رابط الصورة</label><input class="form-input" id="pImg" value="${p.image||''}"></div>
+    <div class="form-group">
+      <label class="form-label">أو ارفع صورة جديدة</label>
+      <div class="img-upload-area" onclick="document.getElementById('editFile').click()"><div style="font-size:32px">📤</div><p>اضغط لرفع صورة</p></div>
+      <input type="file" id="editFile" accept="image/*" style="display:none" onchange="uploadEditImg(this,'${id}')">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="updateProduct('${id}')">💾 حفظ التعديلات</button>`;
+  document.getElementById('modal').classList.add('show');
+}
 
-      const data = await res.json();
+async function uploadEditImg(input, id) {
+  const file = input.files[0]; if (!file) return;
+  showToast('⏳ جاري رفع الصورة...','');
+  const fd = new FormData(); fd.append('image', file);
+  const res = await fetch(`${API}/api/products/${id}/upload-image`,{method:'POST',body:fd});
+  const data = await res.json();
+  if (data.image) { document.getElementById('pImg').value = data.image; showToast('✅ تم رفع الصورة','success'); }
+}
 
-      if (data.image) {
-        // حدث الصورة في الـ UI
-        const product = allProducts.find(p => p._id === productId);
-        if (product) product.image = data.image;
+async function updateProduct(id) {
+  const body = {name:document.getElementById('pName').value,price:+document.getElementById('pPrice').value,category_key:document.getElementById('pCat').value,sub_category:document.getElementById('pSub').value,order:+document.getElementById('pOrder').value,image:document.getElementById('pImg').value};
+  await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeModal(); showToast('✅ تم التعديل','success'); loadProducts();
+}
 
-        const card = document.getElementById(`card-${productId}`);
-        card.className = 'card has-image';
-        card.querySelector('.img-container').innerHTML = `
-          <img src="${data.image}" alt="">
-          <div class="badge">✓ صورة</div>
-        `;
-        btn.className = 'upload-btn success';
-        btn.textContent = '✅ تم الرفع';
-        updateStats();
-        showToast('✅ تم رفع الصورة بنجاح!', 'success');
-      } else {
-        throw new Error('فشل الرفع');
-      }
-    } catch (err) {
-      btn.className = 'upload-btn';
-      btn.textContent = '📤 رفع صورة';
-      showToast('❌ فشل رفع الصورة', 'error');
+async function deleteProduct(id, name) {
+  if (!confirm(`هل تريد حذف "${name}"؟`)) return;
+  await fetch(`${API}/api/products/${id}`,{method:'DELETE'});
+  showToast('🗑️ تم الحذف','success'); loadProducts();
+}
+
+// IMAGES
+async function loadImages() {
+  document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const res = await fetch(`${API}/api/products`);
+  imgProducts = await res.json();
+  renderImages();
+}
+
+function filterImages() { renderImages(); }
+
+function renderImages() {
+  const search = document.getElementById('imgSearch')?.value?.toLowerCase()||'';
+  const filter = document.getElementById('imgFilter')?.value||'all';
+  let f = imgProducts;
+  if (filter==='no-image') f = f.filter(p=>!p.image||p.image===''||p.image==='no_image');
+  if (filter==='has-image') f = f.filter(p=>p.image&&p.image!==''&&p.image!=='no_image');
+  if (search) f = f.filter(p=>p.name?.toLowerCase().includes(search));
+  const withImg = imgProducts.filter(p=>p.image&&p.image!==''&&p.image!=='no_image').length;
+  const cards = f.map(p=>`
+    <div class="img-card ${p.image&&p.image!==''&&p.image!=='no_image'?'has-img':''}" id="icard-${p._id}">
+      <div class="img-card-img" id="iimg-${p._id}">
+        ${p.image&&p.image!==''&&p.image!=='no_image'?`<img src="${p.image}" onerror="this.parentElement.innerHTML='📷'">`:'📷'}
+      </div>
+      <div class="img-card-body">
+        <div class="img-card-name">${p.name||'-'}</div>
+        <div class="img-card-sub">${p.sub_category||''}</div>
+        <input type="file" accept="image/*" id="ifile-${p._id}" style="display:none" onchange="uploadImgCard('${p._id}',this)">
+        <button class="btn btn-primary" style="width:100%;font-size:12px" id="ibtn-${p._id}" onclick="document.getElementById('ifile-${p._id}').click()">📤 رفع صورة</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('pageContent').innerHTML = `
+    <div style="margin-bottom:16px;display:flex;gap:10px">
+      <span class="badge badge-success">✓ ${withImg} عندها صورة</span>
+      <span class="badge badge-danger">✗ ${imgProducts.length-withImg} بدون صورة</span>
+    </div>
+    <div class="img-grid">${cards||'<div class="loading">لا توجد منتجات</div>'}</div>`;
+}
+
+async function uploadImgCard(id, input) {
+  const file = input.files[0]; if (!file) return;
+  const btn = document.getElementById(`ibtn-${id}`);
+  btn.textContent = '⏳ جاري الرفع...'; btn.disabled = true;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const res = await fetch(`${API}/api/products/${id}/upload-image`,{method:'POST',body:fd});
+    const data = await res.json();
+    if (data.image) {
+      const p = imgProducts.find(p=>p._id===id); if(p) p.image = data.image;
+      document.getElementById(`iimg-${id}`).innerHTML = `<img src="${data.image}" style="width:100%;height:100%;object-fit:cover">`;
+      document.getElementById(`icard-${id}`).classList.add('has-img');
+      btn.textContent = '✅ تم'; btn.style.background = 'var(--green)';
+      showToast('✅ تم رفع الصورة','success');
     }
-  }
+  } catch { btn.textContent = '❌ فشل'; btn.disabled = false; showToast('❌ فشل الرفع','error'); }
+}
 
-  function showToast(msg, type = '') {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.className = `toast ${type} show`;
-    setTimeout(() => toast.className = 'toast', 3000);
-  }
+// CATEGORIES
+async function loadCategories() {
+  document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const res = await fetch(`${API}/api/categories`);
+  const cats = await res.json();
+  const rows = cats.map(c=>`
+    <tr>
+      <td>${c.image_url?`<img src="${c.image_url}" class="product-img" onerror="this.style.display='none'">`:`<div class="no-img">🗂️</div>`}</td>
+      <td><strong>${c.name}</strong></td>
+      <td><code style="background:var(--bg);padding:2px 8px;border-radius:6px;font-size:12px">${c._id||'-'}</code></td>
+      <td>${c.order||0}</td>
+      <td><span class="badge badge-success">نشط</span></td>
+    </tr>`).join('');
+  document.getElementById('pageContent').innerHTML = `
+    <div class="table-card">
+      <div class="table-header"><h3>🗂️ الأقسام (${cats.length})</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>الصورة</th><th>الاسم</th><th>المفتاح</th><th>الترتيب</th><th>الحالة</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </div>
+    </div>`;
+}
 
-  loadProducts();
+// BANNERS
+async function loadBanners() {
+  document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const res = await fetch(`${API}/api/banners`);
+  const data = await res.json();
+  const banners = data.banners || [];
+  const cards = banners.map(b=>`
+    <div style="background:var(--white);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+      <img src="${b.image}" style="width:100%;height:160px;object-fit:cover" onerror="this.style.background='var(--bg)'">
+      <div style="padding:14px">
+        <div style="font-weight:700;margin-bottom:4px">${b.title||'بدون عنوان'}</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">ترتيب: ${b.order}</div>
+        <span class="badge ${b.isActive?'badge-success':'badge-danger'}">${b.isActive?'نشط':'غير نشط'}</span>
+      </div>
+    </div>`).join('');
+  document.getElementById('pageContent').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">${cards||'<div class="loading">لا توجد بنرات</div>'}</div>`;
+}
+
+function openAddBanner() {
+  document.getElementById('modalTitle').textContent = '➕ إضافة بنر';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label class="form-label">العنوان</label><input class="form-input" id="bTitle" placeholder="عنوان البنر"></div>
+    <div class="form-group"><label class="form-label">رابط الصورة</label><input class="form-input" id="bImg" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">الترتيب</label><input class="form-input" type="number" id="bOrder" value="0"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveBanner()">💾 حفظ</button>`;
+  document.getElementById('modal').classList.add('show');
+}
+
+async function saveBanner() {
+  const body = {title:document.getElementById('bTitle').value,image:document.getElementById('bImg').value,order:+document.getElementById('bOrder').value,isActive:true};
+  await fetch(`${API}/api/banners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeModal(); showToast('✅ تم إضافة البنر','success'); loadBanners();
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(()=>t.className='toast', 3000);
+}
+
+loadDashboard();
 </script>
 </body>
 </html>
