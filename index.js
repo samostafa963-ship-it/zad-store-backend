@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dns = require('dns');
-const ordersRouter = require('./routes/orders'); // ← واحدة بس
+const ordersRouter = require('./routes/orders');
 const bannersRouter = require('./routes/banners');
 
 require('dotenv').config();
@@ -18,12 +18,16 @@ const productsRouter = require('./routes/products');
 const authRouter = require('./routes/auth');
 const path = require('path');
 
-
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/banners', bannersRouter);
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.use('/admin', express.static(path.join(__dirname, 'public')));
 
 mongoose.connect(process.env.MONGO_URI, {
