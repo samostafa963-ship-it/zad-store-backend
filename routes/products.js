@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 const axios = require('axios');
 const https = require('https');
 const http = require('http');
@@ -20,6 +21,8 @@ cloudinary.config({
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 });
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 async function searchImage(productName, subCategory = '') {
   try {
@@ -83,9 +86,10 @@ async function processBatch() {
   if (isRunning) return;
   isRunning = true;
   try {
-   const products = await Product.find({
-  $or: [{ image: '' }, { image: null }, { image: { $exists: false } }, { image: 'no_image' }],
-}).limit(BATCH_LIMIT);
+    const products = await Product.find({
+      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }, { image: 'no_image' }],
+    }).limit(BATCH_LIMIT);
+
     if (products.length === 0) {
       console.log('✅ كل الصور اتحطت!');
       isRunning = false;
@@ -115,13 +119,11 @@ async function processBatch() {
   isRunning = false;
 }
 
-// شغل بعد 5 ثواني من الـ start
 setTimeout(async () => {
   console.log('⏰ بدأ أول batch...');
   await processBatch();
 }, 5000);
 
-// كل دقيقتين تلقائي
 setInterval(async () => {
   console.log('⏰ batch جديد...');
   await processBatch();
@@ -153,6 +155,29 @@ router.get('/category/:key', async (req, res) => {
   try {
     const products = await Product.find({ category_key: req.params.key }).sort({ order: 1 });
     res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ رفع صورة لمنتج معين
+router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'zad_products',
+          transformation: [
+            { width: 800, height: 800, crop: 'pad', background: 'white' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        },
+        (err, result) => err ? reject(err) : resolve(result)
+      ).end(req.file.buffer);
+    });
+
+    await Product.updateOne({ _id: req.params.id }, { $set: { image: result.secure_url } });
+    res.json({ image: result.secure_url });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

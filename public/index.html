@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>زاد - لوحة رفع الصور</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --pink: #E91E8C;
+      --pink-light: #fce4f3;
+      --pink-dark: #c01470;
+      --green: #e8f5e9;
+      --gray: #f5f5f5;
+      --dark: #1a1a2e;
+      --text: #333;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--gray);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--pink);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 20px rgba(233,30,140,0.3);
+    }
+
+    header h1 { font-size: 24px; font-weight: 900; }
+    header p { font-size: 13px; opacity: 0.85; }
+
+    .logo { font-size: 36px; }
+
+    .controls {
+      padding: 20px 30px;
+      background: white;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .controls input:focus { border-color: var(--pink); }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .stat {
+      background: var(--pink-light);
+      color: var(--pink-dark);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+
+    .stat.green {
+      background: var(--green);
+      color: #2e7d32;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 25px 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .card.has-image { border: 2px solid #4caf50; }
+    .card.no-image { border: 2px solid #eee; }
+
+    .img-container {
+      width: 100%;
+      height: 180px;
+      background: var(--gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .no-img-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #bbb;
+    }
+
+    .no-img-placeholder span { font-size: 40px; }
+    .no-img-placeholder p { font-size: 12px; }
+
+    .card-body { padding: 15px; }
+
+    .product-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .product-sub {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    .upload-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--pink);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .upload-btn:hover { background: var(--pink-dark); }
+    .upload-btn.success { background: #4caf50; }
+    .upload-btn.loading { background: #999; cursor: not-allowed; }
+
+    .upload-input { display: none; }
+
+    .badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #4caf50;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .loading-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      flex-direction: column;
+      gap: 15px;
+      color: var(--pink);
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--pink-light);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .filter-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #eee;
+      border-radius: 20px;
+      background: white;
+      font-family: 'Cairo', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .filter-btn.active {
+      background: var(--pink);
+      color: white;
+      border-color: var(--pink);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show { opacity: 1; }
+    .toast.success { background: #4caf50; }
+    .toast.error { background: #f44336; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🛒</div>
+  <div>
+    <h1>لوحة رفع الصور - زاد</h1>
+    <p>ارفع صور المنتجات بسهولة</p>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." oninput="filterProducts()">
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="setFilter('all', this)">الكل</button>
+    <button class="filter-btn" onclick="setFilter('no-image', this)">بدون صورة</button>
+    <button class="filter-btn" onclick="setFilter('has-image', this)">عندها صورة</button>
+  </div>
+  <div class="stats">
+    <span class="stat" id="totalStat">إجمالي: 0</span>
+    <span class="stat green" id="imageStat">عندها صورة: 0</span>
+  </div>
+</div>
+
+<div id="content">
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <p>جاري تحميل المنتجات...</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';
+  let allProducts = [];
+  let currentFilter = 'all';
+
+  async function loadProducts() {
+    try {
+      const res = await fetch(`${API}/api/products`);
+      allProducts = await res.json();
+      updateStats();
+      renderProducts();
+    } catch (err) {
+      document.getElementById('content').innerHTML = '<div class="loading-screen"><p>❌ فشل تحميل المنتجات</p></div>';
+    }
+  }
+
+  function updateStats() {
+    const withImage = allProducts.filter(p => p.image && p.image !== '' && p.image !== 'no_image').length;
+    document.getElementById('totalStat').textContent = `إجمالي: ${allProducts.length}`;
+    document.getElementById('imageStat').textContent = `عندها صورة: ${withImage}`;
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderProducts();
+  }
+
+  function filterProducts() {
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allProducts;
+
+    if (currentFilter === 'no-image') {
+      filtered = filtered.filter(p => !p.image || p.image === '' || p.image === 'no_image');
+    } else if (currentFilter === 'has-image') {
+      filtered = filtered.filter(p => p.image && p.image !== '' && p.image !== 'no_image');
+    }
+
+    if (search) {
+      filtered = filtered.filter(p => p.name?.toLowerCase().includes(search) || p.sub_category?.toLowerCase().includes(search));
+    }
+
+    const grid = filtered.map(p => `
+      <div class="card ${p.image && p.image !== '' && p.image !== 'no_image' ? 'has-image' : 'no-image'}" id="card-${p._id}">
+        <div class="img-container">
+          ${p.image && p.image !== '' && p.image !== 'no_image'
+            ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">
+               <div class="badge">✓ صورة</div>`
+            : `<div class="no-img-placeholder">
+                <span>📷</span>
+                <p>لا توجد صورة</p>
+               </div>`
+          }
+        </div>
+        <div class="card-body">
+          <div class="product-name">${p.name || 'بدون اسم'}</div>
+          <div class="product-sub">${p.sub_category || ''} • ${p.price || 0} جنيه</div>
+          <input type="file" accept="image/*" class="upload-input" id="file-${p._id}" onchange="uploadImage('${p._id}', this)">
+          <button class="upload-btn" id="btn-${p._id}" onclick="document.getElementById('file-${p._id}').click()">
+            📤 رفع صورة
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('content').innerHTML = `<div class="grid">${grid || '<div style="padding:40px;text-align:center;color:#999">لا توجد منتجات</div>'}</div>`;
+  }
+
+  async function uploadImage(productId, input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const btn = document.getElementById(`btn-${productId}`);
+    btn.className = 'upload-btn loading';
+    btn.textContent = '⏳ جاري الرفع...';
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch(`${API}/api/products/${productId}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.image) {
+        // حدث الصورة في الـ UI
+        const product = allProducts.find(p => p._id === productId);
+        if (product) product.image = data.image;
+
+        const card = document.getElementById(`card-${productId}`);
+        card.className = 'card has-image';
+        card.querySelector('.img-container').innerHTML = `
+          <img src="${data.image}" alt="">
+          <div class="badge">✓ صورة</div>
+        `;
+        btn.className = 'upload-btn success';
+        btn.textContent = '✅ تم الرفع';
+        updateStats();
+        showToast('✅ تم رفع الصورة بنجاح!', 'success');
+      } else {
+        throw new Error('فشل الرفع');
+      }
+    } catch (err) {
+      btn.className = 'upload-btn';
+      btn.textContent = '📤 رفع صورة';
+      showToast('❌ فشل رفع الصورة', 'error');
+    }
+  }
+
+  function showToast(msg, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `toast ${type} show`;
+    setTimeout(() => toast.className = 'toast', 3000);
+  }
+
+  loadProducts();
+</script>
+</body>
+</html>
