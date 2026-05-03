@@ -3,67 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>زاد - لوحة التحكم</title>
+<title>زورا - لوحة التحكم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--pink:#E91E8C;--pink-dark:#c01470;--pink-light:#fce4f3;--green:#4caf50;--red:#f44336;--orange:#ff9800;--blue:#2196f3;--bg:#f0f2f5;--white:#fff;--text:#2d2d2d;--gray:#888;--border:#e8e8e8;--sidebar:#0f0f1a}
+:root{
+  --primary:#D100BC;
+  --primary-dark:#8a007a;
+  --primary-light:#fce8f9;
+  --green:#4caf50;--red:#f44336;--orange:#ff9800;--blue:#2196f3;
+  --bg:#f5f0fc;--white:#fff;--text:#2d2d2d;--gray:#888;--border:#edd8f5;
+  --sidebar:#0f0a12
+}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
 /* SIDEBAR */
 .sidebar{width:240px;background:var(--sidebar);color:white;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;overflow:hidden}
 .logo{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px}
-.logo-icon{width:40px;height:40px;background:var(--pink);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.logo h2{font-size:18px;font-weight:900;color:#fff}
+.logo-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo h2{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px}
 .logo p{font-size:10px;color:rgba(255,255,255,0.4)}
 .nav{flex:1;padding:12px 0;overflow-y:auto}
 .nav-section{font-size:10px;color:rgba(255,255,255,0.3);padding:10px 18px 4px;font-weight:700;letter-spacing:1px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;transition:all 0.2s;border-right:3px solid transparent;color:rgba(255,255,255,0.5);font-size:13px;font-weight:600}
 .nav-item:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.85)}
-.nav-item.active{background:rgba(233,30,140,0.12);color:var(--pink);border-right-color:var(--pink)}
+.nav-item.active{background:rgba(209,0,188,0.15);color:var(--primary);border-right-color:var(--primary)}
 .nav-item .ni{font-size:17px;width:22px;text-align:center}
-.nav-badge{margin-right:auto;background:var(--pink);color:white;font-size:10px;padding:2px 7px;border-radius:10px}
+
 /* MAIN */
 .main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--white);padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:12px}
 .page-title{font-size:19px;font-weight:900}
 .topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .content{padding:22px 28px;flex:1}
+
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:22px}
-.stat-card{background:var(--white);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 8px rgba(0,0,0,0.05);border:1px solid var(--border)}
+.stat-card{background:var(--white);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border)}
 .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .stat-info h3{font-size:22px;font-weight:900;line-height:1}
 .stat-info p{font-size:11px;color:var(--gray);margin-top:3px}
+
 /* CARDS */
-.card{background:var(--white);border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.05);border:1px solid var(--border);overflow:hidden}
+.card{background:var(--white);border-radius:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border);overflow:hidden}
 .card-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .card-header h3{font-size:15px;font-weight:700}
+
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th{background:var(--bg);padding:11px 14px;text-align:right;font-size:11px;color:var(--gray);font-weight:700;border-bottom:1px solid var(--border)}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#fafafa}
+tr:hover td{background:#fdf5fc}
 .timg{width:42px;height:42px;border-radius:8px;object-fit:cover;background:var(--bg)}
 .tno-img{width:42px;height:42px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px}
+
 /* BUTTONS */
 .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;white-space:nowrap}
-.btn-pink{background:var(--pink);color:white}.btn-pink:hover{background:var(--pink-dark)}
+.btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
 .btn-green{background:var(--green);color:white}
 .btn-red{background:var(--red);color:white}
 .btn-orange{background:var(--orange);color:white}
 .btn-blue{background:var(--blue);color:white}
-.btn-ghost{background:transparent;border:2px solid var(--border);color:var(--text)}.btn-ghost:hover{border-color:var(--pink);color:var(--pink)}
+.btn-ghost{background:transparent;border:2px solid var(--border);color:var(--text)}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .btn-sm{padding:5px 10px;font-size:12px}
+
 /* BADGE */
 .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
 .badge-green{background:#e8f5e9;color:var(--green)}
 .badge-red{background:#ffebee;color:var(--red)}
 .badge-orange{background:#fff3e0;color:var(--orange)}
 .badge-blue{background:#e3f2fd;color:var(--blue)}
+.badge-primary{background:var(--primary-light);color:var(--primary-dark)}
+
 /* SEARCH */
 .search-input{padding:8px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s}
-.search-input:focus{border-color:var(--pink)}
+.search-input:focus{border-color:var(--primary)}
+
 /* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
@@ -71,53 +87,63 @@ tr:hover td{background:#fafafa}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .modal-hd h3{font-size:17px;font-weight:700}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);line-height:1}
+
 /* FORM */
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--text)}
 .fi{width:100%;padding:10px 13px;border:2px solid var(--border);border-radius:9px;font-family:'Cairo',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
-.fi:focus{border-color:var(--pink)}
+.fi:focus{border-color:var(--primary)}
 select.fi{cursor:pointer}
 .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s}
-.upload-zone:hover{border-color:var(--pink);background:var(--pink-light)}
+.upload-zone:hover{border-color:var(--primary);background:var(--primary-light)}
 .upload-zone .uz-icon{font-size:30px;margin-bottom:6px}
 .upload-zone p{font-size:12px;color:var(--gray)}
+
+/* BANNER GRID */
+.banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.banner-card{background:var(--white);border-radius:14px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s}
+.banner-card:hover{box-shadow:0 4px 20px rgba(209,0,188,0.12)}
+.banner-img{width:100%;height:150px;object-fit:cover;background:var(--bg);display:block}
+.banner-body{padding:14px}
+.banner-title{font-weight:700;margin-bottom:4px;font-size:14px}
+.banner-order{font-size:12px;color:var(--gray);margin-bottom:10px}
+.banner-actions{display:flex;gap:6px;align-items:center}
+
 /* IMG GRID */
-.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .img-card{background:var(--white);border-radius:12px;overflow:hidden;border:2px solid var(--border);transition:border-color 0.2s}
 .img-card.done{border-color:var(--green)}
-.img-card-pic{width:100%;height:150px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gray);overflow:hidden}
+.img-card-pic{width:100%;height:140px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gray);overflow:hidden}
 .img-card-pic img{width:100%;height:100%;object-fit:cover}
 .img-card-body{padding:11px}
 .img-card-name{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .img-card-sub{font-size:10px;color:var(--gray);margin-bottom:8px}
+
 /* TOAST */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:9999;white-space:nowrap}
 .toast.show{opacity:1}
 .toast.ok{background:var(--green)}
 .toast.err{background:var(--red)}
+
 /* MISC */
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--gray);flex-direction:column;gap:10px}
-.spin{width:36px;height:36px;border:3px solid var(--pink-light);border-top-color:var(--pink);border-radius:50%;animation:spin 0.8s linear infinite}
+.spin{width:36px;height:36px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .pagination{display:flex;gap:6px;padding:14px 18px;justify-content:flex-end;flex-wrap:wrap}
 .pg-btn{width:32px;height:32px;border:2px solid var(--border);border-radius:7px;background:var(--white);cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;transition:all 0.2s}
-.pg-btn:hover,.pg-btn.on{background:var(--pink);color:white;border-color:var(--pink)}
-.toggle{display:flex;align-items:center;gap:8px;cursor:pointer}
-.toggle input{width:40px;height:22px;appearance:none;background:#ccc;border-radius:11px;cursor:pointer;transition:background 0.2s;position:relative}
-.toggle input:checked{background:var(--green)}
-.toggle input::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;right:2px;transition:right 0.2s}
-.toggle input:checked::after{right:20px}
-.color-dot{width:20px;height:20px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,0.1)}
+.pg-btn:hover,.pg-btn.on{background:var(--primary);color:white;border-color:var(--primary)}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:600px){.two-col{grid-template-columns:1fr}.sidebar{width:60px}.main{margin-right:60px}.nav-item span:not(.ni){display:none}.logo h2,.logo p{display:none}}
+.progress-bar{background:#eee;border-radius:20px;height:14px;overflow:hidden}
+.progress-fill{background:var(--primary);height:100%;border-radius:20px;transition:width 1s}
+@media(max-width:768px){.sidebar{width:60px}.main{margin-right:60px}.nav-item span:not(.ni){display:none}.logo h2,.logo p{display:none}.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-icon">🛒</div>
-    <div><h2>زاد</h2><p>Admin Panel</p></div>
+    <div class="logo-icon">✦</div>
+    <div><h2>Zura</h2><p>Admin Panel</p></div>
   </div>
   <nav class="nav">
     <div class="nav-section">عام</div>
@@ -126,8 +152,9 @@ select.fi{cursor:pointer}
     <div class="nav-item" onclick="go('products',this)"><span class="ni">📦</span><span>المنتجات</span></div>
     <div class="nav-item" onclick="go('images',this)"><span class="ni">🖼️</span><span>الصور</span></div>
     <div class="nav-item" onclick="go('categories',this)"><span class="ni">🗂️</span><span>الأقسام</span></div>
-    <div class="nav-item" onclick="go('banners',this)"><span class="ni">🎨</span><span>البنرات</span></div>
-    <div class="nav-item" onclick="go('mini_banners',this)"><span class="ni">🖼</span><span>Mini بنرات</span></div>
+    <div class="nav-section">التسويق</div>
+    <div class="nav-item" onclick="go('banners',this)"><span class="ni">🎨</span><span>البنرات الكبيرة</span></div>
+    <div class="nav-item" onclick="go('mini_banners',this)"><span class="ni">🖼</span><span>البنرات الصغيرة</span></div>
   </nav>
 </aside>
 
@@ -148,22 +175,21 @@ select.fi{cursor:pointer}
 <div class="toast" id="T"></div>
 
 <script>
-const API='';
-let prods=[],imgProds=[],cats=[],banners=[],pp=1,ipp=1,sv='',isv='';
+const API='https://zad-store-backend-production.up.railway.app';
+let prods=[],imgProds=[],cats=[],banners=[],miniBanners=[],pp=1,ipp=1,sv='',isv='';
 const PER=25;
 
-// NAV
 function go(page,el){
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   el.classList.add('active');
-  const tls={dashboard:'الرئيسية',products:'المنتجات',images:'الصور',categories:'الأقسام',banners:'البنرات',mini_banners:'Mini بنرات'};
+  const tls={dashboard:'الرئيسية',products:'المنتجات',images:'الصور',categories:'الأقسام',banners:'البنرات الكبيرة',mini_banners:'البنرات الصغيرة'};
   document.getElementById('PT').textContent=tls[page]||page;
   const acts={
-    products:`<button class="btn btn-pink" onclick="openAdd('product')">➕ منتج جديد</button>`,
-    categories:`<button class="btn btn-pink" onclick="openAdd('category')">➕ قسم جديد</button>`,
-    banners:`<button class="btn btn-pink" onclick="openAdd('banner')">➕ بنر جديد</button>`,
-    mini_banners:`<button class="btn btn-pink" onclick="openAdd('minibanner')">➕ Mini بنر</button>`,
-    images:`<input class="search-input" id="IS" placeholder="🔍 بحث..." oninput="isv=this.value;renderImgs()" style="width:170px">
+    products:`<button class="btn btn-primary" onclick="openAdd('product')">➕ منتج جديد</button>`,
+    categories:`<button class="btn btn-primary" onclick="openAdd('category')">➕ قسم جديد</button>`,
+    banners:`<button class="btn btn-primary" onclick="openAdd('banner')">➕ بنر جديد</button>`,
+    mini_banners:`<button class="btn btn-primary" onclick="openAdd('minibanner')">➕ بنر صغير</button>`,
+    images:`<input class="search-input" id="IS" placeholder="🔍 بحث..." oninput="isv=this.value;renderImgs()" style="width:160px">
             <select class="search-input" id="IF" onchange="renderImgs()">
               <option value="all">الكل</option><option value="no">بدون صورة</option><option value="yes">عندها صورة</option>
             </select>`,
@@ -177,42 +203,45 @@ function go(page,el){
 async function loadDash(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
-    const [p,b]=await Promise.all([api('/api/products'),api('/api/banners')]);
+    const [p,b,mb]=await Promise.all([api('/api/products'),api('/api/banners'),apiSafe('/api/banners/mini')]);
     const wi=p.filter(x=>x.image&&x.image!==''&&x.image!=='no_image').length;
     const pct=Math.round(wi/p.length*100)||0;
+    const bn=b.banners?.length||0;
+    const mbn=mb?.banners?.length||0;
     setC(`
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon" style="background:#fce4f3">📦</div><div class="stat-info"><h3>${p.length}</h3><p>إجمالي المنتجات</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📦</div><div class="stat-info"><h3>${p.length}</h3><p>إجمالي المنتجات</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9">🖼️</div><div class="stat-info"><h3>${wi}</h3><p>منتجات بصور</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#ffebee">⚠️</div><div class="stat-info"><h3>${p.length-wi}</h3><p>بدون صور</p></div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd">🎨</div><div class="stat-info"><h3>${b.banners?.length||0}</h3><p>البنرات</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd">🎨</div><div class="stat-info"><h3>${bn}</h3><p>بنرات كبيرة</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fff3e0">🖼</div><div class="stat-info"><h3>${mbn}</h3><p>بنرات صغيرة</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3 id="catCount">-</h3><p>الأقسام</p></div></div>
     </div>
-    <div class="card" style="padding:20px">
+    <div class="card" style="padding:20px;margin-bottom:16px">
       <h3 style="margin-bottom:12px;font-size:15px">📈 نسبة اكتمال الصور</h3>
-      <div style="background:#eee;border-radius:20px;height:14px;overflow:hidden">
-        <div style="background:var(--pink);height:100%;width:${pct}%;border-radius:20px;transition:width 1s"></div>
-      </div>
-      <p style="margin-top:8px;font-size:13px;color:var(--gray)">${pct}% مكتمل (${wi} من ${p.length})</p>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <p style="margin-top:8px;font-size:13px;color:var(--gray)">${pct}% مكتمل (${wi} من ${p.length} منتج)</p>
     </div>`);
-  }catch{setC('<div class="loading">❌ فشل التحميل</div>')}
+    api('/api/categories').then(c=>{const el=document.getElementById('catCount');if(el)el.textContent=c.length||0});
+  }catch(e){setC('<div class="loading">❌ فشل التحميل</div>')}
 }
 
 // PRODUCTS
 async function loadProds(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  prods=await api('/api/products'); pp=1; sv=''; renderProds();
+  prods=await api('/api/products');pp=1;sv='';renderProds();
 }
 function renderProds(){
   let f=prods;
   if(sv) f=f.filter(p=>p.name?.includes(sv)||p.sub_category?.includes(sv)||p.category_key?.includes(sv));
-  const total=f.length, pages=Math.ceil(total/PER);
+  const total=f.length,pages=Math.ceil(total/PER);
   const sl=f.slice((pp-1)*PER,pp*PER);
   const rows=sl.map(p=>`<tr>
     <td>${p.image&&p.image!==''&&p.image!=='no_image'?`<img src="${p.image}" class="timg" onerror="this.style.display='none'">`:`<div class="tno-img">📷</div>`}</td>
     <td><strong>${esc(p.name||'-')}</strong></td>
     <td><span style="font-size:12px;color:var(--gray)">${esc(p.sub_category||'-')}</span></td>
     <td><code style="background:var(--bg);padding:2px 7px;border-radius:5px;font-size:11px">${esc(p.category_key||'-')}</code></td>
-    <td><strong style="color:var(--pink)">${p.price||0} ج</strong></td>
+    <td><strong style="color:var(--primary)">${p.price||0} ج</strong></td>
     <td><span class="badge ${p.image&&p.image!==''&&p.image!=='no_image'?'badge-green':'badge-red'}">${p.image&&p.image!==''&&p.image!=='no_image'?'✓':'✗'}</span></td>
     <td style="display:flex;gap:5px;flex-wrap:wrap">
       <button class="btn btn-orange btn-sm" onclick="editProd('${p._id}')">✏️</button>
@@ -221,12 +250,13 @@ function renderProds(){
   const pgs=pages>1?Array.from({length:pages},(_,i)=>`<button class="pg-btn ${i+1===pp?'on':''}" onclick="pp=${i+1};renderProds()">${i+1}</button>`).join(''):'';
   setC(`<div class="card">
     <div class="card-header"><h3>📦 المنتجات (${total})</h3>
-      <input class="search-input" placeholder="🔍 بحث بالاسم أو القسم..." value="${sv}" oninput="sv=this.value;pp=1;renderProds()" style="width:230px">
+      <input class="search-input" placeholder="🔍 بحث..." value="${sv}" oninput="sv=this.value;pp=1;renderProds()" style="width:220px">
     </div>
-    <div style="overflow-x:auto"><table><thead><tr><th>صورة</th><th>الاسم</th><th>القسم الفرعي</th><th>القسم</th><th>السعر</th><th>صورة</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>صورة</th><th>الاسم</th><th>القسم الفرعي</th><th>القسم</th><th>السعر</th><th>صورة?</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table></div>
     ${pgs?`<div class="pagination">${pgs}</div>`:''}
   </div>`);
 }
+
 function openAdd(type){
   if(type==='product'){
     setM('➕ إضافة منتج',`
@@ -238,17 +268,70 @@ function openAdd(type){
         <div class="fg"><label class="fl">القسم (category_key)</label><input class="fi" id="pC" placeholder="grocery"></div>
         <div class="fg"><label class="fl">القسم الفرعي</label><input class="fi" id="pS" placeholder="المعلبات"></div>
       </div>
-      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="pO" value="0"></div>
-      <button class="btn btn-pink" style="width:100%" onclick="saveProd()">💾 حفظ</button>`);
+      <div class="two-col">
+        <div class="fg"><label class="fl">الترتيب الفرعي</label><input class="fi" type="number" id="pSO" value="0"></div>
+        <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="pO" value="0"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveProd()">💾 حفظ</button>`);
+  } else if(type==='category'){
+    setM('➕ إضافة قسم',`
+      <div class="fg"><label class="fl">اسم القسم</label><input class="fi" id="cN" placeholder="اسم القسم"></div>
+      <div class="two-col">
+        <div class="fg"><label class="fl">المفتاح (ID)</label><input class="fi" id="cK" placeholder="grocery"></div>
+        <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="cO" value="0"></div>
+      </div>
+      <div class="fg"><label class="fl">لون الخلفية</label><input class="fi" id="cC" placeholder="#fce8f9"></div>
+      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="cI" placeholder="https://..."></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveCat()">💾 حفظ</button>`);
+  } else if(type==='banner'){
+    setM('➕ بنر كبير جديد',`
+      <div class="fg"><label class="fl">العنوان</label><input class="fi" id="bT" placeholder="عنوان البنر"></div>
+      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="bI" placeholder="https://..."></div>
+      <div class="fg">
+        <label class="fl">أو ارفع صورة</label>
+        <div class="upload-zone" onclick="document.getElementById('bFN').click()"><div class="uz-icon">📤</div><p>اضغط لاختيار صورة</p></div>
+        <input type="file" id="bFN" accept="image/*" style="display:none" onchange="previewBannerImg(this,'bI')">
+      </div>
+      <div class="two-col">
+        <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="bO" value="0"></div>
+        <div class="fg"><label class="fl">الحالة</label>
+          <select class="fi" id="bA"><option value="true">نشط</option><option value="false">معطل</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveBanner()">💾 حفظ</button>`);
+  } else if(type==='minibanner'){
+    setM('➕ بنر صغير جديد',`
+      <div class="fg"><label class="fl">العنوان</label><input class="fi" id="mbT" placeholder="عنوان البنر الصغير"></div>
+      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" placeholder="https://..."></div>
+      <div class="fg">
+        <label class="fl">أو ارفع صورة</label>
+        <div class="upload-zone" onclick="document.getElementById('mbFN').click()"><div class="uz-icon">📤</div><p>اضغط لاختيار صورة</p></div>
+        <input type="file" id="mbFN" accept="image/*" style="display:none" onchange="previewBannerImg(this,'mbI')">
+      </div>
+      <div class="two-col">
+        <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="mbO" value="0"></div>
+        <div class="fg"><label class="fl">الحالة</label>
+          <select class="fi" id="mbA"><option value="true">نشط</option><option value="false">معطل</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveMiniBanner()">💾 حفظ</button>`);
   }
 }
+
+function previewBannerImg(inp,targetId){
+  const file=inp.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{document.getElementById(targetId).value=e.target.result;toast('✅ تم اختيار الصورة - ستُرفع عند الحفظ','ok');}
+  reader.readAsDataURL(file);
+}
+
 async function saveProd(){
-  const b={name:v('pN'),price:+v('pP'),category_key:v('pC'),sub_category:v('pS'),order:+v('pO'),image:''};
+  const b={name:v('pN'),price:+v('pP'),category_key:v('pC'),sub_category:v('pS'),sub_category_order:+v('pSO'),order:+v('pO'),image:'',isActive:true};
   await fetch(`${API}/api/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة المنتج','ok');loadProds();
 }
 function editProd(id){
-  const p=prods.find(x=>x._id===id); if(!p) return;
+  const p=prods.find(x=>x._id===id);if(!p) return;
   setM('✏️ تعديل منتج',`
     <div class="two-col">
       <div class="fg"><label class="fl">الاسم</label><input class="fi" id="pN" value="${esc(p.name||'')}"></div>
@@ -258,14 +341,17 @@ function editProd(id){
       <div class="fg"><label class="fl">القسم</label><input class="fi" id="pC" value="${esc(p.category_key||'')}"></div>
       <div class="fg"><label class="fl">القسم الفرعي</label><input class="fi" id="pS" value="${esc(p.sub_category||'')}"></div>
     </div>
-    <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="pO" value="${p.order||0}"></div>
+    <div class="two-col">
+      <div class="fg"><label class="fl">ترتيب القسم الفرعي</label><input class="fi" type="number" id="pSO" value="${p.sub_category_order||0}"></div>
+      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="pO" value="${p.order||0}"></div>
+    </div>
     <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="pI" value="${esc(p.image||'')}"></div>
     <div class="fg">
-      <label class="fl">أو ارفع صورة</label>
+      <label class="fl">أو ارفع صورة جديدة</label>
       <div class="upload-zone" onclick="document.getElementById('pF').click()"><div class="uz-icon">📤</div><p>اضغط لرفع صورة</p></div>
       <input type="file" id="pF" accept="image/*" style="display:none" onchange="uploadProdImg(this,'${id}')">
     </div>
-    <button class="btn btn-pink" style="width:100%" onclick="updateProd('${id}')">💾 حفظ التعديلات</button>`);
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="updateProd('${id}')">💾 حفظ التعديلات</button>`);
 }
 async function uploadProdImg(inp,id){
   toast('⏳ جاري الرفع...','');
@@ -274,7 +360,7 @@ async function uploadProdImg(inp,id){
   if(d.image){document.getElementById('pI').value=d.image;toast('✅ تم رفع الصورة','ok');}
 }
 async function updateProd(id){
-  const b={name:v('pN'),price:+v('pP'),category_key:v('pC'),sub_category:v('pS'),order:+v('pO'),image:v('pI')};
+  const b={name:v('pN'),price:+v('pP'),category_key:v('pC'),sub_category:v('pS'),sub_category_order:+v('pSO'),order:+v('pO'),image:v('pI')};
   await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم التعديل','ok');loadProds();
 }
@@ -306,7 +392,7 @@ function renderImgs(){
         <div class="img-card-name">${esc(p.name||'-')}</div>
         <div class="img-card-sub">${esc(p.sub_category||'')} • ${p.price||0} ج</div>
         <input type="file" accept="image/*" id="if-${p._id}" style="display:none" onchange="uploadImgCard('${p._id}',this)">
-        <button class="btn btn-pink btn-sm" style="width:100%" id="ib-${p._id}" onclick="document.getElementById('if-${p._id}').click()">📤 رفع صورة</button>
+        <button class="btn btn-primary btn-sm" style="width:100%" id="ib-${p._id}" onclick="document.getElementById('if-${p._id}').click()">📤 رفع صورة</button>
       </div>
     </div>`).join('');
   setC(`
@@ -344,7 +430,7 @@ function renderCats(){
     <td><strong>${esc(c.name||'-')}</strong></td>
     <td><code style="background:var(--bg);padding:2px 7px;border-radius:5px;font-size:11px">${esc(c._id||'-')}</code></td>
     <td>${c.order||0}</td>
-    <td>${c.color_class?`<span class="badge" style="background:${c.color_class};color:#fff">${c.color_class}</span>`:'-'}</td>
+    <td>${c.color_class?`<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:${c.color_class};border:2px solid rgba(0,0,0,0.1)"></span>`:'-'}</td>
     <td style="display:flex;gap:5px">
       <button class="btn btn-orange btn-sm" onclick="editCat('${c._id}')">✏️</button>
       <button class="btn btn-red btn-sm" onclick="delCat('${c._id}','${esc(c.name||'')}')">🗑️</button>
@@ -354,50 +440,13 @@ function renderCats(){
     <div style="overflow-x:auto"><table><thead><tr><th>صورة</th><th>الاسم</th><th>المفتاح</th><th>الترتيب</th><th>اللون</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table></div>
   </div>`);
 }
-function openAdd(type){
-  if(type==='product'){
-    setM('➕ إضافة منتج',`
-      <div class="two-col">
-        <div class="fg"><label class="fl">اسم المنتج</label><input class="fi" id="pN" placeholder="الاسم"></div>
-        <div class="fg"><label class="fl">السعر</label><input class="fi" type="number" id="pP" placeholder="0"></div>
-      </div>
-      <div class="two-col">
-        <div class="fg"><label class="fl">القسم</label><input class="fi" id="pC" placeholder="grocery"></div>
-        <div class="fg"><label class="fl">القسم الفرعي</label><input class="fi" id="pS" placeholder="المعلبات"></div>
-      </div>
-      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="pO" value="0"></div>
-      <button class="btn btn-pink" style="width:100%" onclick="saveProd()">💾 حفظ</button>`);
-  } else if(type==='category'){
-    setM('➕ إضافة قسم',`
-      <div class="fg"><label class="fl">اسم القسم</label><input class="fi" id="cN" placeholder="اسم القسم"></div>
-      <div class="two-col">
-        <div class="fg"><label class="fl">المفتاح (ID)</label><input class="fi" id="cK" placeholder="grocery"></div>
-        <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="cO" value="0"></div>
-      </div>
-      <div class="fg"><label class="fl">لون الخلفية</label><input class="fi" id="cC" placeholder="#E91E8C أو bg-pink"></div>
-      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="cI" placeholder="https://..."></div>
-      <button class="btn btn-pink" style="width:100%" onclick="saveCat()">💾 حفظ</button>`);
-  } else if(type==='banner'){
-    setM('➕ إضافة بنر',`
-      <div class="fg"><label class="fl">العنوان</label><input class="fi" id="bT" placeholder="عنوان البنر"></div>
-      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="bI" placeholder="https://..."></div>
-      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="bO" value="0"></div>
-      <button class="btn btn-pink" style="width:100%" onclick="saveBanner()">💾 حفظ</button>`);
-  } else if(type==='minibanner'){
-    setM('➕ إضافة Mini بنر',`
-      <div class="fg"><label class="fl">العنوان</label><input class="fi" id="mbT" placeholder="عنوان"></div>
-      <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" placeholder="https://..."></div>
-      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="mbO" value="0"></div>
-      <button class="btn btn-pink" style="width:100%" onclick="saveMiniBanner()">💾 حفظ</button>`);
-  }
-}
 async function saveCat(){
   const b={_id:v('cK'),name:v('cN'),order:+v('cO'),color_class:v('cC'),image_url:v('cI')};
   await fetch(`${API}/api/categories`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة القسم','ok');loadCats();
 }
 function editCat(id){
-  const c=cats.find(x=>x._id===id); if(!c) return;
+  const c=cats.find(x=>x._id===id);if(!c) return;
   setM('✏️ تعديل قسم',`
     <div class="fg"><label class="fl">اسم القسم</label><input class="fi" id="cN" value="${esc(c.name||'')}"></div>
     <div class="two-col">
@@ -410,7 +459,7 @@ function editCat(id){
       <div class="upload-zone" onclick="document.getElementById('cF').click()"><div class="uz-icon">📤</div><p>اضغط لرفع صورة</p></div>
       <input type="file" id="cF" accept="image/*" style="display:none" onchange="uploadCatImg(this,'${id}')">
     </div>
-    <button class="btn btn-pink" style="width:100%" onclick="updateCat('${id}')">💾 حفظ</button>`);
+    <button class="btn btn-primary" style="width:100%" onclick="updateCat('${id}')">💾 حفظ</button>`);
 }
 async function uploadCatImg(inp,id){
   toast('⏳ جاري الرفع...','');
@@ -432,37 +481,51 @@ async function delCat(id,name){
 // BANNERS
 async function loadBanners(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  const d=await api('/api/banners'); banners=d.banners||[];renderBanners();
+  const d=await api('/api/banners');banners=d.banners||[];renderBanners();
 }
 function renderBanners(){
   const cards=banners.map(b=>`
-    <div class="card" style="overflow:hidden">
-      <img src="${b.image}" style="width:100%;height:150px;object-fit:cover" onerror="this.style.background='var(--bg)'">
-      <div style="padding:14px">
-        <div style="font-weight:700;margin-bottom:4px">${esc(b.title||'بدون عنوان')}</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">ترتيب: ${b.order}</div>
-        <div style="display:flex;gap:6px;align-items:center">
+    <div class="banner-card">
+      <img src="${b.image}" class="banner-img" onerror="this.style.background='var(--bg)';this.style.minHeight='150px'">
+      <div class="banner-body">
+        <div class="banner-title">${esc(b.title||'بدون عنوان')}</div>
+        <div class="banner-order">ترتيب: ${b.order||0}</div>
+        <div class="banner-actions">
           <span class="badge ${b.isActive?'badge-green':'badge-red'}">${b.isActive?'نشط':'معطل'}</span>
           <button class="btn btn-orange btn-sm" style="margin-right:auto" onclick="editBanner('${b._id}')">✏️ تعديل</button>
           <button class="btn btn-red btn-sm" onclick="delBanner('${b._id}')">🗑️</button>
         </div>
       </div>
     </div>`).join('');
-  setC(`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">${cards||'<div class="loading">لا توجد بنرات</div>'}</div>`);
+  setC(`<div class="banner-grid">${cards||'<div class="loading">لا توجد بنرات - اضغط ➕ لإضافة</div>'}</div>`);
 }
 async function saveBanner(){
-  const b={title:v('bT'),image:v('bI'),order:+v('bO'),isActive:true};
+  const imgVal=v('bI');
+  let finalImg=imgVal;
+  if(imgVal.startsWith('data:')){
+    const fd=new FormData();
+    const blob=await(await fetch(imgVal)).blob();
+    fd.append('image',blob,'banner.jpg');
+    toast('⏳ جاري رفع الصورة...','');
+    try{
+      const tempId='temp_'+Date.now();
+      const d=await fetch(`${API}/api/banners/upload-temp`,{method:'POST',body:fd}).then(r=>r.json());
+      if(d.image) finalImg=d.image;
+    }catch{}
+  }
+  const b={title:v('bT'),image:finalImg,order:+v('bO'),isActive:v('bA')==='true'};
   await fetch(`${API}/api/banners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة البنر','ok');loadBanners();
 }
 function editBanner(id){
-  const b=banners.find(x=>x._id===id); if(!b) return;
-  setM('✏️ تعديل بنر',`
+  const b=banners.find(x=>x._id===id);if(!b) return;
+  setM('✏️ تعديل بنر كبير',`
     <div class="fg"><label class="fl">العنوان</label><input class="fi" id="bT" value="${esc(b.title||'')}"></div>
-    <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="bI" value="${esc(b.image||'')}"></div>
+    <div class="fg"><label class="fl">رابط الصورة الحالية</label><input class="fi" id="bI" value="${esc(b.image||'')}"></div>
+    ${b.image?`<div style="margin-bottom:12px"><img src="${b.image}" style="width:100%;height:120px;object-fit:cover;border-radius:10px" onerror="this.style.display='none'"></div>`:''}
     <div class="fg">
-      <label class="fl">أو ارفع صورة</label>
-      <div class="upload-zone" onclick="document.getElementById('bF').click()"><div class="uz-icon">📤</div><p>اضغط لرفع صورة</p></div>
+      <label class="fl">رفع صورة جديدة</label>
+      <div class="upload-zone" onclick="document.getElementById('bF').click()"><div class="uz-icon">📤</div><p>اضغط لاختيار صورة</p></div>
       <input type="file" id="bF" accept="image/*" style="display:none" onchange="uploadBannerImg(this,'${id}')">
     </div>
     <div class="two-col">
@@ -471,13 +534,13 @@ function editBanner(id){
         <select class="fi" id="bA"><option value="true" ${b.isActive?'selected':''}>نشط</option><option value="false" ${!b.isActive?'selected':''}>معطل</option></select>
       </div>
     </div>
-    <button class="btn btn-pink" style="width:100%" onclick="updateBanner('${id}')">💾 حفظ</button>`);
+    <button class="btn btn-primary" style="width:100%" onclick="updateBanner('${id}')">💾 حفظ التعديلات</button>`);
 }
 async function uploadBannerImg(inp,id){
   toast('⏳ جاري الرفع...','');
   const fd=new FormData();fd.append('image',inp.files[0]);
   const d=await fetch(`${API}/api/banners/${id}/upload-image`,{method:'POST',body:fd}).then(r=>r.json());
-  if(d.image){document.getElementById('bI').value=d.image;toast('✅ تم','ok');}
+  if(d.image){document.getElementById('bI').value=d.image;toast('✅ تم رفع الصورة','ok');}
 }
 async function updateBanner(id){
   const b={title:v('bT'),image:v('bI'),order:+v('bO'),isActive:v('bA')==='true'};
@@ -485,7 +548,7 @@ async function updateBanner(id){
   closeM();toast('✅ تم التعديل','ok');loadBanners();
 }
 async function delBanner(id){
-  if(!confirm('حذف البنر؟')) return;
+  if(!confirm('حذف هذا البنر؟')) return;
   await fetch(`${API}/api/banners/${id}`,{method:'DELETE'});
   toast('🗑️ تم الحذف','ok');loadBanners();
 }
@@ -495,23 +558,70 @@ async function loadMiniBanners(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
     const d=await api('/api/banners/mini');
-    const mb=d.banners||[];
-    const cards=mb.map(b=>`
-      <div class="card" style="overflow:hidden">
-        <img src="${b.image}" style="width:100%;height:120px;object-fit:cover" onerror="this.style.background='var(--bg)'">
-        <div style="padding:12px">
-          <div style="font-weight:700;margin-bottom:4px">${esc(b.title||'بدون عنوان')}</div>
-          <div style="display:flex;gap:6px;margin-top:8px">
-            <span class="badge ${b.isActive?'badge-green':'badge-red'}">${b.isActive?'نشط':'معطل'}</span>
-          </div>
+    miniBanners=d.banners||[];
+    renderMiniBanners();
+  }catch{setC('<div class="loading">❌ فشل التحميل - تأكد من وجود endpoint /api/banners/mini</div>')}
+}
+function renderMiniBanners(){
+  const cards=miniBanners.map(b=>`
+    <div class="banner-card">
+      <img src="${b.image}" style="width:100%;height:110px;object-fit:cover;background:var(--bg)" onerror="this.style.background='var(--bg)';this.style.minHeight='110px'">
+      <div class="banner-body">
+        <div class="banner-title">${esc(b.title||'بدون عنوان')}</div>
+        <div class="banner-order">ترتيب: ${b.order||0}</div>
+        <div class="banner-actions">
+          <span class="badge ${b.isActive?'badge-green':'badge-red'}">${b.isActive?'نشط':'معطل'}</span>
+          <button class="btn btn-orange btn-sm" style="margin-right:auto" onclick="editMiniBanner('${b._id}')">✏️</button>
+          <button class="btn btn-red btn-sm" onclick="delMiniBanner('${b._id}')">🗑️</button>
         </div>
-      </div>`).join('');
-    setC(`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">${cards||'<div class="loading">لا توجد mini بنرات</div>'}</div>`);
-  }catch{setC('<div class="loading">❌ فشل التحميل</div>')}
+      </div>
+    </div>`).join('');
+  setC(`<div class="banner-grid">${cards||'<div class="loading">لا توجد بنرات صغيرة - اضغط ➕ لإضافة</div>'}</div>`);
+}
+async function saveMiniBanner(){
+  const b={title:v('mbT'),image:v('mbI'),order:+v('mbO'),isActive:v('mbA')==='true'};
+  await fetch(`${API}/api/banners/mini`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  closeM();toast('✅ تم إضافة البنر الصغير','ok');loadMiniBanners();
+}
+function editMiniBanner(id){
+  const b=miniBanners.find(x=>x._id===id);if(!b) return;
+  setM('✏️ تعديل بنر صغير',`
+    <div class="fg"><label class="fl">العنوان</label><input class="fi" id="mbT" value="${esc(b.title||'')}"></div>
+    <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" value="${esc(b.image||'')}"></div>
+    ${b.image?`<div style="margin-bottom:12px"><img src="${b.image}" style="width:100%;height:90px;object-fit:cover;border-radius:10px" onerror="this.style.display='none'"></div>`:''}
+    <div class="fg">
+      <label class="fl">رفع صورة جديدة</label>
+      <div class="upload-zone" onclick="document.getElementById('mbF').click()"><div class="uz-icon">📤</div><p>اضغط لاختيار صورة</p></div>
+      <input type="file" id="mbF" accept="image/*" style="display:none" onchange="uploadMiniBannerImg(this,'${id}')">
+    </div>
+    <div class="two-col">
+      <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="mbO" value="${b.order||0}"></div>
+      <div class="fg"><label class="fl">الحالة</label>
+        <select class="fi" id="mbA"><option value="true" ${b.isActive?'selected':''}>نشط</option><option value="false" ${!b.isActive?'selected':''}>معطل</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="updateMiniBanner('${id}')">💾 حفظ التعديلات</button>`);
+}
+async function uploadMiniBannerImg(inp,id){
+  toast('⏳ جاري الرفع...','');
+  const fd=new FormData();fd.append('image',inp.files[0]);
+  const d=await fetch(`${API}/api/banners/mini/${id}/upload-image`,{method:'POST',body:fd}).then(r=>r.json());
+  if(d.image){document.getElementById('mbI').value=d.image;toast('✅ تم رفع الصورة','ok');}
+}
+async function updateMiniBanner(id){
+  const b={title:v('mbT'),image:v('mbI'),order:+v('mbO'),isActive:v('mbA')==='true'};
+  await fetch(`${API}/api/banners/mini/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  closeM();toast('✅ تم التعديل','ok');loadMiniBanners();
+}
+async function delMiniBanner(id){
+  if(!confirm('حذف هذا البنر الصغير؟')) return;
+  await fetch(`${API}/api/banners/mini/${id}`,{method:'DELETE'});
+  toast('🗑️ تم الحذف','ok');loadMiniBanners();
 }
 
 // UTILS
-async function api(url){const r=await fetch(API+url);const d=await r.json();return d.banners?d:d;}
+async function api(url){const r=await fetch(API+url);const d=await r.json();return Array.isArray(d)?d:d;}
+async function apiSafe(url){try{return await api(url);}catch{return null;}}
 function setC(h){document.getElementById('PC').innerHTML=h}
 function setM(t,b){document.getElementById('MT').textContent=t;document.getElementById('MB').innerHTML=b;document.getElementById('MOD').classList.add('show')}
 function closeM(){document.getElementById('MOD').classList.remove('show')}

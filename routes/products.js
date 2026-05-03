@@ -160,7 +160,6 @@ router.get('/category/:key', async (req, res) => {
   }
 });
 
-// ✅ رفع صورة لمنتج معين
 router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
   try {
     const result = await new Promise((resolve, reject) => {
@@ -175,9 +174,36 @@ router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
         (err, result) => err ? reject(err) : resolve(result)
       ).end(req.file.buffer);
     });
-
     await Product.updateOne({ _id: req.params.id }, { $set: { image: result.secure_url } });
     res.json({ image: result.secure_url });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: 'تم الحذف' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
