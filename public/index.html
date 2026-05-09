@@ -14,7 +14,6 @@
   --sidebar:#0f0a12
 }
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
-
 .sidebar{width:240px;background:var(--sidebar);color:white;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;overflow:hidden}
 .logo{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px}
 .logo-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -25,68 +24,71 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);displ
 .nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;transition:all 0.2s;border-right:3px solid transparent;color:rgba(255,255,255,0.5);font-size:13px;font-weight:600}
 .nav-item:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.85)}
 .nav-item.active{background:rgba(209,0,188,0.15);color:var(--primary);border-right-color:var(--primary)}
-
 .main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--white);padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:12px}
 .page-title{font-size:19px;font-weight:900}
 .topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .content{padding:22px 28px;flex:1}
-
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:22px}
 .stat-card{background:var(--white);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border)}
 .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .stat-info h3{font-size:22px;font-weight:900;line-height:1}
 .stat-info p{font-size:11px;color:var(--gray);margin-top:3px}
-
-.card{background:var(--white);border-radius:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border);overflow:hidden}
-.card-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.card-header h3{font-size:15px;font-weight:700}
-
+.card{background:var(--white);border-radius:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;cursor:pointer;user-select:none}
+.card-header h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-header .toggle{font-size:18px;color:var(--gray);transition:transform 0.2s}
+.card-header.collapsed .toggle{transform:rotate(-90deg)}
+.card-body{overflow:hidden;transition:max-height 0.3s ease}
 table{width:100%;border-collapse:collapse}
-th{background:var(--bg);padding:11px 14px;text-align:right;font-size:11px;color:var(--gray);font-weight:700;border-bottom:1px solid var(--border)}
-td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+th{background:var(--bg);padding:10px 12px;text-align:right;font-size:11px;color:var(--gray);font-weight:700;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fdf5fc}
-.timg{width:42px;height:42px;border-radius:8px;object-fit:cover;background:var(--bg)}
-.tno-img{width:42px;height:42px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px}
+.timg{width:38px;height:38px;border-radius:8px;object-fit:cover;background:var(--bg);cursor:pointer;border:2px solid transparent;transition:border-color 0.2s}
+.timg:hover{border-color:var(--primary)}
+.tno-img{width:38px;height:38px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:2px dashed var(--border);transition:border-color 0.2s}
+.tno-img:hover{border-color:var(--primary)}
 
-.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;white-space:nowrap}
+/* ✅ INLINE PRICE EDIT */
+.price-cell{display:flex;align-items:center;gap:6px}
+.price-display{font-weight:800;color:var(--primary);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background 0.2s;border:2px solid transparent}
+.price-display:hover{background:var(--primary-light);border-color:var(--primary)}
+.price-input{width:80px;padding:4px 8px;border:2px solid var(--primary);border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;color:var(--primary);outline:none;display:none}
+.price-input.show{display:block}
+.price-display.hide{display:none}
+
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;white-space:nowrap}
 .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
 .btn-green{background:var(--green);color:white}
 .btn-red{background:var(--red);color:white}
 .btn-orange{background:var(--orange);color:white}
 .btn-blue{background:var(--blue);color:white}
 .btn-ghost{background:transparent;border:2px solid var(--border);color:var(--text)}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
-.btn-sm{padding:5px 10px;font-size:12px}
-
+.btn-sm{padding:4px 9px;font-size:11px}
 .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
 .badge-green{background:#e8f5e9;color:var(--green)}
 .badge-red{background:#ffebee;color:var(--red)}
 .badge-orange{background:#fff3e0;color:var(--orange)}
 .badge-blue{background:#e3f2fd;color:var(--blue)}
-.badge-primary{background:var(--primary-light);color:var(--primary-dark)}
-
 .search-input{padding:8px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s}
 .search-input:focus{border-color:var(--primary)}
 select.search-input{cursor:pointer}
-
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
 .modal{background:var(--white);border-radius:18px;padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .modal-hd h3{font-size:17px;font-weight:700}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray)}
-
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
 .fi{width:100%;padding:10px 13px;border:2px solid var(--border);border-radius:9px;font-family:'Cairo',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
 .fi:focus{border-color:var(--primary)}
 select.fi{cursor:pointer}
-.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s}
 .upload-zone:hover{border-color:var(--primary);background:var(--primary-light)}
-.upload-zone .uz-icon{font-size:30px;margin-bottom:6px}
+.upload-zone .uz-icon{font-size:28px;margin-bottom:4px}
 .upload-zone p{font-size:12px;color:var(--gray)}
-
 .banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .banner-card{background:var(--white);border-radius:14px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s}
 .banner-card:hover{box-shadow:0 4px 20px rgba(209,0,188,0.12)}
@@ -95,17 +97,14 @@ select.fi{cursor:pointer}
 .banner-title{font-weight:700;margin-bottom:4px;font-size:14px}
 .banner-order{font-size:12px;color:var(--gray);margin-bottom:10px}
 .banner-actions{display:flex;gap:6px;align-items:center}
-
-.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
 .img-card{background:var(--white);border-radius:12px;overflow:hidden;border:2px solid var(--border);transition:border-color 0.2s}
 .img-card.done{border-color:var(--green)}
-.img-card-pic{width:100%;height:140px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gray);overflow:hidden}
+.img-card-pic{width:100%;height:130px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gray);overflow:hidden}
 .img-card-pic img{width:100%;height:100%;object-fit:cover}
-.img-card-body{padding:11px}
+.img-card-body{padding:10px}
 .img-card-name{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .img-card-sub{font-size:10px;color:var(--gray);margin-bottom:8px}
-
-/* SUBCATS */
 .subcat-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:10px}
 .subcat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .subcat-name{font-size:14px;font-weight:700;color:var(--text)}
@@ -115,30 +114,33 @@ select.fi{cursor:pointer}
 .drag-handle:active{cursor:grabbing}
 .subcat-card.dragging{opacity:0.4;border:2px dashed var(--primary)}
 .subcat-card.drag-over{border-top:3px solid var(--primary)}
-
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:9999;white-space:nowrap}
 .toast.show{opacity:1}
 .toast.ok{background:var(--green)}
 .toast.err{background:var(--red)}
-
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--gray);flex-direction:column;gap:10px}
 .spin{width:36px;height:36px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.pagination{display:flex;gap:6px;padding:14px 18px;justify-content:flex-end;flex-wrap:wrap}
-.pg-btn{width:32px;height:32px;border:2px solid var(--border);border-radius:7px;background:var(--white);cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;transition:all 0.2s}
-.pg-btn:hover,.pg-btn.on{background:var(--primary);color:white;border-color:var(--primary)}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .progress-bar{background:#eee;border-radius:20px;height:14px;overflow:hidden}
 .progress-fill{background:var(--primary);height:100%;border-radius:20px;transition:width 1s}
-
-/* ORDER BADGE */
 .order-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--primary-light);border-radius:8px;font-size:13px;font-weight:900;color:var(--primary-dark)}
-
+.cat-section{margin-bottom:20px}
+.cat-header{background:var(--sidebar);color:white;padding:12px 18px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.cat-header h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.cat-header .count{background:rgba(255,255,255,0.15);padding:2px 10px;border-radius:20px;font-size:11px}
+.cat-header .chev{transition:transform 0.2s;font-size:14px}
+.cat-header.open .chev{transform:rotate(180deg)}
+.cat-body{border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;display:none}
+.cat-body.open{display:block}
+.search-bar{padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;gap:8px}
+.prod-name-cell{max-width:220px}
+.prod-name-text{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-sub-text{font-size:11px;color:var(--gray)}
 @media(max-width:768px){.sidebar{width:60px}.main{margin-right:60px}.nav-item span:not(.ni){display:none}.logo h2,.logo p{display:none}.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">✦</div>
@@ -158,7 +160,6 @@ select.fi{cursor:pointer}
     <div class="nav-item" onclick="go('mini_banners',this)"><span>🖼</span><span>البنرات الصغيرة</span></div>
   </nav>
 </aside>
-
 <div class="main">
   <div class="topbar">
     <div class="page-title" id="PT">الرئيسية</div>
@@ -166,7 +167,6 @@ select.fi{cursor:pointer}
   </div>
   <div class="content" id="PC"><div class="loading"><div class="spin"></div></div></div>
 </div>
-
 <div class="overlay" id="MOD">
   <div class="modal">
     <div class="modal-hd"><h3 id="MT"></h3><button class="modal-close" onclick="closeM()">✕</button></div>
@@ -177,9 +177,8 @@ select.fi{cursor:pointer}
 
 <script>
 const API='https://zad-store-backend-production.up.railway.app';
-let prods=[],imgProds=[],cats=[],banners=[],miniBanners=[],pp=1,ipp=1,sv='',isv='';
-const PER=25;
-let dragSrc=null;
+let prods=[],imgProds=[],cats=[],banners=[],miniBanners=[],sv='',isv='';
+let searchTimer=null;
 
 function go(page,el){
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -194,21 +193,20 @@ function go(page,el){
     subcats:`<select class="search-input" id="subcatFilter" onchange="loadSubcats()"><option value="">كل الأقسام</option></select>`,
     images:`<input class="search-input" id="IS" placeholder="🔍 بحث..." oninput="isv=this.value;renderImgs()" style="width:160px">
             <select class="search-input" id="IF" onchange="renderImgs()"><option value="all">الكل</option><option value="no">بدون صورة</option><option value="yes">عندها صورة</option></select>`,
-    move:``,dashboard:'',
+    move:'',dashboard:'',
   };
   document.getElementById('TR').innerHTML=acts[page]||'';
   ({dashboard:loadDash,products:loadProds,subcats:loadSubcats,move:loadMove,images:loadImgs,categories:loadCats,banners:loadBanners,mini_banners:loadMiniBanners})[page]?.();
 }
 
-// DASHBOARD
+// ── DASHBOARD ──
 async function loadDash(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
     const [p,b,mb]=await Promise.all([api('/api/products'),api('/api/banners'),apiSafe('/api/banners/mini')]);
     const wi=p.filter(x=>x.image&&x.image!==''&&x.image!=='no_image').length;
     const pct=Math.round(wi/p.length*100)||0;
-    setC(`
-    <div class="stats-grid">
+    setC(`<div class="stats-grid">
       <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📦</div><div class="stat-info"><h3>${p.length}</h3><p>إجمالي المنتجات</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9">🖼️</div><div class="stat-info"><h3>${wi}</h3><p>منتجات بصور</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#ffebee">⚠️</div><div class="stat-info"><h3>${p.length-wi}</h3><p>بدون صور</p></div></div>
@@ -216,7 +214,7 @@ async function loadDash(){
       <div class="stat-card"><div class="stat-icon" style="background:#fff3e0">🖼</div><div class="stat-info"><h3>${mb?.banners?.length||0}</h3><p>بنرات صغيرة</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3 id="catCount">-</h3><p>الأقسام</p></div></div>
     </div>
-    <div class="card" style="padding:20px;margin-bottom:16px">
+    <div class="card" style="padding:20px">
       <h3 style="margin-bottom:12px;font-size:15px">📈 نسبة اكتمال الصور</h3>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <p style="margin-top:8px;font-size:13px;color:var(--gray)">${pct}% مكتمل (${wi} من ${p.length} منتج)</p>
@@ -225,129 +223,224 @@ async function loadDash(){
   }catch(e){setC('<div class="loading">❌ فشل التحميل</div>')}
 }
 
-// PRODUCTS
+// ── PRODUCTS - مجمعة بالقسم ──
 async function loadProds(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  prods=await api('/api/products');pp=1;sv='';renderProds();
-}
-function renderProds(){
-  let f=prods;
-  if(sv) f=f.filter(p=>p.name?.includes(sv)||p.sub_category?.includes(sv)||p.category_key?.includes(sv));
-  const total=f.length,pages=Math.ceil(total/PER);
-  const sl=f.slice((pp-1)*PER,pp*PER);
-  const rows=sl.map(p=>`<tr>
-    <td>${p.image&&p.image!==''&&p.image!=='no_image'?`<img src="${p.image}" class="timg" onerror="this.style.display='none'">`:`<div class="tno-img">📷</div>`}</td>
-    <td><strong>${esc(p.name||'-')}</strong></td>
-    <td><span style="font-size:12px;color:var(--gray)">${esc(p.sub_category||'-')}</span></td>
-    <td><code style="background:var(--bg);padding:2px 7px;border-radius:5px;font-size:11px">${esc(p.category_key||'-')}</code></td>
-    <td><strong style="color:var(--primary)">${p.price||0} ج</strong></td>
-    <td><span class="badge ${p.image&&p.image!==''&&p.image!=='no_image'?'badge-green':'badge-red'}">${p.image&&p.image!==''&&p.image!=='no_image'?'✓':'✗'}</span></td>
-    <td style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="btn btn-orange btn-sm" onclick="editProd('${p._id}')">✏️</button>
-      <button class="btn btn-blue btn-sm" onclick="openMoveSingle('${p._id}')">🔀</button>
-      <button class="btn btn-red btn-sm" onclick="delProd('${p._id}','${esc(p.name||'')}')">🗑️</button>
-    </td></tr>`).join('');
-  const pgs=pages>1?Array.from({length:pages},(_,i)=>`<button class="pg-btn ${i+1===pp?'on':''}" onclick="pp=${i+1};renderProds()">${i+1}</button>`).join(''):'';
-  setC(`<div class="card">
-    <div class="card-header"><h3>📦 المنتجات (${total})</h3>
-      <input class="search-input" placeholder="🔍 بحث..." value="${sv}" oninput="sv=this.value;pp=1;renderProds()" style="width:220px">
-    </div>
-    <div style="overflow-x:auto"><table><thead><tr><th>صورة</th><th>الاسم</th><th>القسم الفرعي</th><th>القسم</th><th>السعر</th><th>صورة؟</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table></div>
-    ${pgs?`<div class="pagination">${pgs}</div>`:''}
-  </div>`);
+  prods=await api('/api/products');
+  if(!cats.length) cats=await api('/api/categories');
+  sv='';
+  renderProds();
 }
 
-// SUBCATS - مع ترتيب بالـ drag & drop
+function renderProds(){
+  // جمع المنتجات بالقسم
+  const grouped={};
+  let filtered=prods;
+  if(sv) filtered=prods.filter(p=>p.name?.includes(sv)||p.sub_category?.includes(sv));
+
+  filtered.forEach(p=>{
+    const k=p.category_key||'غير محدد';
+    if(!grouped[k]) grouped[k]=[];
+    grouped[k].push(p);
+  });
+
+  const totalFiltered=filtered.length;
+  let html=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <input class="search-input" placeholder="🔍 بحث في كل المنتجات..." value="${sv}"
+      oninput="clearTimeout(searchTimer);searchTimer=setTimeout(()=>{sv=this.value;renderProds();},350)"
+      style="width:280px">
+    <span style="font-size:13px;color:var(--gray)">${totalFiltered} منتج</span>
+    <button class="btn btn-ghost btn-sm" onclick="expandAll()">فتح الكل</button>
+    <button class="btn btn-ghost btn-sm" onclick="collapseAll()">إغلاق الكل</button>
+  </div>`;
+
+  Object.entries(grouped).forEach(([catKey,catProds])=>{
+    const cat=cats.find(c=>c._id===catKey);
+    const catName=cat?.name||catKey;
+    html+=`
+    <div class="cat-section" id="cat-${catKey}">
+      <div class="cat-header open" onclick="toggleCat('${catKey}')">
+        <h3>🗂️ ${esc(catName)} <span class="count">${catProds.length} منتج</span></h3>
+        <span class="chev">▼</span>
+      </div>
+      <div class="cat-body open" id="catbody-${catKey}">
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th style="width:44px">صورة</th>
+            <th>الاسم / القسم الفرعي</th>
+            <th style="width:130px">السعر</th>
+            <th style="width:110px">إجراءات</th>
+          </tr></thead>
+          <tbody>
+          ${catProds.map(p=>`
+            <tr id="row-${p._id}">
+              <td>
+                <div onclick="quickUploadImg('${p._id}')" title="اضغط لتغيير الصورة">
+                  ${p.image&&p.image!==''&&p.image!=='no_image'
+                    ?`<img src="${p.image}" class="timg" onerror="this.parentElement.innerHTML='<div class=tno-img>📷</div>'">`
+                    :`<div class="tno-img">📷</div>`}
+                </div>
+                <input type="file" id="imgf-${p._id}" accept="image/*" style="display:none" onchange="uploadImgInline(this,'${p._id}')">
+              </td>
+              <td class="prod-name-cell">
+                <div class="prod-name-text" title="${esc(p.name||'')}">${esc(p.name||'-')}</div>
+                <div class="prod-sub-text">${esc(p.sub_category||'-')}</div>
+              </td>
+              <td>
+                <div class="price-cell">
+                  <span class="price-display" id="pd-${p._id}" onclick="editPrice('${p._id}')">${p.price||0} ج</span>
+                  <input class="price-input" id="pi-${p._id}" type="number" value="${p.price||0}"
+                    onkeydown="if(event.key==='Enter')savePrice('${p._id}');if(event.key==='Escape')cancelPrice('${p._id}')"
+                    onblur="savePrice('${p._id}')">
+                </div>
+              </td>
+              <td style="display:flex;gap:4px">
+                <button class="btn btn-orange btn-sm" onclick="editProd('${p._id}')">✏️</button>
+                <button class="btn btn-blue btn-sm" onclick="openMoveSingle('${p._id}')">🔀</button>
+                <button class="btn btn-red btn-sm" onclick="delProd('${p._id}','${esc(p.name||'')}')">🗑️</button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  setC(html||'<div class="loading">لا توجد نتائج</div>');
+}
+
+function toggleCat(key){
+  const hdr=document.querySelector(`#cat-${key} .cat-header`);
+  const body=document.getElementById(`catbody-${key}`);
+  if(!hdr||!body)return;
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+}
+function expandAll(){document.querySelectorAll('.cat-header').forEach(h=>h.classList.add('open'));document.querySelectorAll('.cat-body').forEach(b=>b.classList.add('open'));}
+function collapseAll(){document.querySelectorAll('.cat-header').forEach(h=>h.classList.remove('open'));document.querySelectorAll('.cat-body').forEach(b=>b.classList.remove('open'));}
+
+// ✅ INLINE PRICE EDIT
+function editPrice(id){
+  document.getElementById(`pd-${id}`).classList.add('hide');
+  const inp=document.getElementById(`pi-${id}`);
+  inp.classList.add('show');
+  inp.focus();inp.select();
+}
+function cancelPrice(id){
+  document.getElementById(`pd-${id}`).classList.remove('hide');
+  document.getElementById(`pi-${id}`).classList.remove('show');
+}
+async function savePrice(id){
+  const inp=document.getElementById(`pi-${id}`);
+  if(!inp||!inp.classList.contains('show'))return;
+  const newPrice=+inp.value;
+  const p=prods.find(x=>x._id===id);
+  if(!p)return;
+  if(newPrice===p.price){cancelPrice(id);return;}
+  await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,price:newPrice})});
+  p.price=newPrice;
+  const disp=document.getElementById(`pd-${id}`);
+  if(disp)disp.textContent=`${newPrice} ج`;
+  cancelPrice(id);
+  toast('✅ تم تحديث السعر','ok');
+}
+
+// ✅ QUICK IMAGE UPLOAD من الجدول
+function quickUploadImg(id){
+  document.getElementById(`imgf-${id}`)?.click();
+}
+async function uploadImgInline(inp,id){
+  if(!inp.files[0])return;
+  toast('⏳ جاري رفع الصورة...','');
+  const fd=new FormData();fd.append('image',inp.files[0]);
+  try{
+    const d=await fetch(`${API}/api/products/${id}/upload-image`,{method:'POST',body:fd}).then(r=>r.json());
+    if(d.image){
+      const p=prods.find(x=>x._id===id);if(p)p.image=d.image;
+      const row=document.getElementById(`row-${id}`);
+      if(row){
+        const imgWrap=row.querySelector('td:first-child div');
+        if(imgWrap)imgWrap.innerHTML=`<img src="${d.image}" class="timg">`;
+      }
+      toast('✅ تم رفع الصورة','ok');
+    }
+  }catch{toast('❌ فشل الرفع','err');}
+}
+
+// ── SUBCATS ──
 async function loadSubcats(){
   setC('<div class="loading"><div class="spin"></div></div>');
   if(!prods.length) prods=await api('/api/products');
   if(!cats.length) cats=await api('/api/categories');
-
-  // fill filter
   const filterEl=document.getElementById('subcatFilter');
   if(filterEl&&filterEl.options.length<=1){
     cats.forEach(c=>{const o=document.createElement('option');o.value=c._id;o.textContent=c.name||c._id;filterEl.appendChild(o);});
   }
-  const selectedCat=filterEl?.value||'';
-  renderSubcats(selectedCat);
+  renderSubcats(filterEl?.value||'');
 }
 
 function renderSubcats(catFilter){
-  // group by category then sub_category, with order
   const groups={};
   prods.forEach(p=>{
-    if(catFilter&&p.category_key!==catFilter) return;
+    if(catFilter&&p.category_key!==catFilter)return;
     const k=p.category_key||'غير محدد';
     const s=p.sub_category||'غير محدد';
-    if(!groups[k]) groups[k]={};
-    if(!groups[k][s]) groups[k][s]={count:0,order:p.sub_category_order||0};
+    if(!groups[k])groups[k]={};
+    if(!groups[k][s])groups[k][s]={count:0,order:p.sub_category_order||0};
     groups[k][s].count++;
-    if(p.sub_category_order) groups[k][s].order=p.sub_category_order;
+    if(p.sub_category_order)groups[k][s].order=p.sub_category_order;
   });
-
   let html='';
   Object.entries(groups).forEach(([catKey,subs])=>{
     const cat=cats.find(c=>c._id===catKey);
     const catName=cat?.name||catKey;
     const sortedSubs=Object.entries(subs).sort((a,b)=>a[1].order-b[1].order);
-    html+=`
-      <div class="card" style="margin-bottom:18px">
-        <div class="card-header">
-          <h3>🗂️ ${esc(catName)} <span style="font-size:12px;color:var(--gray);font-weight:400">(${Object.values(subs).reduce((a,b)=>a+b.count,0)} منتج)</span></h3>
-          <button class="btn btn-primary btn-sm" onclick="openAddSubcat('${catKey}','${esc(catName)}')">➕ قسم فرعي جديد</button>
-        </div>
-        <div style="padding:14px" id="sublist-${catKey}">
-          ${sortedSubs.map(([sub,info],idx)=>`
-            <div class="subcat-card" draggable="true"
-              ondragstart="dragStart(event,'${catKey}','${esc(sub)}')"
-              ondragover="dragOver(event)"
-              ondrop="dropOn(event,'${catKey}','${esc(sub)}')"
-              ondragleave="dragLeave(event)"
-              id="sc-${catKey}-${esc(sub)}">
-              <div class="subcat-header">
-                <div style="display:flex;align-items:center;gap:10px">
-                  <span class="drag-handle" title="اسحب لتغيير الترتيب">⠿</span>
-                  <span class="order-badge">${idx+1}</span>
-                  <div>
-                    <div class="subcat-name">${esc(sub)}</div>
-                    <div class="subcat-meta">${info.count} منتج • ترتيب: ${info.order||idx+1}</div>
-                  </div>
-                </div>
-                <div class="subcat-actions">
-                  <button class="btn btn-orange btn-sm" onclick="editSubcat('${catKey}','${esc(sub)}','${esc(catName)}')">✏️ تعديل</button>
-                  <button class="btn btn-red btn-sm" onclick="deleteSubcat('${catKey}','${esc(sub)}')">🗑️ حذف</button>
+    html+=`<div class="card" style="margin-bottom:18px">
+      <div class="card-header">
+        <h3>🗂️ ${esc(catName)} <span style="font-size:12px;color:var(--gray);font-weight:400">(${Object.values(subs).reduce((a,b)=>a+b.count,0)} منتج)</span></h3>
+        <button class="btn btn-primary btn-sm" onclick="openAddSubcat('${catKey}','${esc(catName)}')">➕ قسم فرعي جديد</button>
+      </div>
+      <div style="padding:14px">
+        ${sortedSubs.map(([sub,info],idx)=>`
+          <div class="subcat-card" draggable="true"
+            ondragstart="dragStart(event,'${catKey}','${esc(sub)}')"
+            ondragover="dragOver(event)" ondrop="dropOn(event,'${catKey}','${esc(sub)}')"
+            ondragleave="dragLeave(event)">
+            <div class="subcat-header">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="drag-handle">⠿</span>
+                <span class="order-badge">${idx+1}</span>
+                <div>
+                  <div class="subcat-name">${esc(sub)}</div>
+                  <div class="subcat-meta">${info.count} منتج • ترتيب: ${info.order||idx+1}</div>
                 </div>
               </div>
-            </div>`).join('')}
-        </div>
-      </div>`;
+              <div class="subcat-actions">
+                <button class="btn btn-orange btn-sm" onclick="editSubcat('${catKey}','${esc(sub)}','${esc(catName)}')">✏️ تعديل</button>
+                <button class="btn btn-red btn-sm" onclick="deleteSubcat('${catKey}','${esc(sub)}')">🗑️ حذف</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
   });
-
   setC(html||'<div class="loading">لا توجد أقسام فرعية</div>');
 }
 
-// DRAG & DROP للترتيب
 let dragCatKey='',dragSubName='';
-function dragStart(e,catKey,sub){
-  dragCatKey=catKey;dragSubName=sub;
-  e.target.classList.add('dragging');
-  e.dataTransfer.effectAllowed='move';
-}
+function dragStart(e,catKey,sub){dragCatKey=catKey;dragSubName=sub;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
 function dragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function dragLeave(e){e.currentTarget.classList.remove('drag-over');}
 async function dropOn(e,toCatKey,toSub){
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if(dragCatKey!==toCatKey||dragSubName===toSub) return;
-
-  // get current order of both
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragCatKey!==toCatKey||dragSubName===toSub)return;
   const fromProds=prods.filter(p=>p.category_key===dragCatKey&&p.sub_category===dragSubName);
   const toProds=prods.filter(p=>p.category_key===toCatKey&&p.sub_category===toSub);
   const fromOrder=fromProds[0]?.sub_category_order||0;
   const toOrder=toProds[0]?.sub_category_order||0;
-
   toast('⏳ جاري تغيير الترتيب...','');
-  // swap orders
   const updates=[];
   fromProds.forEach(p=>updates.push(fetch(`${API}/api/products/${p._id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,sub_category_order:toOrder})})));
   toProds.forEach(p=>updates.push(fetch(`${API}/api/products/${p._id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,sub_category_order:fromOrder})})));
@@ -360,23 +453,17 @@ async function dropOn(e,toCatKey,toSub){
 function openAddSubcat(catKey,catName){
   setM(`➕ إضافة قسم فرعي في ${catName}`,`
     <div class="fg"><label class="fl">اسم القسم الفرعي</label><input class="fi" id="nsN" placeholder="مثال: ألبان"></div>
-    <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="nsO" value="0" placeholder="0 = آخر"></div>
-    <p style="font-size:12px;color:var(--gray);margin-bottom:14px">سيتم إنشاء قسم فرعي جديد فارغ - يمكنك إضافة منتجات له لاحقاً</p>
+    <div class="fg"><label class="fl">الترتيب</label><input class="fi" type="number" id="nsO" value="0"></div>
     <button class="btn btn-primary" style="width:100%" onclick="saveNewSubcat('${catKey}')">💾 حفظ</button>`);
 }
-
 async function saveNewSubcat(catKey){
   const name=v('nsN');const order=+v('nsO');
   if(!name){toast('أدخل اسم القسم الفرعي','err');return;}
-  // add a placeholder product to create the subcat
-  await fetch(`${API}/api/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-    name:'منتج مؤقت - يمكن حذفه',price:0,category_key:catKey,sub_category:name,sub_category_order:order,image:'',isActive:false
-  })});
+  await fetch(`${API}/api/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'منتج مؤقت - يمكن حذفه',price:0,category_key:catKey,sub_category:name,sub_category_order:order,image:'',isActive:false})});
   toast('✅ تم إنشاء القسم الفرعي','ok');closeM();
   prods=await api('/api/products');
   renderSubcats(document.getElementById('subcatFilter')?.value||'');
 }
-
 function editSubcat(catKey,oldSub,catName){
   const catProds=prods.filter(p=>p.category_key===catKey&&p.sub_category===oldSub);
   const currentOrder=catProds[0]?.sub_category_order||0;
@@ -388,7 +475,6 @@ function editSubcat(catKey,oldSub,catName){
     <p style="font-size:12px;color:var(--gray);margin-bottom:14px">سيتم تطبيق التغيير على ${catProds.length} منتج</p>
     <button class="btn btn-primary" style="width:100%" onclick="doEditSubcat('${catKey}','${esc(oldSub)}')">💾 حفظ</button>`);
 }
-
 async function doEditSubcat(catKey,oldSub){
   const newName=v('esN');const newOrder=+v('esO');
   const catProds=prods.filter(p=>p.category_key===catKey&&p.sub_category===oldSub);
@@ -398,7 +484,6 @@ async function doEditSubcat(catKey,oldSub){
   prods=await api('/api/products');
   renderSubcats(document.getElementById('subcatFilter')?.value||'');
 }
-
 async function deleteSubcat(catKey,sub){
   const count=prods.filter(p=>p.category_key===catKey&&p.sub_category===sub).length;
   if(!confirm(`حذف القسم الفرعي "${sub}" و${count} منتج؟`))return;
@@ -410,21 +495,20 @@ async function deleteSubcat(catKey,sub){
   renderSubcats(document.getElementById('subcatFilter')?.value||'');
 }
 
-// MOVE PRODUCT
+// ── MOVE ──
 async function loadMove(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  if(!prods.length) prods=await api('/api/products');
-  if(!cats.length) cats=await api('/api/categories');
+  if(!prods.length)prods=await api('/api/products');
+  if(!cats.length)cats=await api('/api/categories');
   renderMoveUI();
 }
-
 function renderMoveUI(){
   setC(`<div class="card" style="padding:24px;max-width:600px">
     <h3 style="margin-bottom:18px;font-size:16px">🔀 نقل منتج بين الأقسام</h3>
     <div class="fg"><label class="fl">اختر المنتج</label>
       <input class="search-input" id="moveSearch" placeholder="🔍 ابحث عن المنتج..." oninput="filterMoveProds()" style="width:100%;margin-bottom:8px">
       <select class="fi" id="moveProdSel" onchange="showMoveInfo()" size="8" style="height:200px">
-        ${prods.map(p=>`<option value="${p._id}" data-cat="${p.category_key||''}" data-sub="${esc(p.sub_category||'')}">${esc(p.name||'')} | ${esc(p.sub_category||'')} | ${esc(p.category_key||'')}</option>`).join('')}
+        ${prods.map(p=>`<option value="${p._id}">${esc(p.name||'')} | ${esc(p.sub_category||'')} | ${esc(p.category_key||'')}</option>`).join('')}
       </select>
     </div>
     <div id="moveInfo" style="display:none">
@@ -444,59 +528,45 @@ function renderMoveUI(){
         </div>
       </div>
       <div class="fg" id="moveSubSuggestions" style="display:none">
-        <label class="fl">أقسام فرعية موجودة (اضغط للاختيار):</label>
+        <label class="fl">أقسام فرعية موجودة:</label>
         <div id="moveSubList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
       </div>
       <button class="btn btn-orange" style="width:100%" onclick="doMove()">🔀 تأكيد النقل</button>
     </div>
   </div>`);
 }
-
 function filterMoveProds(){
   const q=document.getElementById('moveSearch').value.toLowerCase();
-  const sel=document.getElementById('moveProdSel');
-  Array.from(sel.options).forEach(o=>{
-    o.style.display=o.text.toLowerCase().includes(q)?'':'none';
-  });
+  Array.from(document.getElementById('moveProdSel').options).forEach(o=>{o.style.display=o.text.toLowerCase().includes(q)?'':'none';});
 }
-
 function showMoveInfo(){
   const sel=document.getElementById('moveProdSel');
   const opt=sel.options[sel.selectedIndex];
   if(!opt||!opt.value){document.getElementById('moveInfo').style.display='none';return;}
-  const p=prods.find(x=>x._id===opt.value);
-  if(!p)return;
+  const p=prods.find(x=>x._id===opt.value);if(!p)return;
   document.getElementById('moveInfo').style.display='block';
   document.getElementById('moveProdName').textContent=p.name||'';
   document.getElementById('moveProdCurrent').textContent=`القسم الحالي: ${p.category_key||''} | القسم الفرعي: ${p.sub_category||''}`;
-  // set current values
-  const catSel=document.getElementById('moveNewCat');
-  if(catSel) catSel.value=p.category_key||catSel.options[0]?.value;
+  document.getElementById('moveNewCat').value=p.category_key||'';
   document.getElementById('moveNewSub').value=p.sub_category||'';
   updateMoveSubOptions();
 }
-
 function updateMoveSubOptions(){
   const catKey=document.getElementById('moveNewCat')?.value||'';
-  const existingSubs=[...new Set(prods.filter(p=>p.category_key===catKey).map(p=>p.sub_category).filter(Boolean))];
+  const subs=[...new Set(prods.filter(p=>p.category_key===catKey).map(p=>p.sub_category).filter(Boolean))];
   const wrap=document.getElementById('moveSubSuggestions');
   const list=document.getElementById('moveSubList');
-  if(existingSubs.length){
-    wrap.style.display='block';
-    list.innerHTML=existingSubs.map(s=>`<span onclick="document.getElementById('moveNewSub').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
-  } else {wrap.style.display='none';}
+  if(subs.length){wrap.style.display='block';list.innerHTML=subs.map(s=>`<span onclick="document.getElementById('moveNewSub').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');}
+  else wrap.style.display='none';
 }
-
 async function doMove(){
   const id=document.getElementById('moveProdSel')?.value;
   const newCat=v('moveNewCat');const newSub=v('moveNewSub');
   if(!id){toast('اختر منتجاً','err');return;}
   const p=prods.find(x=>x._id===id);
   await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,category_key:newCat,sub_category:newSub})});
-  toast('✅ تم نقل المنتج','ok');
-  prods=await api('/api/products');renderMoveUI();
+  toast('✅ تم نقل المنتج','ok');prods=await api('/api/products');renderMoveUI();
 }
-
 function openMoveSingle(id){
   const p=prods.find(x=>x._id===id);if(!p)return;
   setM(`🔀 نقل: ${esc(p.name||'')}`,`
@@ -508,34 +578,30 @@ function openMoveSingle(id){
         ${cats.map(c=>`<option value="${c._id}" ${c._id===p.category_key?'selected':''}>${esc(c.name||c._id)}</option>`).join('')}
       </select>
     </div>
-    <div class="fg"><label class="fl">القسم الفرعي الجديد</label>
-      <input class="fi" id="ms_sub" value="${esc(p.sub_category||'')}">
-    </div>
+    <div class="fg"><label class="fl">القسم الفرعي الجديد</label><input class="fi" id="ms_sub" value="${esc(p.sub_category||'')}"></div>
     <div id="ms_subs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
     <button class="btn btn-orange" style="width:100%" onclick="doMoveSingle('${id}')">🔀 نقل</button>`);
   setTimeout(()=>updateMoveSingleSubs(id),100);
 }
-
 function updateMoveSingleSubs(id){
   const catKey=document.getElementById('ms_cat')?.value||'';
   const subs=[...new Set(prods.filter(p=>p.category_key===catKey).map(p=>p.sub_category).filter(Boolean))];
   const el=document.getElementById('ms_subs');
-  if(el) el.innerHTML=subs.map(s=>`<span onclick="document.getElementById('ms_sub').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
+  if(el)el.innerHTML=subs.map(s=>`<span onclick="document.getElementById('ms_sub').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
 }
-
 async function doMoveSingle(id){
   const p=prods.find(x=>x._id===id);
   await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,category_key:v('ms_cat'),sub_category:v('ms_sub')})});
   toast('✅ تم النقل','ok');closeM();prods=await api('/api/products');renderProds();
 }
 
-// PRODUCTS CRUD
+// ── ADD PRODUCT ──
 function openAdd(type){
   if(type==='product'){
     setM('➕ إضافة منتج',`
       <div class="two-col">
         <div class="fg"><label class="fl">اسم المنتج</label><input class="fi" id="pN"></div>
-        <div class="fg"><label class="fl">السعر</label><input class="fi" type="number" id="pP"></div>
+        <div class="fg"><label class="fl">السعر</label><input class="fi" type="number" id="pP" value="0"></div>
       </div>
       <div class="fg"><label class="fl">القسم</label>
         <select class="fi" id="pC" onchange="updateProdSubSuggestions()">
@@ -543,7 +609,7 @@ function openAdd(type){
         </select>
       </div>
       <div class="two-col">
-        <div class="fg"><label class="fl">القسم الفرعي</label><input class="fi" id="pS" placeholder="المعلبات"></div>
+        <div class="fg"><label class="fl">القسم الفرعي</label><input class="fi" id="pS"></div>
         <div class="fg"><label class="fl">الترتيب الفرعي</label><input class="fi" type="number" id="pSO" value="0"></div>
       </div>
       <div id="prodSubSugs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
@@ -564,20 +630,17 @@ function openAdd(type){
     setM('➕ بنر صغير جديد',miniBannerForm({},'saveMiniBanner'));
   }
 }
-
 function updateProdSubSuggestions(){
   const catKey=document.getElementById('pC')?.value||'';
   const subs=[...new Set(prods.filter(p=>p.category_key===catKey).map(p=>p.sub_category).filter(Boolean))];
   const el=document.getElementById('prodSubSugs');
-  if(el) el.innerHTML=subs.length?subs.map(s=>`<span onclick="document.getElementById('pS').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join(''):'';
+  if(el)el.innerHTML=subs.map(s=>`<span onclick="document.getElementById('pS').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
 }
-
 async function saveProd(){
   const b={name:v('pN'),price:+v('pP'),category_key:v('pC'),sub_category:v('pS'),sub_category_order:+v('pSO'),image:'',isActive:true};
   await fetch(`${API}/api/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة المنتج','ok');prods=await api('/api/products');renderProds();
 }
-
 function editProd(id){
   const p=prods.find(x=>x._id===id);if(!p)return;
   setM('✏️ تعديل منتج',`
@@ -609,14 +672,12 @@ function editProd(id){
     </div>`);
   setTimeout(()=>updateEditSubSuggestions(id),100);
 }
-
 function updateEditSubSuggestions(id){
   const catKey=document.getElementById('pC')?.value||'';
   const subs=[...new Set(prods.filter(p=>p.category_key===catKey).map(p=>p.sub_category).filter(Boolean))];
   const el=document.getElementById('editSubSugs');
-  if(el) el.innerHTML=subs.map(s=>`<span onclick="document.getElementById('pS').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
+  if(el)el.innerHTML=subs.map(s=>`<span onclick="document.getElementById('pS').value='${esc(s)}'" style="background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">${esc(s)}</span>`).join('');
 }
-
 async function uploadProdImg(inp,id){
   toast('⏳ جاري الرفع...','');
   const fd=new FormData();fd.append('image',inp.files[0]);
@@ -635,7 +696,7 @@ async function delProd(id,name){
   toast('🗑️ تم الحذف','ok');prods=await api('/api/products');renderProds();
 }
 
-// IMAGES
+// ── IMAGES ──
 async function loadImgs(){
   setC('<div class="loading"><div class="spin"></div></div>');
   imgProds=await api('/api/products');renderImgs();
@@ -644,9 +705,9 @@ function renderImgs(){
   const sr=(document.getElementById('IS')?.value||isv).toLowerCase();
   const fl=document.getElementById('IF')?.value||'all';
   let f=imgProds;
-  if(fl==='no') f=f.filter(p=>!p.image||p.image===''||p.image==='no_image');
-  if(fl==='yes') f=f.filter(p=>p.image&&p.image!==''&&p.image!=='no_image');
-  if(sr) f=f.filter(p=>p.name?.toLowerCase().includes(sr)||p.sub_category?.toLowerCase().includes(sr));
+  if(fl==='no')f=f.filter(p=>!p.image||p.image===''||p.image==='no_image');
+  if(fl==='yes')f=f.filter(p=>p.image&&p.image!==''&&p.image!=='no_image');
+  if(sr)f=f.filter(p=>p.name?.toLowerCase().includes(sr)||p.sub_category?.toLowerCase().includes(sr));
   const wi=imgProds.filter(p=>p.image&&p.image!==''&&p.image!=='no_image').length;
   const cards=f.map(p=>`
     <div class="img-card ${p.image&&p.image!==''&&p.image!=='no_image'?'done':''}" id="ic-${p._id}">
@@ -660,8 +721,7 @@ function renderImgs(){
         <button class="btn btn-primary btn-sm" style="width:100%" id="ib-${p._id}" onclick="document.getElementById('if-${p._id}').click()">📤 رفع صورة</button>
       </div>
     </div>`).join('');
-  setC(`
-    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+  setC(`<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <span class="badge badge-green">✓ ${wi} عندها صورة</span>
       <span class="badge badge-red">✗ ${imgProds.length-wi} بدون صورة</span>
       <span class="badge badge-blue">إجمالي: ${imgProds.length}</span>
@@ -682,7 +742,7 @@ async function uploadImgCard(id,inp){
   }catch{btn.textContent='❌ فشل';btn.disabled=false;toast('❌ فشل الرفع','err');}
 }
 
-// CATEGORIES
+// ── CATEGORIES ──
 async function loadCats(){
   setC('<div class="loading"><div class="spin"></div></div>');
   cats=await api('/api/categories');renderCatsPage();
@@ -742,7 +802,7 @@ async function delCat(id,name){
   toast('🗑️ تم','ok');cats=await api('/api/categories');renderCatsPage();
 }
 
-// BANNERS
+// ── BANNERS ──
 function bannerForm(b,action){
   return`<div class="fg"><label class="fl">العنوان</label><input class="fi" id="bT" value="${esc(b.title||'')}"></div>
     <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="bI" value="${esc(b.image||'')}"></div>
@@ -781,10 +841,7 @@ async function saveBanner(){
   await fetch(`${API}/api/banners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:v('bT'),image:v('bI'),order:+v('bO'),isActive:v('bA')==='true'})});
   closeM();toast('✅ تم','ok');const d=await api('/api/banners');banners=d.banners||[];renderBannersPage();
 }
-function editBanner(id){
-  const b=banners.find(x=>x._id===id);if(!b)return;
-  setM('✏️ تعديل بنر',bannerForm(b,`updateBanner('${id}')`));
-}
+function editBanner(id){const b=banners.find(x=>x._id===id);if(!b)return;setM('✏️ تعديل بنر',bannerForm(b,`updateBanner('${id}')`));}
 async function uploadBannerImg(inp,id){
   toast('⏳ رفع...','');
   const fd=new FormData();fd.append('image',inp.files[0]);
@@ -801,7 +858,7 @@ async function delBanner(id){
   toast('🗑️ تم','ok');const d=await api('/api/banners');banners=d.banners||[];renderBannersPage();
 }
 
-// MINI BANNERS
+// ── MINI BANNERS ──
 function miniBannerForm(b,action){
   return`<div class="fg"><label class="fl">العنوان</label><input class="fi" id="mbT" value="${esc(b.title||'')}"></div>
     <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" value="${esc(b.image||'')}"></div>
@@ -841,10 +898,7 @@ async function saveMiniBanner(){
   await fetch(`${API}/api/banners/mini`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:v('mbT'),image:v('mbI'),order:+v('mbO'),isActive:v('mbA')==='true'})});
   closeM();toast('✅ تم','ok');const d=await api('/api/banners/mini');miniBanners=d.banners||[];renderMiniBannersPage();
 }
-function editMiniBanner(id){
-  const b=miniBanners.find(x=>x._id===id);if(!b)return;
-  setM('✏️ تعديل بنر صغير',miniBannerForm(b,`updateMiniBanner('${id}')`));
-}
+function editMiniBanner(id){const b=miniBanners.find(x=>x._id===id);if(!b)return;setM('✏️ تعديل بنر صغير',miniBannerForm(b,`updateMiniBanner('${id}')`));}
 async function uploadMiniBannerImg(inp,id){
   toast('⏳ رفع...','');
   const fd=new FormData();fd.append('image',inp.files[0]);
@@ -861,7 +915,7 @@ async function delMiniBanner(id){
   toast('🗑️ تم','ok');const d=await api('/api/banners/mini');miniBanners=d.banners||[];renderMiniBannersPage();
 }
 
-// UTILS
+// ── UTILS ──
 function previewImg(inp,targetId){
   const file=inp.files[0];if(!file)return;
   const reader=new FileReader();
