@@ -11,6 +11,17 @@ cloudinary.config({
   api_secret: '_mOnrmrNe2laya_57lKncQhjvwk',
 });
 
+// ✅ FIX: /mini لازم تيجي قبل /:id عشان Express ميعتبرش 'mini' هو الـ id
+router.get('/mini', async (req, res) => {
+  try {
+    const MiniBanner = require('../models/MiniBanner');
+    const banners = await MiniBanner.find({ isActive: true }).sort({ order: 1 });
+    res.json({ success: true, banners });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const banners = await Banner.find().sort({ order: 1 });
@@ -58,16 +69,6 @@ router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
     });
     await Banner.findByIdAndUpdate(req.params.id, { image: result.secure_url });
     res.json({ success: true, image: result.secure_url });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-router.get('/mini', async (req, res) => {
-  try {
-    const MiniBanner = require('../models/MiniBanner');
-    const banners = await MiniBanner.find({ isActive: true }).sort({ order: 1 });
-    res.json({ success: true, banners });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
