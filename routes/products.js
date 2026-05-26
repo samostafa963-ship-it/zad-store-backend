@@ -129,28 +129,80 @@ setInterval(async () => {
   await processBatch();
 }, 2 * 60 * 1000);
 
+// ── GET /mini لازم قبل /:id ──
+router.get('/mini', async (req, res) => {
+  try {
+    const MiniBanner = require('../models/MiniBanner');
+    const banners = await MiniBanner.find({ isActive: true }).sort({ order: 1 });
+    res.json({ success: true, banners });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ✅ FIX: GET all products مع limit — بيرجع 20 بس بدل 1327
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();
+    const limit = parseInt(req.query.limit) || 20;
+    const page  = parseInt(req.query.page)  || 1;
+    const skip  = (page - 1) * limit;
+
+    const products = await Product.find({
+      image: { $nin: ['', null, 'no_image'] },
+      price: { $gt: 0 },
+    })
+      .skip(skip)
+      .limit(limit);
+
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ── GET grouped by sub_category ──
 router.get('/category/:key/grouped', async (req, res) => {
   try {
-    const products = await Product.aggregate([
-      { $match: { category_key: req.params.key } },
-      { $group: { _id: "$sub_category", products: { $push: "$$ROOT" }, sub_category_order: { $first: "$sub_category_order" } } },
-      { $sort: { sub_category_order: 1 } }
+    const page     = parseInt(req.query.page)    || 1;
+    const limit    = parseInt(req.query.limit)   || 999;
+    const maxProds = parseInt(req.query.maxProds) || 50;
+
+    const groups = await Product.aggregate([
+      {
+        $match: {
+          category_key: req.params.key,
+          image: { $nin: ['', null, 'no_image'] },
+        },
+      },
+      { $sort: { sub_category_order: 1, _id: 1 } },
+      {
+        $group: {
+          _id: '$sub_category',
+          products: { $push: '$$ROOT' },
+          sub_category_order: { $first: '$sub_category_order' },
+          total: { $sum: 1 },
+        },
+      },
+      { $sort: { sub_category_order: 1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 1,
+          sub_category_order: 1,
+          total: 1,
+          products: { $slice: ['$products', maxProds] },
+        },
+      },
     ]);
-    res.json(products);
+
+    res.json(groups);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ── GET products by category ──
 router.get('/category/:key', async (req, res) => {
   try {
     const products = await Product.find({ category_key: req.params.key }).sort({ order: 1 });
@@ -160,6 +212,20 @@ router.get('/category/:key', async (req, res) => {
   }
 });
 
+// ── GET search ──
+router.get('/search', async (req, res) => {
+  try {
+    const q = req.query.q || '';
+    const products = await Product.find({
+      name: { $regex: q, $options: 'i' },
+    }).limit(50);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST upload image ──
 router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
   try {
     const result = await new Promise((resolve, reject) => {
@@ -168,10 +234,10 @@ router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
           folder: 'zad_products',
           transformation: [
             { width: 800, height: 800, crop: 'pad', background: 'white' },
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
+            { quality: 'auto', fetch_format: 'auto' },
+          ],
         },
-        (err, result) => err ? reject(err) : resolve(result)
+        (err, result) => (err ? reject(err) : resolve(result))
       ).end(req.file.buffer);
     });
     await Product.updateOne({ _id: req.params.id }, { $set: { image: result.secure_url } });
@@ -181,6 +247,7 @@ router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
   }
 });
 
+// ── POST create ──
 router.post('/', async (req, res) => {
   try {
     const product = new Product(req.body);
@@ -191,6 +258,7 @@ router.post('/', async (req, res) => {
   }
 });
 
+// ── PUT update ──
 router.put('/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -200,6 +268,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// ── DELETE ──
 router.delete('/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -209,6 +278,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ── Admin routes ──
 router.get('/admin/upload-images', async (req, res) => {
   res.json({ message: '🚀 بدأ رفع الصور...' });
   await processBatch();
@@ -216,10 +286,17 @@ router.get('/admin/upload-images', async (req, res) => {
 
 router.get('/admin/image-stats', async (req, res) => {
   try {
-    const total = await Product.countDocuments();
+    const total     = await Product.countDocuments();
     const withImage = await Product.countDocuments({ image: { $nin: ['', null, 'no_image'] } });
-    const noImage = await Product.countDocuments({ $or: [{ image: '' }, { image: null }, { image: { $exists: false } }] });
-    res.json({ total, withImage, noImage, percentage: Math.round((withImage / total) * 100) + '%' });
+    const noImage   = await Product.countDocuments({
+      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }],
+    });
+    res.json({
+      total,
+      withImage,
+      noImage,
+      percentage: Math.round((withImage / total) * 100) + '%',
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
