@@ -8,16 +8,11 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --primary:#D100BC;
-  --primary-dark:#8a007a;
-  --primary-light:#fce8f9;
+  --primary:#D100BC;--primary-dark:#8a007a;--primary-light:#fce8f9;
   --green:#4caf50;--red:#f44336;--orange:#ff9800;--blue:#2196f3;
-  --bg:#f5f0fc;--white:#fff;--text:#2d2d2d;--gray:#888;--border:#edd8f5;
-  --sidebar:#0f0a12
+  --bg:#f5f0fc;--white:#fff;--text:#2d2d2d;--gray:#888;--border:#edd8f5;--sidebar:#0f0a12
 }
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
-
-/* SIDEBAR */
 .sidebar{width:240px;background:var(--sidebar);color:white;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;overflow:hidden}
 .logo{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px}
 .logo-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -29,27 +24,19 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);displ
 .nav-item:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.85)}
 .nav-item.active{background:rgba(209,0,188,0.15);color:var(--primary);border-right-color:var(--primary)}
 .nav-item .ni{font-size:17px;width:22px;text-align:center}
-
-/* MAIN */
 .main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--white);padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:12px}
 .page-title{font-size:19px;font-weight:900}
 .topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .content{padding:22px 28px;flex:1}
-
-/* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:22px}
 .stat-card{background:var(--white);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border)}
 .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .stat-info h3{font-size:22px;font-weight:900;line-height:1}
 .stat-info p{font-size:11px;color:var(--gray);margin-top:3px}
-
-/* CARDS */
 .card{background:var(--white);border-radius:14px;box-shadow:0 1px 8px rgba(209,0,188,0.06);border:1px solid var(--border);overflow:hidden}
 .card-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .card-header h3{font-size:15px;font-weight:700}
-
-/* TABLE */
 table{width:100%;border-collapse:collapse}
 th{background:var(--bg);padding:11px 14px;text-align:right;font-size:11px;color:var(--gray);font-weight:700;border-bottom:1px solid var(--border)}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
@@ -57,59 +44,37 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:#fdf5fc}
 .timg{width:42px;height:42px;border-radius:8px;object-fit:cover;background:var(--bg)}
 .tno-img{width:42px;height:42px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px}
-
-/* BUTTONS */
 .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;white-space:nowrap}
 .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
-.btn-green{background:var(--green);color:white}
-.btn-red{background:var(--red);color:white}
-.btn-orange{background:var(--orange);color:white}
-.btn-blue{background:var(--blue);color:white}
+.btn-green{background:var(--green);color:white}.btn-red{background:var(--red);color:white}
+.btn-orange{background:var(--orange);color:white}.btn-blue{background:var(--blue);color:white}
 .btn-ghost{background:transparent;border:2px solid var(--border);color:var(--text)}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .btn-sm{padding:5px 10px;font-size:12px}
-
-/* BADGE */
 .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.badge-green{background:#e8f5e9;color:var(--green)}
-.badge-red{background:#ffebee;color:var(--red)}
-.badge-orange{background:#fff3e0;color:var(--orange)}
-.badge-blue{background:#e3f2fd;color:var(--blue)}
+.badge-green{background:#e8f5e9;color:var(--green)}.badge-red{background:#ffebee;color:var(--red)}
+.badge-orange{background:#fff3e0;color:var(--orange)}.badge-blue{background:#e3f2fd;color:var(--blue)}
 .badge-primary{background:var(--primary-light);color:var(--primary-dark)}
-
-/* SEARCH */
 .search-input{padding:8px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s}
 .search-input:focus{border-color:var(--primary)}
-
-/* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
 .modal{background:var(--white);border-radius:18px;padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .modal-hd h3{font-size:17px;font-weight:700}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);line-height:1}
-
-/* FORM */
-.fg{margin-bottom:14px}
-.fl{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.fg{margin-bottom:14px}.fl{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--text)}
 .fi{width:100%;padding:10px 13px;border:2px solid var(--border);border-radius:9px;font-family:'Cairo',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
-.fi:focus{border-color:var(--primary)}
-select.fi{cursor:pointer}
+.fi:focus{border-color:var(--primary)}select.fi{cursor:pointer}
 .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s}
 .upload-zone:hover{border-color:var(--primary);background:var(--primary-light)}
-.upload-zone .uz-icon{font-size:30px;margin-bottom:6px}
-.upload-zone p{font-size:12px;color:var(--gray)}
-
-/* BANNER GRID */
+.upload-zone .uz-icon{font-size:30px;margin-bottom:6px}.upload-zone p{font-size:12px;color:var(--gray)}
 .banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .banner-card{background:var(--white);border-radius:14px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s}
 .banner-card:hover{box-shadow:0 4px 20px rgba(209,0,188,0.12)}
 .banner-img{width:100%;height:150px;object-fit:cover;background:var(--bg);display:block}
-.banner-body{padding:14px}
-.banner-title{font-weight:700;margin-bottom:4px;font-size:14px}
+.banner-body{padding:14px}.banner-title{font-weight:700;margin-bottom:4px;font-size:14px}
 .banner-order{font-size:12px;color:var(--gray);margin-bottom:10px}
 .banner-actions{display:flex;gap:6px;align-items:center}
-
-/* IMG GRID */
 .img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .img-card{background:var(--white);border-radius:12px;overflow:hidden;border:2px solid var(--border);transition:border-color 0.2s}
 .img-card.done{border-color:var(--green)}
@@ -118,14 +83,8 @@ select.fi{cursor:pointer}
 .img-card-body{padding:11px}
 .img-card-name{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .img-card-sub{font-size:10px;color:var(--gray);margin-bottom:8px}
-
-/* TOAST */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:9999;white-space:nowrap}
-.toast.show{opacity:1}
-.toast.ok{background:var(--green)}
-.toast.err{background:var(--red)}
-
-/* MISC */
+.toast.show{opacity:1}.toast.ok{background:var(--green)}.toast.err{background:var(--red)}
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--gray);flex-direction:column;gap:10px}
 .spin{width:36px;height:36px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -139,7 +98,6 @@ select.fi{cursor:pointer}
 </style>
 </head>
 <body>
-
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">✦</div>
@@ -157,7 +115,6 @@ select.fi{cursor:pointer}
     <div class="nav-item" onclick="go('mini_banners',this)"><span class="ni">🖼</span><span>البنرات الصغيرة</span></div>
   </nav>
 </aside>
-
 <div class="main">
   <div class="topbar">
     <div class="page-title" id="PT">الرئيسية</div>
@@ -165,7 +122,6 @@ select.fi{cursor:pointer}
   </div>
   <div class="content" id="PC"><div class="loading"><div class="spin"></div></div></div>
 </div>
-
 <div class="overlay" id="MOD">
   <div class="modal">
     <div class="modal-hd"><h3 id="MT"></h3><button class="modal-close" onclick="closeM()">✕</button></div>
@@ -173,9 +129,9 @@ select.fi{cursor:pointer}
   </div>
 </div>
 <div class="toast" id="T"></div>
-
 <script>
-const API='';
+// ✅ FIX: الـ API URL الصح
+const API='https://zad-store-backend-production.up.railway.app';
 let prods=[],imgProds=[],cats=[],banners=[],miniBanners=[],pp=1,ipp=1,sv='',isv='';
 const PER=25;
 
@@ -199,37 +155,43 @@ function go(page,el){
   ({dashboard:loadDash,products:loadProds,images:loadImgs,categories:loadCats,banners:loadBanners,mini_banners:loadMiniBanners})[page]?.();
 }
 
-// DASHBOARD
+// ✅ FIX: الـ dashboard بيجيب كل المنتجات للإحصائيات بس
 async function loadDash(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
-    const [p,b,mb]=await Promise.all([api('/api/products'),api('/api/banners'),apiSafe('/api/banners/mini')]);
-    const wi=p.filter(x=>x.image&&x.image!==''&&x.image!=='no_image').length;
-    const pct=Math.round(wi/p.length*100)||0;
+    const [p,b,mb,cats]=await Promise.all([
+      fetch(API+'/api/admin/image-stats').then(r=>r.json()),
+      api('/api/banners'),
+      apiSafe('/api/banners/mini'),
+      api('/api/categories')
+    ]);
+    const total=p.total||0, wi=p.withImage||0, noImg=p.noImage||0;
+    const pct=p.percentage||'0%';
     const bn=b.banners?.length||0;
     const mbn=mb?.banners?.length||0;
     setC(`
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📦</div><div class="stat-info"><h3>${p.length}</h3><p>إجمالي المنتجات</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📦</div><div class="stat-info"><h3>${total}</h3><p>إجمالي المنتجات</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9">🖼️</div><div class="stat-info"><h3>${wi}</h3><p>منتجات بصور</p></div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:#ffebee">⚠️</div><div class="stat-info"><h3>${p.length-wi}</h3><p>بدون صور</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#ffebee">⚠️</div><div class="stat-info"><h3>${noImg}</h3><p>بدون صور</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd">🎨</div><div class="stat-info"><h3>${bn}</h3><p>بنرات كبيرة</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#fff3e0">🖼</div><div class="stat-info"><h3>${mbn}</h3><p>بنرات صغيرة</p></div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3 id="catCount">-</h3><p>الأقسام</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3>${cats.length||0}</h3><p>الأقسام</p></div></div>
     </div>
     <div class="card" style="padding:20px;margin-bottom:16px">
       <h3 style="margin-bottom:12px;font-size:15px">📈 نسبة اكتمال الصور</h3>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <p style="margin-top:8px;font-size:13px;color:var(--gray)">${pct}% مكتمل (${wi} من ${p.length} منتج)</p>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}"></div></div>
+      <p style="margin-top:8px;font-size:13px;color:var(--gray)">${pct} مكتمل (${wi} من ${total} منتج)</p>
     </div>`);
-    api('/api/categories').then(c=>{const el=document.getElementById('catCount');if(el)el.textContent=c.length||0});
-  }catch(e){setC('<div class="loading">❌ فشل التحميل</div>')}
+  }catch(e){setC('<div class="loading">❌ فشل التحميل: '+e.message+'</div>')}
 }
 
-// PRODUCTS
+// ✅ FIX: المنتجات بتجيب كل الصفحات
 async function loadProds(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  prods=await api('/api/products');pp=1;sv='';renderProds();
+  // جيب كل المنتجات بـ limit كبير
+  prods=await api('/api/products?limit=2000');
+  pp=1;sv='';renderProds();
 }
 function renderProds(){
   let f=prods;
@@ -319,9 +281,9 @@ function openAdd(type){
 }
 
 function previewBannerImg(inp,targetId){
-  const file=inp.files[0]; if(!file) return;
+  const file=inp.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{document.getElementById(targetId).value=e.target.result;toast('✅ تم اختيار الصورة - ستُرفع عند الحفظ','ok');}
+  reader.onload=e=>{document.getElementById(targetId).value=e.target.result;toast('✅ تم اختيار الصورة','ok');}
   reader.readAsDataURL(file);
 }
 
@@ -331,7 +293,7 @@ async function saveProd(){
   closeM();toast('✅ تم إضافة المنتج','ok');loadProds();
 }
 function editProd(id){
-  const p=prods.find(x=>x._id===id);if(!p) return;
+  const p=prods.find(x=>x._id===id);if(!p)return;
   setM('✏️ تعديل منتج',`
     <div class="two-col">
       <div class="fg"><label class="fl">الاسم</label><input class="fi" id="pN" value="${esc(p.name||'')}"></div>
@@ -365,15 +327,15 @@ async function updateProd(id){
   closeM();toast('✅ تم التعديل','ok');loadProds();
 }
 async function delProd(id,name){
-  if(!confirm(`حذف "${name}"؟`)) return;
+  if(!confirm(`حذف "${name}"؟`))return;
   await fetch(`${API}/api/products/${id}`,{method:'DELETE'});
   toast('🗑️ تم الحذف','ok');loadProds();
 }
 
-// IMAGES
+// ✅ FIX: الصور بتجيب كل المنتجات
 async function loadImgs(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  imgProds=await api('/api/products');renderImgs();
+  imgProds=await api('/api/products?limit=2000');renderImgs();
 }
 function renderImgs(){
   const sr=(document.getElementById('IS')?.value||isv).toLowerCase();
@@ -410,7 +372,7 @@ async function uploadImgCard(id,inp){
   try{
     const d=await fetch(`${API}/api/products/${id}/upload-image`,{method:'POST',body:fd}).then(r=>r.json());
     if(d.image){
-      const p=imgProds.find(x=>x._id===id);if(p) p.image=d.image;
+      const p=imgProds.find(x=>x._id===id);if(p)p.image=d.image;
       document.getElementById(`ip-${id}`).innerHTML=`<img src="${d.image}" style="width:100%;height:100%;object-fit:cover">`;
       document.getElementById(`ic-${id}`).classList.add('done');
       btn.textContent='✅ تم';btn.style.background='var(--green)';
@@ -419,7 +381,6 @@ async function uploadImgCard(id,inp){
   }catch{btn.textContent='❌ فشل';btn.disabled=false;toast('❌ فشل الرفع','err');}
 }
 
-// CATEGORIES
 async function loadCats(){
   setC('<div class="loading"><div class="spin"></div></div>');
   cats=await api('/api/categories');renderCats();
@@ -446,7 +407,7 @@ async function saveCat(){
   closeM();toast('✅ تم إضافة القسم','ok');loadCats();
 }
 function editCat(id){
-  const c=cats.find(x=>x._id===id);if(!c) return;
+  const c=cats.find(x=>x._id===id);if(!c)return;
   setM('✏️ تعديل قسم',`
     <div class="fg"><label class="fl">اسم القسم</label><input class="fi" id="cN" value="${esc(c.name||'')}"></div>
     <div class="two-col">
@@ -473,12 +434,11 @@ async function updateCat(id){
   closeM();toast('✅ تم التعديل','ok');loadCats();
 }
 async function delCat(id,name){
-  if(!confirm(`حذف قسم "${name}"؟`)) return;
+  if(!confirm(`حذف قسم "${name}"؟`))return;
   await fetch(`${API}/api/categories/${id}`,{method:'DELETE'});
   toast('🗑️ تم الحذف','ok');loadCats();
 }
 
-// BANNERS
 async function loadBanners(){
   setC('<div class="loading"><div class="spin"></div></div>');
   const d=await api('/api/banners');banners=d.banners||[];renderBanners();
@@ -500,25 +460,12 @@ function renderBanners(){
   setC(`<div class="banner-grid">${cards||'<div class="loading">لا توجد بنرات - اضغط ➕ لإضافة</div>'}</div>`);
 }
 async function saveBanner(){
-  const imgVal=v('bI');
-  let finalImg=imgVal;
-  if(imgVal.startsWith('data:')){
-    const fd=new FormData();
-    const blob=await(await fetch(imgVal)).blob();
-    fd.append('image',blob,'banner.jpg');
-    toast('⏳ جاري رفع الصورة...','');
-    try{
-      const tempId='temp_'+Date.now();
-      const d=await fetch(`${API}/api/banners/upload-temp`,{method:'POST',body:fd}).then(r=>r.json());
-      if(d.image) finalImg=d.image;
-    }catch{}
-  }
-  const b={title:v('bT'),image:finalImg,order:+v('bO'),isActive:v('bA')==='true'};
+  const b={title:v('bT'),image:v('bI'),order:+v('bO'),isActive:v('bA')==='true'};
   await fetch(`${API}/api/banners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة البنر','ok');loadBanners();
 }
 function editBanner(id){
-  const b=banners.find(x=>x._id===id);if(!b) return;
+  const b=banners.find(x=>x._id===id);if(!b)return;
   setM('✏️ تعديل بنر كبير',`
     <div class="fg"><label class="fl">العنوان</label><input class="fi" id="bT" value="${esc(b.title||'')}"></div>
     <div class="fg"><label class="fl">رابط الصورة الحالية</label><input class="fi" id="bI" value="${esc(b.image||'')}"></div>
@@ -548,24 +495,22 @@ async function updateBanner(id){
   closeM();toast('✅ تم التعديل','ok');loadBanners();
 }
 async function delBanner(id){
-  if(!confirm('حذف هذا البنر؟')) return;
+  if(!confirm('حذف هذا البنر؟'))return;
   await fetch(`${API}/api/banners/${id}`,{method:'DELETE'});
   toast('🗑️ تم الحذف','ok');loadBanners();
 }
 
-// MINI BANNERS
 async function loadMiniBanners(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
     const d=await api('/api/banners/mini');
-    miniBanners=d.banners||[];
-    renderMiniBanners();
-  }catch{setC('<div class="loading">❌ فشل التحميل - تأكد من وجود endpoint /api/banners/mini</div>')}
+    miniBanners=d.banners||[];renderMiniBanners();
+  }catch{setC('<div class="loading">❌ فشل التحميل</div>')}
 }
 function renderMiniBanners(){
   const cards=miniBanners.map(b=>`
     <div class="banner-card">
-      <img src="${b.image}" style="width:100%;height:110px;object-fit:cover;background:var(--bg)" onerror="this.style.background='var(--bg)';this.style.minHeight='110px'">
+      <img src="${b.image.trim()}" style="width:100%;height:110px;object-fit:cover;background:var(--bg)" onerror="this.style.background='var(--bg)';this.style.minHeight='110px'">
       <div class="banner-body">
         <div class="banner-title">${esc(b.title||'بدون عنوان')}</div>
         <div class="banner-order">ترتيب: ${b.order||0}</div>
@@ -579,16 +524,16 @@ function renderMiniBanners(){
   setC(`<div class="banner-grid">${cards||'<div class="loading">لا توجد بنرات صغيرة - اضغط ➕ لإضافة</div>'}</div>`);
 }
 async function saveMiniBanner(){
-  const b={title:v('mbT'),image:v('mbI'),order:+v('mbO'),isActive:v('mbA')==='true'};
+  const b={title:v('mbT'),image:v('mbI').trim(),order:+v('mbO'),isActive:v('mbA')==='true'};
   await fetch(`${API}/api/banners/mini`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم إضافة البنر الصغير','ok');loadMiniBanners();
 }
 function editMiniBanner(id){
-  const b=miniBanners.find(x=>x._id===id);if(!b) return;
+  const b=miniBanners.find(x=>x._id===id);if(!b)return;
   setM('✏️ تعديل بنر صغير',`
     <div class="fg"><label class="fl">العنوان</label><input class="fi" id="mbT" value="${esc(b.title||'')}"></div>
-    <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" value="${esc(b.image||'')}"></div>
-    ${b.image?`<div style="margin-bottom:12px"><img src="${b.image}" style="width:100%;height:90px;object-fit:cover;border-radius:10px" onerror="this.style.display='none'"></div>`:''}
+    <div class="fg"><label class="fl">رابط الصورة</label><input class="fi" id="mbI" value="${esc(b.image?.trim()||'')}"></div>
+    ${b.image?`<div style="margin-bottom:12px"><img src="${b.image.trim()}" style="width:100%;height:90px;object-fit:cover;border-radius:10px" onerror="this.style.display='none'"></div>`:''}
     <div class="fg">
       <label class="fl">رفع صورة جديدة</label>
       <div class="upload-zone" onclick="document.getElementById('mbF').click()"><div class="uz-icon">📤</div><p>اضغط لاختيار صورة</p></div>
@@ -609,17 +554,16 @@ async function uploadMiniBannerImg(inp,id){
   if(d.image){document.getElementById('mbI').value=d.image;toast('✅ تم رفع الصورة','ok');}
 }
 async function updateMiniBanner(id){
-  const b={title:v('mbT'),image:v('mbI'),order:+v('mbO'),isActive:v('mbA')==='true'};
+  const b={title:v('mbT'),image:v('mbI').trim(),order:+v('mbO'),isActive:v('mbA')==='true'};
   await fetch(`${API}/api/banners/mini/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
   closeM();toast('✅ تم التعديل','ok');loadMiniBanners();
 }
 async function delMiniBanner(id){
-  if(!confirm('حذف هذا البنر الصغير؟')) return;
+  if(!confirm('حذف هذا البنر الصغير؟'))return;
   await fetch(`${API}/api/banners/mini/${id}`,{method:'DELETE'});
   toast('🗑️ تم الحذف','ok');loadMiniBanners();
 }
 
-// UTILS
 async function api(url){const r=await fetch(API+url);const d=await r.json();return Array.isArray(d)?d:d;}
 async function apiSafe(url){try{return await api(url);}catch{return null;}}
 function setC(h){document.getElementById('PC').innerHTML=h}
