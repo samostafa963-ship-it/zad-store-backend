@@ -160,7 +160,7 @@ async function loadDash(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
     const [p,b,mb,cats]=await Promise.all([
-      fetch(API+'/api/admin/image-stats').then(r=>r.json()),
+      fetch(API+'/api/products/admin/image-stats').then(r=>r.json()),
       api('/api/banners'),
       apiSafe('/api/banners/mini'),
       api('/api/categories')
