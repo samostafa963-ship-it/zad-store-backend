@@ -24,6 +24,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/banners', bannersRouter);
 app.use(express.static('public'));
+app.use('/api/ai', require('./routes/ai'));
 
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
