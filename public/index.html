@@ -94,6 +94,35 @@ tr:hover td{background:#fdf5fc}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .progress-bar{background:#eee;border-radius:20px;height:14px;overflow:hidden}
 .progress-fill{background:var(--primary);height:100%;border-radius:20px;transition:width 1s}
+
+/* ── AI CHAT STYLES ── */
+.ai-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);gap:16px}
+.ai-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:4px 0}
+.ai-msg{display:flex;gap:10px;align-items:flex-start}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-bubble{max-width:75%;padding:12px 16px;border-radius:16px;font-size:13px;line-height:1.6}
+.ai-msg.bot .ai-bubble{background:var(--white);border:1px solid var(--border);border-radius:4px 16px 16px 16px}
+.ai-msg.user .ai-bubble{background:var(--primary);color:white;border-radius:16px 4px 16px 16px}
+.ai-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ai-msg.bot .ai-avatar{background:var(--primary-light)}
+.ai-msg.user .ai-avatar{background:var(--primary);color:white;font-size:14px;font-weight:900}
+.ai-img-result{width:100%;max-width:400px;border-radius:12px;margin-top:10px;border:1px solid var(--border);cursor:pointer;transition:transform 0.2s}
+.ai-img-result:hover{transform:scale(1.02)}
+.ai-input-row{display:flex;gap:10px;align-items:flex-end}
+.ai-textarea{flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-size:13px;resize:none;outline:none;transition:border-color 0.2s;min-height:48px;max-height:120px}
+.ai-textarea:focus{border-color:var(--primary)}
+.ai-send{width:48px;height:48px;border-radius:14px;background:var(--primary);border:none;color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0}
+.ai-send:hover{background:var(--primary-dark)}
+.ai-send:disabled{background:var(--gray);cursor:not-allowed}
+.ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.ai-banner-select{padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;background:var(--white);cursor:pointer}
+.ai-banner-select:focus{border-color:var(--primary)}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:12px 16px}
+.ai-typing span{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:bounce 1.2s infinite}
+.ai-typing span:nth-child(2){animation-delay:0.2s}
+.ai-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+
 @media(max-width:768px){.sidebar{width:60px}.main{margin-right:60px}.nav-item span:not(.ni){display:none}.logo h2,.logo p{display:none}.two-col{grid-template-columns:1fr}}
 </style>
 </head>
@@ -113,6 +142,8 @@ tr:hover td{background:#fdf5fc}
     <div class="nav-section">التسويق</div>
     <div class="nav-item" onclick="go('banners',this)"><span class="ni">🎨</span><span>البنرات الكبيرة</span></div>
     <div class="nav-item" onclick="go('mini_banners',this)"><span class="ni">🖼</span><span>البنرات الصغيرة</span></div>
+    <div class="nav-section">الذكاء الاصطناعي</div>
+    <div class="nav-item" onclick="go('ai',this)"><span class="ni">🤖</span><span>مساعد AI</span></div>
   </nav>
 </aside>
 <div class="main">
@@ -130,15 +161,18 @@ tr:hover td{background:#fdf5fc}
 </div>
 <div class="toast" id="T"></div>
 <script>
-// ✅ FIX: الـ API URL الصح
 const API='https://zad-store-backend-production.up.railway.app';
 let prods=[],imgProds=[],cats=[],banners=[],miniBanners=[],pp=1,ipp=1,sv='',isv='';
 const PER=25;
 
+// ── AI State ──
+let aiMessages=[];
+let aiGeneratedImgUrl=null;
+
 function go(page,el){
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   el.classList.add('active');
-  const tls={dashboard:'الرئيسية',products:'المنتجات',images:'الصور',categories:'الأقسام',banners:'البنرات الكبيرة',mini_banners:'البنرات الصغيرة'};
+  const tls={dashboard:'الرئيسية',products:'المنتجات',images:'الصور',categories:'الأقسام',banners:'البنرات الكبيرة',mini_banners:'البنرات الصغيرة',ai:'🤖 مساعد AI'};
   document.getElementById('PT').textContent=tls[page]||page;
   const acts={
     products:`<button class="btn btn-primary" onclick="openAdd('product')">➕ منتج جديد</button>`,
@@ -149,26 +183,22 @@ function go(page,el){
             <select class="search-input" id="IF" onchange="renderImgs()">
               <option value="all">الكل</option><option value="no">بدون صورة</option><option value="yes">عندها صورة</option>
             </select>`,
-    dashboard:'',
+    dashboard:'',ai:'',
   };
   document.getElementById('TR').innerHTML=acts[page]||'';
-  ({dashboard:loadDash,products:loadProds,images:loadImgs,categories:loadCats,banners:loadBanners,mini_banners:loadMiniBanners})[page]?.();
+  ({dashboard:loadDash,products:loadProds,images:loadImgs,categories:loadCats,banners:loadBanners,mini_banners:loadMiniBanners,ai:loadAI})[page]?.();
 }
 
-// ✅ FIX: الـ dashboard بيجيب كل المنتجات للإحصائيات بس
+// ── DASHBOARD ──
 async function loadDash(){
   setC('<div class="loading"><div class="spin"></div></div>');
   try{
-    const [p,b,mb,cats]=await Promise.all([
+    const [p,b,mb,c]=await Promise.all([
       fetch(API+'/api/products/admin/image-stats').then(r=>r.json()),
-      api('/api/banners'),
-      apiSafe('/api/banners/mini'),
-      api('/api/categories')
+      api('/api/banners'),apiSafe('/api/banners/mini'),api('/api/categories')
     ]);
-    const total=p.total||0, wi=p.withImage||0, noImg=p.noImage||0;
-    const pct=p.percentage||'0%';
-    const bn=b.banners?.length||0;
-    const mbn=mb?.banners?.length||0;
+    const total=p.total||0,wi=p.withImage||0,noImg=p.noImage||0,pct=p.percentage||'0%';
+    const bn=b.banners?.length||0,mbn=mb?.banners?.length||0;
     setC(`
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📦</div><div class="stat-info"><h3>${total}</h3><p>إجمالي المنتجات</p></div></div>
@@ -176,7 +206,7 @@ async function loadDash(){
       <div class="stat-card"><div class="stat-icon" style="background:#ffebee">⚠️</div><div class="stat-info"><h3>${noImg}</h3><p>بدون صور</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd">🎨</div><div class="stat-info"><h3>${bn}</h3><p>بنرات كبيرة</p></div></div>
       <div class="stat-card"><div class="stat-icon" style="background:#fff3e0">🖼</div><div class="stat-info"><h3>${mbn}</h3><p>بنرات صغيرة</p></div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3>${cats.length||0}</h3><p>الأقسام</p></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#f3e5f5">🗂️</div><div class="stat-info"><h3>${c.length||0}</h3><p>الأقسام</p></div></div>
     </div>
     <div class="card" style="padding:20px;margin-bottom:16px">
       <h3 style="margin-bottom:12px;font-size:15px">📈 نسبة اكتمال الصور</h3>
@@ -186,10 +216,136 @@ async function loadDash(){
   }catch(e){setC('<div class="loading">❌ فشل التحميل: '+e.message+'</div>')}
 }
 
-// ✅ FIX: المنتجات بتجيب كل الصفحات
+// ── AI PAGE ──
+async function loadAI(){
+  // جيب البنرات عشان نختار
+  const [b,mb]=await Promise.all([apiSafe('/api/banners'),apiSafe('/api/banners/mini')]);
+  const allBanners=[...(b?.banners||[]).map(x=>({...x,type:'banner'})),...(mb?.banners||[]).map(x=>({...x,type:'mini'}))];
+
+  const bannerOpts=allBanners.map(x=>`<option value="${x._id}|${x.type}">${x.type==='banner'?'🎨':'🖼'} ${esc(x.title||'بدون عنوان')}</option>`).join('');
+
+  setC(`
+  <div class="ai-wrap">
+    <div class="ai-messages" id="aiMsgs">
+      <div class="ai-msg bot">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <div class="ai-bubble">
+            مرحباً! أنا مساعد زورا AI 🎨<br>
+            اكتب وصف للصورة اللي عايزها وهولّدهالك في ثواني.<br>
+            <strong>مثال:</strong> fresh colorful fruits on white background, professional product photo
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="ai-input-row">
+        <textarea class="ai-textarea" id="aiInput" placeholder="اكتب وصف الصورة بالإنجليزي للجودة الأفضل..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"></textarea>
+        <button class="ai-send" id="aiSendBtn" onclick="sendAI()">➤</button>
+      </div>
+      <div class="ai-actions" id="aiActions" style="display:none">
+        <select class="ai-banner-select" id="aiBannerSel">
+          <option value="">اختر بنر للحفظ...</option>
+          ${bannerOpts}
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="saveAIToBanner()">💾 احفظ في البنر</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiActions').style.display='none';aiGeneratedImgUrl=null">✕ إلغاء</button>
+      </div>
+    </div>
+  </div>`);
+}
+
+async function sendAI(){
+  const input=document.getElementById('aiInput');
+  const prompt=input.value.trim();
+  if(!prompt)return;
+
+  // أضف رسالة المستخدم
+  addAIMsg('user',prompt);
+  input.value='';
+
+  // أضف typing indicator
+  const typingId='typing_'+Date.now();
+  document.getElementById('aiMsgs').insertAdjacentHTML('beforeend',`
+    <div class="ai-msg bot" id="${typingId}">
+      <div class="ai-avatar">🤖</div>
+      <div class="ai-bubble">
+        <div class="ai-typing"><span></span><span></span><span></span></div>
+      </div>
+    </div>`);
+  scrollAI();
+
+  document.getElementById('aiSendBtn').disabled=true;
+
+  try{
+    const resp=await fetch(`${API}/api/ai/generate-image`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    const data=await resp.json();
+
+    document.getElementById(typingId)?.remove();
+
+    if(data.imageUrl){
+      aiGeneratedImgUrl=data.imageUrl;
+      addAIMsg('bot','✅ جاهزة! اختار بنر لحفظها أو اضغط على الصورة لتحميلها:',data.imageUrl);
+      document.getElementById('aiActions').style.display='flex';
+    } else {
+      addAIMsg('bot','❌ '+(data.error||'حدث خطأ، حاول مرة أخرى'));
+    }
+  }catch(e){
+    document.getElementById(typingId)?.remove();
+    addAIMsg('bot','❌ فشل الاتصال بالسيرفر');
+  }
+
+  document.getElementById('aiSendBtn').disabled=false;
+  scrollAI();
+}
+
+async function saveAIToBanner(){
+  const sel=document.getElementById('aiBannerSel').value;
+  if(!sel){toast('اختر بنر أولاً','err');return;}
+  if(!aiGeneratedImgUrl){toast('مفيش صورة للحفظ','err');return;}
+
+  const [id,type]=sel.split('|');
+  const endpoint=type==='mini'?`/api/banners/mini/${id}`:`/api/banners/${id}`;
+
+  try{
+    await fetch(API+endpoint,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:aiGeneratedImgUrl})
+    });
+    toast('✅ تم حفظ الصورة في البنر','ok');
+    document.getElementById('aiActions').style.display='none';
+    aiGeneratedImgUrl=null;
+    addAIMsg('bot','✅ تم حفظ الصورة في البنر بنجاح! 🎉');
+  }catch{toast('❌ فشل الحفظ','err');}
+}
+
+function addAIMsg(role,text,imgUrl=null){
+  const msgs=document.getElementById('aiMsgs');
+  const isUser=role==='user';
+  msgs.insertAdjacentHTML('beforeend',`
+    <div class="ai-msg ${isUser?'user':'bot'}">
+      <div class="ai-avatar">${isUser?'أ':'🤖'}</div>
+      <div>
+        <div class="ai-bubble">${esc(text)}</div>
+        ${imgUrl?`<img src="${imgUrl}" class="ai-img-result" onclick="window.open('${imgUrl}','_blank')" title="اضغط للتحميل">`:''}
+      </div>
+    </div>`);
+  scrollAI();
+}
+
+function scrollAI(){
+  const msgs=document.getElementById('aiMsgs');
+  if(msgs) msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── PRODUCTS ──
 async function loadProds(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  // جيب كل المنتجات بـ limit كبير
   prods=await api('/api/products?limit=2000');
   pp=1;sv='';renderProds();
 }
@@ -332,7 +488,6 @@ async function delProd(id,name){
   toast('🗑️ تم الحذف','ok');loadProds();
 }
 
-// ✅ FIX: الصور بتجيب كل المنتجات
 async function loadImgs(){
   setC('<div class="loading"><div class="spin"></div></div>');
   imgProds=await api('/api/products?limit=2000');renderImgs();
