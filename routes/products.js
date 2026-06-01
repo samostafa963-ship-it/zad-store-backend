@@ -140,7 +140,7 @@ router.get('/mini', async (req, res) => {
   }
 });
 
-// ✅ FIX: GET all products مع limit — بيرجع 20 بس بدل 1327
+// ── GET all products ──
 router.get('/', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
@@ -225,6 +225,42 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ── GET admin image stats ──
+router.get('/admin/image-stats', async (req, res) => {
+  try {
+    const total     = await Product.countDocuments();
+    const withImage = await Product.countDocuments({ image: { $nin: ['', null, 'no_image'] } });
+    const noImage   = await Product.countDocuments({
+      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }],
+    });
+    res.json({
+      total,
+      withImage,
+      noImage,
+      percentage: Math.round((withImage / total) * 100) + '%',
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET admin upload images ──
+router.get('/admin/upload-images', async (req, res) => {
+  res.json({ message: '🚀 بدأ رفع الصور...' });
+  await processBatch();
+});
+
+// ── GET single product by id ──
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'المنتج غير موجود' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── POST upload image ──
 router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
   try {
@@ -273,30 +309,6 @@ router.delete('/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ message: 'تم الحذف' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── Admin routes ──
-router.get('/admin/upload-images', async (req, res) => {
-  res.json({ message: '🚀 بدأ رفع الصور...' });
-  await processBatch();
-});
-
-router.get('/admin/image-stats', async (req, res) => {
-  try {
-    const total     = await Product.countDocuments();
-    const withImage = await Product.countDocuments({ image: { $nin: ['', null, 'no_image'] } });
-    const noImage   = await Product.countDocuments({
-      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }],
-    });
-    res.json({
-      total,
-      withImage,
-      noImage,
-      percentage: Math.round((withImage / total) * 100) + '%',
-    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
