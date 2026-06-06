@@ -118,4 +118,18 @@ router.post('/:id/upload-image', upload.single('image'), async (req, res) => {
   }
 });
 
+router.post('/upload-temp', upload.single('image'), async (req, res) => {
+  try {
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'zad_banners', transformation: [{ quality: 'auto' }] },
+        (err, result) => err ? reject(err) : resolve(result)
+      ).end(req.file.buffer);
+    });
+    res.json({ success: true, image: result.secure_url });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
