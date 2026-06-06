@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const miniBannerSchema = new mongoose.Schema({
+  title: { type: String, default: '' },
   image: { type: String, required: true },
   isActive: { type: Boolean, default: true },
   order: { type: Number, default: 0 },
