@@ -389,15 +389,19 @@ async function loadDash(){
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}"></div></div>
       <p style="margin-top:7px;font-size:12px;color:var(--gray)">${wi} من ${total} منتج مكتمل</p>
     </div>`);
-    updatePhonePreview(b?.banners||[],mb?.banners||[],cats);
+    banners=b?.banners||[];miniBanners=mb?.banners||[];cats=c||[];
+    updatePhonePreview(banners,miniBanners,cats);
   }catch(e){setC('<div class="loading">❌ فشل التحميل</div>')}
 }
 
 // ── BANNERS ──
 async function loadBanners(){
   setC('<div class="loading"><div class="spin"></div></div>');
-  const d=await api('/api/banners');
-  banners=d.banners||[];renderBanners();
+  const [d,mb,c]=await Promise.all([api('/api/banners'),apiSafe('/api/banners/mini'),apiSafe('/api/categories')]);
+  banners=d.banners||[];
+  miniBanners=mb?.banners||[];
+  cats=c||[];
+  renderBanners();
   updatePhonePreview(banners,miniBanners,cats);
 }
 
