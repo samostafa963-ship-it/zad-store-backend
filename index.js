@@ -27,7 +27,7 @@ app.use(express.static('public'));
 app.use('/api/ai', require('./routes/ai'));
 
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 app.use('/admin', express.static(path.join(__dirname, 'public')));
