@@ -4,6 +4,8 @@ const cors = require('cors');
 const dns = require('dns');
 const ordersRouter = require('./routes/orders');
 const bannersRouter = require('./routes/banners');
+const driversRouter = require('./routes/drivers');
+const zonesRouter = require('./routes/zones');
 
 require('dotenv').config();
 
@@ -23,6 +25,8 @@ app.use('/api/products', productsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/banners', bannersRouter);
+app.use('/api/drivers', driversRouter);
+app.use('/api/zones', zonesRouter);
 app.use(express.static('public'));
 app.use('/api/ai', require('./routes/ai'));
 

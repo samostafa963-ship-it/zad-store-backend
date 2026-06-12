@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>زورا - إدارة الطلبات</title>
+<title>زورا - لوحة التحكم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -28,7 +28,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-
 .sidebar{width:220px;background:var(--pink);display:flex;flex-direction:column;height:100vh;flex-shrink:0}
 .sb-logo{padding:20px 18px;display:flex;align-items:center;gap:8px}
 .sb-logo-txt{font-size:22px;font-weight:900;color:white;letter-spacing:-0.5px}
-.sb-logo-txt span{opacity:0.7;font-weight:400;font-size:14px}
 .sb-nav{flex:1;padding:8px 0}
 .sb-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;transition:.15s;border-right:3px solid transparent}
 .sb-item:hover{background:rgba(255,255,255,0.1);color:white}
@@ -38,7 +37,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-
 .sb-av{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);object-fit:cover}
 .sb-nm{font-size:12px;font-weight:700;color:white}
 .sb-rl{font-size:10px;color:rgba(255,255,255,0.6)}
-.sb-out{margin-top:auto;padding:12px 18px;display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:700}
+.sb-out{padding:12px 18px;display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:700}
 .sb-out:hover{color:white}
 
 /* MAIN */
@@ -46,16 +45,21 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-
 
 /* TOPBAR */
 .topbar{background:var(--white);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
-.tb-l{display:flex;align-items:center;gap:12px}
-.tb-r{display:flex;align-items:center;gap:10px}
 .tb-title{font-size:16px;font-weight:900;color:var(--text)}
+.tb-r{display:flex;align-items:center;gap:10px}
 .tb-srch{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:7px 16px;width:340px}
 .tb-srch input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:12px;outline:none;width:100%;direction:rtl}
 .tb-srch input::placeholder{color:var(--text2)}
 .tb-ic{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:14px}
 .tb-ic:hover{background:var(--bg)}
 .nb{position:absolute;top:-4px;right:-4px;background:var(--pink);color:white;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid white}
-.tb-menu{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:900;color:var(--text2)}
+
+/* PAGE */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden}
+.page.active{display:flex}
+.page-body{flex:1;overflow-y:auto;padding:16px 20px}
+.page-body::-webkit-scrollbar{width:4px}
+.page-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
 /* STATS */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 20px;flex-shrink:0}
@@ -80,13 +84,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-
 .btn{padding:8px 16px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;border:none;transition:.15s}
 .bp{background:var(--pink);color:white}.bp:hover{background:var(--pink-d)}
 .bo{background:var(--white);border:1.5px solid var(--border);color:var(--text)}.bo:hover{border-color:var(--pink);color:var(--pink)}
+.br{background:var(--red-l);border:1.5px solid var(--red);color:var(--red)}
 .tl-sel{padding:7px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;background:var(--white);cursor:pointer;direction:rtl}
 .live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
 .ldot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:bl 1.5s infinite}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* TABLE AREA */
-.body-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column}
+/* TABLE */
 .table-wrap{flex:1;overflow-y:auto;padding:0 20px}
 .table-wrap::-webkit-scrollbar{width:4px}
 .table-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -109,7 +113,7 @@ tbody tr.selected td{background:var(--pink-u)}
 .act-ic{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.1s}
 .act-ic:hover{border-color:var(--pink);background:var(--pink-u)}
 
-/* STATUS BADGE */
+/* BADGE */
 .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
 .b-new{background:#fce7f3;color:#be185d}
 .b-confirmed{background:var(--blue-l);color:#1d4ed8}
@@ -117,6 +121,9 @@ tbody tr.selected td{background:var(--pink-u)}
 .b-delivering{background:var(--purple-l);color:#6d28d9}
 .b-completed{background:var(--green-l);color:#065f46}
 .b-cancelled{background:var(--red-l);color:#dc2626}
+.b-available{background:var(--green-l);color:#065f46}
+.b-busy{background:var(--orange-l);color:#b45309}
+.b-offline{background:#f3f4f6;color:#6b7280}
 
 /* DETAIL PANEL */
 .detail-panel{background:var(--white);border-top:1.5px solid var(--border);flex-shrink:0;max-height:0;overflow:hidden;transition:max-height .3s ease}
@@ -146,10 +153,49 @@ tbody tr.selected td{background:var(--pink-u)}
 .dpbtn-ol{background:var(--white);border:1.5px solid var(--border);color:var(--text)}.dpbtn-ol:hover{border-color:var(--pink);color:var(--pink)}
 .dpbtn-rd{background:var(--red-l);color:var(--red)}
 
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:20px;padding:28px;width:420px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:900;margin-bottom:20px;color:var(--text)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;direction:rtl;background:var(--white)}
+.form-group input:focus,.form-group select:focus{border-color:var(--pink)}
+.modal-btns{display:flex;gap:8px;margin-top:20px}
+.modal-btns .btn{flex:1;justify-content:center}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.rcard{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.rcard-n{font-size:28px;font-weight:900;color:var(--pink)}
+.rcard-l{font-size:12px;color:var(--text2);margin-top:4px;font-weight:600}
+.chart-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:900;margin-bottom:16px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{width:100px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--bg);border-radius:20px;height:10px;overflow:hidden}
+.bar-fill{height:100%;background:var(--pink);border-radius:20px;transition:width .5s}
+.bar-val{width:50px;font-size:12px;font-weight:700;color:var(--text)}
+
+/* CALLS */
+.call-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.call-card:hover{border-color:var(--pink)}
+.call-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.call-in{background:var(--green-l)}
+.call-out{background:var(--blue-l)}
+.call-miss{background:var(--red-l)}
+
 /* TOAST */
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:700;opacity:0;transition:.3s;z-index:9999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 .toast.ok{background:var(--green)}.toast.err{background:var(--red)}.toast.info{background:var(--pink)}
+
+/* DRIVER STATUS DOT */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:5px}
+.dot-available{background:var(--green)}
+.dot-busy{background:var(--orange)}
+.dot-offline{background:#9ca3af}
 </style>
 </head>
 <body>
@@ -172,111 +218,92 @@ tbody tr.selected td{background:var(--pink-u)}
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="SB" style="display:none">
-  <div class="sb-logo">
-    <div class="sb-logo-txt">زúra</div>
-  </div>
+  <div class="sb-logo"><div class="sb-logo-txt">زúra</div></div>
   <div class="sb-nav">
-    <div class="sb-item active"><span class="si">🛍️</span><span>الطلبات</span></div>
-    <div class="sb-item"><span class="si">🛵</span><span>المندوبين</span></div>
-    <div class="sb-item"><span class="si">👥</span><span>العملاء</span></div>
-    <div class="sb-item"><span class="si">🏷️</span><span>كوبونات الخصم</span></div>
-    <div class="sb-item"><span class="si">🗺️</span><span>مناطق وأسعار التوصيل</span></div>
-    <div class="sb-item"><span class="si">📞</span><span>سجل المكالمات</span></div>
-    <div class="sb-item"><span class="si">📊</span><span>تقرير اليوم</span></div>
+    <div class="sb-item active" onclick="showPage('orders')"><span class="si">🛍️</span><span>الطلبات</span></div>
+    <div class="sb-item" onclick="showPage('drivers')"><span class="si">🛵</span><span>المندوبين</span></div>
+    <div class="sb-item" onclick="showPage('customers')"><span class="si">👥</span><span>العملاء</span></div>
+    <div class="sb-item" onclick="showPage('zones')"><span class="si">🗺️</span><span>مناطق وأسعار التوصيل</span></div>
+    <div class="sb-item" onclick="showPage('calls')"><span class="si">📞</span><span>سجل المكالمات</span></div>
+    <div class="sb-item" onclick="showPage('report')"><span class="si">📊</span><span>تقرير اليوم</span></div>
   </div>
   <div class="sb-user">
     <img id="uAv" class="sb-av" src="" alt="">
     <div><div class="sb-nm" id="uNm">—</div><div class="sb-rl">موظف استقبال</div></div>
   </div>
-  <div class="sb-out" onclick="doLogout()">
-    <span>🚪</span><span>تسجيل الخروج</span>
-  </div>
+  <div class="sb-out" onclick="doLogout()"><span>🚪</span><span>تسجيل الخروج</span></div>
 </div>
 
 <!-- MAIN -->
 <div class="main" id="MS" style="display:none">
+
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="tb-l">
-      <div class="tb-title">الطلبات</div>
-    </div>
+    <div class="tb-title" id="pageTitle">الطلبات</div>
     <div class="tb-r">
       <div class="tb-srch">
         <span style="color:var(--text2)">🔍</span>
-        <input placeholder="ابحث برقم الطلب أو اسم العميل أو رقم الهاتف..." id="srch" oninput="doFilter()">
+        <input placeholder="بحث..." id="srch" oninput="onSearch()">
       </div>
       <div class="tb-ic" id="nbtn">🔔<div class="nb" id="nbdg" style="display:none">0</div></div>
-      <div class="tb-menu">⋯</div>
-    </div>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats">
-    <div class="sc new-card" onclick="setFilter('all')">
-      <div><div class="sc-n" id="sn">0</div><div class="sc-l">طلبات جديدة</div><div class="sc-lnk">عرض الكل</div></div>
-      <div class="new-plus">+</div>
-    </div>
-    <div class="sc" onclick="setFilter('preparing')">
-      <div class="sc-ic" style="background:var(--orange-l)">🏪</div>
-      <div><div class="sc-n" id="sp2">0</div><div class="sc-l">جاري التجهيز</div><div class="sc-lnk">عرض الكل</div></div>
-    </div>
-    <div class="sc" onclick="setFilter('delivering')">
-      <div class="sc-ic" style="background:var(--purple-l)">🛵</div>
-      <div><div class="sc-n" id="sd">0</div><div class="sc-l">مع المندوب</div><div class="sc-lnk">عرض الكل</div></div>
-    </div>
-    <div class="sc" onclick="setFilter('completed')">
-      <div class="sc-ic" style="background:var(--green-l)">✅</div>
-      <div><div class="sc-n" id="sc2">0</div><div class="sc-l">مكتملة</div><div class="sc-lnk">عرض الكل</div></div>
-    </div>
-    <div class="sc" onclick="setFilter('cancelled')">
-      <div class="sc-ic" style="background:var(--red-l)">❌</div>
-      <div><div class="sc-n" id="sx">0</div><div class="sc-l">ملغية</div><div class="sc-lnk">عرض الكل</div></div>
-    </div>
-  </div>
-
-  <!-- TOOLBAR -->
-  <div class="toolbar">
-    <div class="tl-l">
-      <button class="btn bp">+ طلب جديد</button>
-      <button class="btn bo" onclick="doExport()">📥 تصدير</button>
-    </div>
-    <div class="tl-r">
-      <input type="date" class="tl-sel" id="dateFilter" onchange="doFilter()">
-      <select class="tl-sel" id="statusFilter" onchange="doFilter()">
-        <option value="">جميع الحالات</option>
-        <option value="pending">جديد</option>
-        <option value="confirmed">مؤكد</option>
-        <option value="preparing">جاري التجهيز</option>
-        <option value="delivering">مع المندوب</option>
-        <option value="completed">مكتمل</option>
-        <option value="cancelled">ملغي</option>
-      </select>
       <div class="live"><div class="ldot"></div><span id="lu">جارٍ التحميل...</span></div>
     </div>
   </div>
 
-  <!-- TABLE + DETAIL -->
-  <div class="body-wrap">
+  <!-- ===== PAGE: ORDERS ===== -->
+  <div class="page active" id="pg-orders">
+    <div class="stats">
+      <div class="sc new-card" onclick="setFilter('all')">
+        <div><div class="sc-n" id="sn">0</div><div class="sc-l">طلبات جديدة</div><div class="sc-lnk">عرض الكل</div></div>
+        <div class="new-plus">+</div>
+      </div>
+      <div class="sc" onclick="setFilter('preparing')">
+        <div class="sc-ic" style="background:var(--orange-l)">🏪</div>
+        <div><div class="sc-n" id="sp2">0</div><div class="sc-l">جاري التجهيز</div><div class="sc-lnk">عرض الكل</div></div>
+      </div>
+      <div class="sc" onclick="setFilter('delivering')">
+        <div class="sc-ic" style="background:var(--purple-l)">🛵</div>
+        <div><div class="sc-n" id="sd">0</div><div class="sc-l">مع المندوب</div><div class="sc-lnk">عرض الكل</div></div>
+      </div>
+      <div class="sc" onclick="setFilter('completed')">
+        <div class="sc-ic" style="background:var(--green-l)">✅</div>
+        <div><div class="sc-n" id="sc2">0</div><div class="sc-l">مكتملة</div><div class="sc-lnk">عرض الكل</div></div>
+      </div>
+      <div class="sc" onclick="setFilter('cancelled')">
+        <div class="sc-ic" style="background:var(--red-l)">❌</div>
+        <div><div class="sc-n" id="sx">0</div><div class="sc-l">ملغية</div><div class="sc-lnk">عرض الكل</div></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="tl-l">
+        <button class="btn bp">+ طلب جديد</button>
+        <button class="btn bo" onclick="doExport()">📥 تصدير</button>
+      </div>
+      <div class="tl-r">
+        <input type="date" class="tl-sel" id="dateFilter" onchange="doFilter()">
+        <select class="tl-sel" id="statusFilter" onchange="doFilter()">
+          <option value="">جميع الحالات</option>
+          <option value="pending">جديد</option>
+          <option value="confirmed">مؤكد</option>
+          <option value="preparing">جاري التجهيز</option>
+          <option value="delivering">مع المندوب</option>
+          <option value="completed">مكتمل</option>
+          <option value="cancelled">ملغي</option>
+        </select>
+      </div>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>رقم الطلب</th>
-            <th>العميل</th>
-            <th>المنطقة</th>
-            <th>القيمة</th>
-            <th>الحالة</th>
-            <th>الوقت</th>
-            <th>إجراءات</th>
+            <th>رقم الطلب</th><th>العميل</th><th>المنطقة</th><th>القيمة</th><th>الحالة</th><th>الوقت</th><th>إجراءات</th>
           </tr>
         </thead>
         <tbody id="TB"></tbody>
       </table>
     </div>
-
-    <!-- DETAIL PANEL -->
     <div class="detail-panel" id="DP">
       <div class="dp-inner">
-        <!-- تفاصيل الطلب -->
         <div class="dp-sec">
           <div class="dp-hd">
             <div style="display:flex;align-items:center;gap:8px">
@@ -288,22 +315,157 @@ tbody tr.selected td{background:var(--pink-u)}
           <div class="dp-title" style="margin-bottom:10px">تفاصيل الطلب</div>
           <div id="dp-client"></div>
         </div>
-        <!-- المنتجات -->
         <div class="dp-sec">
           <div class="dp-title" style="margin-bottom:10px">المنتجات (<span id="dp-count">0</span>)</div>
           <div id="dp-items"></div>
         </div>
-        <!-- ملخص الطلب -->
         <div class="dp-sec">
           <div class="dp-title" style="margin-bottom:10px">ملخص الطلب</div>
           <div id="dp-summary"></div>
         </div>
-        <!-- الإجراءات -->
         <div class="dp-sec">
           <div class="dp-title" style="margin-bottom:10px">الإجراءات</div>
           <div class="dp-btns" id="dp-actions"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: DRIVERS ===== -->
+  <div class="page" id="pg-drivers">
+    <div class="toolbar" style="padding-top:14px">
+      <div class="tl-l">
+        <button class="btn bp" onclick="openDriverModal()">+ مندوب جديد</button>
+      </div>
+      <div class="tl-r">
+        <select class="tl-sel" id="driverStatusFilter" onchange="renderDrivers()">
+          <option value="">الكل</option>
+          <option value="available">متاح</option>
+          <option value="busy">مشغول</option>
+          <option value="offline">غير متصل</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>المندوب</th><th>الحالة</th><th>المنطقة</th><th>الطلب الحالي</th><th>إجمالي التوصيلات</th><th>إجراءات</th></tr>
+        </thead>
+        <tbody id="driversTB"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: CUSTOMERS ===== -->
+  <div class="page" id="pg-customers">
+    <div class="toolbar" style="padding-top:14px">
+      <div class="tl-l"><div style="font-size:12px;color:var(--text2);padding:8px 0">العملاء مستخرجون من الطلبات</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>العميل</th><th>الموبايل</th><th>عدد الطلبات</th><th>إجمالي الإنفاق</th><th>آخر طلب</th><th>إجراءات</th></tr>
+        </thead>
+        <tbody id="customersTB"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: ZONES ===== -->
+  <div class="page" id="pg-zones">
+    <div class="toolbar" style="padding-top:14px">
+      <div class="tl-l">
+        <button class="btn bp" onclick="openZoneModal()">+ منطقة جديدة</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>المنطقة</th><th>سعر التوصيل</th><th>وقت التوصيل</th><th>الحالة</th><th>إجراءات</th></tr>
+        </thead>
+        <tbody id="zonesTB"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: CALLS ===== -->
+  <div class="page" id="pg-calls">
+    <div class="page-body">
+      <div id="callsList"></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: REPORT ===== -->
+  <div class="page" id="pg-report">
+    <div class="page-body">
+      <div class="report-grid">
+        <div class="rcard"><div class="rcard-n" id="r-total">0</div><div class="rcard-l">إجمالي الطلبات اليوم</div></div>
+        <div class="rcard"><div class="rcard-n" id="r-revenue">0</div><div class="rcard-l">الإيرادات (ج.م)</div></div>
+        <div class="rcard"><div class="rcard-n" id="r-avg">0</div><div class="rcard-l">متوسط قيمة الطلب</div></div>
+        <div class="rcard"><div class="rcard-n" id="r-cancelled">0</div><div class="rcard-l">ملغية اليوم</div></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">📍 أعلى المناطق طلبات</div>
+        <div id="zonesChart"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">💳 طرق الدفع</div>
+        <div id="payChart"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL: DRIVER -->
+<div class="modal-bg" id="driverModal">
+  <div class="modal">
+    <h3 id="driverModalTitle">مندوب جديد</h3>
+    <div class="form-group"><label>الاسم</label><input id="dm-name" placeholder="اسم المندوب"></div>
+    <div class="form-group"><label>الموبايل</label><input id="dm-phone" placeholder="01xxxxxxxxx"></div>
+    <div class="form-group"><label>المنطقة</label>
+      <select id="dm-zone"><option value="">اختر منطقة</option></select>
+    </div>
+    <div class="form-group"><label>الحالة</label>
+      <select id="dm-status">
+        <option value="available">متاح</option>
+        <option value="busy">مشغول</option>
+        <option value="offline">غير متصل</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn bp" onclick="saveDriver()">حفظ</button>
+      <button class="btn bo" onclick="closeModal('driverModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ZONE -->
+<div class="modal-bg" id="zoneModal">
+  <div class="modal">
+    <h3 id="zoneModalTitle">منطقة جديدة</h3>
+    <div class="form-group"><label>اسم المنطقة</label><input id="zm-name" placeholder="مثال: حدائق أكتوبر"></div>
+    <div class="form-group"><label>سعر التوصيل (ج.م)</label><input id="zm-fee" type="number" placeholder="20"></div>
+    <div class="form-group"><label>أقل وقت توصيل (دقيقة)</label><input id="zm-min" type="number" placeholder="30"></div>
+    <div class="form-group"><label>أقصى وقت توصيل (دقيقة)</label><input id="zm-max" type="number" placeholder="60"></div>
+    <div class="modal-btns">
+      <button class="btn bp" onclick="saveZone()">حفظ</button>
+      <button class="btn bo" onclick="closeModal('zoneModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ASSIGN DRIVER -->
+<div class="modal-bg" id="assignModal">
+  <div class="modal">
+    <h3>إسناد طلب لمندوب</h3>
+    <div id="assignOrderInfo" style="background:var(--pink-u);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px"></div>
+    <div class="form-group"><label>اختر المندوب</label>
+      <select id="assign-driver"></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn bp" onclick="confirmAssign()">إسناد</button>
+      <button class="btn bo" onclick="closeModal('assignModal')">إلغاء</button>
     </div>
   </div>
 </div>
@@ -313,8 +475,10 @@ tbody tr.selected td{background:var(--pink-u)}
 <script>
 const API='https://zad-store-backend-production.up.railway.app';
 const ALLOWED=['samostafa963@gmail.com'];
-let orders=[],prevIds=new Set(),timer=null,selId=null,curFilter='';
+let orders=[],drivers=[],zones=[],prevIds=new Set(),timer=null,selId=null,curFilter='';
+let editDriverId=null,editZoneId=null,assignOrderId=null,curPage='orders';
 
+// ─── AUTH ───
 function gLogin(){
   const cid='213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com';
   const rd=encodeURIComponent(location.origin+location.pathname);
@@ -345,9 +509,30 @@ function startApp(u){
   document.getElementById('MS').style.display='flex';
   document.getElementById('uNm').textContent=u.name;
   document.getElementById('uAv').src=u.avatar||'';
-  loadOrders();timer=setInterval(loadOrders,15000);
+  loadAll();timer=setInterval(loadAll,15000);
 }
 
+// ─── PAGE SWITCH ───
+function showPage(p){
+  curPage=p;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('pg-'+p).classList.add('active');
+  const titles={orders:'الطلبات',drivers:'المندوبين',customers:'العملاء',zones:'مناطق وأسعار التوصيل',calls:'سجل المكالمات',report:'تقرير اليوم'};
+  document.getElementById('pageTitle').textContent=titles[p]||p;
+  const idx={orders:0,drivers:1,customers:2,zones:3,calls:4,report:5};
+  document.querySelectorAll('.sb-item')[idx[p]]?.classList.add('active');
+  document.getElementById('srch').value='';
+  if(p==='report')renderReport();
+  if(p==='calls')renderCalls();
+}
+
+// ─── LOAD ALL ───
+async function loadAll(){
+  await Promise.all([loadOrders(),loadDrivers(),loadZones()]);
+}
+
+// ─── ORDERS ───
 async function loadOrders(){
   try{
     const r=await fetch(`${API}/api/orders`);
@@ -357,13 +542,15 @@ async function loadOrders(){
     const rn=np.filter(id=>!prevIds.has(id));
     if(rn.length>0&&prevIds.size>0){playAlert();toast(`🔔 ${rn.length} طلب جديد!`,'info');}
     prevIds=new Set(np);
-    orders=all;render();updateStats();
+    orders=all;
+    if(curPage==='orders')render();
+    updateStats();
     const n=new Date();
     document.getElementById('lu').textContent=`${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
     const nb=document.getElementById('nbdg');
     if(rn.length>0){nb.textContent=rn.length;nb.style.display='flex';}
     if(selId)renderPanel(selId);
-  }catch{toast('❌ فشل التحميل','err');}
+  }catch{toast('❌ فشل تحميل الطلبات','err');}
 }
 
 function setFilter(f){
@@ -371,11 +558,8 @@ function setFilter(f){
   document.getElementById('statusFilter').value=f==='all'?'':f;
   render();
 }
-
-function doFilter(){
-  curFilter=document.getElementById('statusFilter').value;
-  render();
-}
+function doFilter(){curFilter=document.getElementById('statusFilter').value;render();}
+function onSearch(){if(curPage==='orders')render();else if(curPage==='customers')renderCustomers();else if(curPage==='drivers')renderDrivers();}
 
 function render(){
   const srch=(document.getElementById('srch').value||'').toLowerCase();
@@ -385,19 +569,14 @@ function render(){
   if(sf)f=f.filter(o=>o.status===sf);
   if(df)f=f.filter(o=>new Date(o.createdAt).toISOString().slice(0,10)===df);
   if(srch)f=f.filter(o=>o._id.toLowerCase().includes(srch)||(o.name||'').toLowerCase().includes(srch)||(o.phone||'').includes(srch));
-  // sort by newest
   f=[...f].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-
   const rows=f.map(o=>{
     const id=o._id.slice(-6).toUpperCase();
     const area=(o.address||'').split('-')[0]||'-';
     const isNew=o.status==='pending';
     return `<tr onclick="openPanel('${o._id}')" id="tr-${o._id}" class="${selId===o._id?'selected':''}">
       <td><span class="ord-id">#${id}</span>${isNew?`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pink);margin-right:5px;vertical-align:middle"></span>`:''}</td>
-      <td><div class="ord-cl">
-        <div class="ord-av">👤</div>
-        <div><div class="ord-nm">${esc(o.name||'-')}</div><div class="ord-ph">${esc(o.phone||'-')}</div></div>
-      </div></td>
+      <td><div class="ord-cl"><div class="ord-av">👤</div><div><div class="ord-nm">${esc(o.name||'-')}</div><div class="ord-ph">${esc(o.phone||'-')}</div></div></div></td>
       <td style="color:var(--text2);font-size:11px">${esc(area.trim().slice(0,20))}</td>
       <td><span class="ord-price">${(o.total||0).toFixed(0)} ج.م</span></td>
       <td><span class="badge ${stClass(o.status)}">${stLbl(o.status)}</span></td>
@@ -405,12 +584,10 @@ function render(){
       <td><div class="ord-acts">
         <div class="act-ic" onclick="event.stopPropagation();callCl('${o.phone||''}')" title="اتصال">📞</div>
         <div class="act-ic" onclick="event.stopPropagation();openPanel('${o._id}')" title="تفاصيل">👁️</div>
-        <div class="act-ic" onclick="event.stopPropagation();editRow('${o._id}')" title="تعديل">✏️</div>
-        <div class="act-ic" style="color:var(--text2)" onclick="event.stopPropagation()">⋮</div>
+        <div class="act-ic" onclick="event.stopPropagation();openAssign('${o._id}')" title="إسناد مندوب">🛵</div>
       </div></td>
     </tr>`;
   }).join('');
-
   document.getElementById('TB').innerHTML=rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2)">📭 لا توجد طلبات</td></tr>`;
 }
 
@@ -436,50 +613,36 @@ function closePanel(){
   document.querySelectorAll('tbody tr').forEach(tr=>tr.classList.remove('selected'));
   selId=null;
 }
-
 function renderPanel(id){
   const o=orders.find(x=>x._id===id);if(!o)return;
   document.getElementById('dp-id').textContent='#'+o._id.slice(-6).toUpperCase();
   document.getElementById('dp-badge').innerHTML=`<span class="badge ${stClass(o.status)}">${stLbl(o.status)}</span>`;
-
-  // client info
   document.getElementById('dp-client').innerHTML=`
     <div class="dp-row"><span class="dp-ic">👤</span><span class="dp-val">${esc(o.name||'-')}</span></div>
     <div class="dp-row"><span class="dp-ic">📱</span><span class="dp-val">${esc(o.phone||'-')}</span></div>
     <div class="dp-row"><span class="dp-ic">📍</span><span class="dp-val" style="font-size:11px">${esc(o.address||'-')}</span></div>
     ${o.notes?`<div class="dp-row"><span class="dp-ic">📝</span><span class="dp-val" style="font-size:11px;color:var(--text2)">${esc(o.notes)}</span></div>`:''}`;
-
-  // items
   const its=(o.items||[]);
   document.getElementById('dp-count').textContent=its.length;
   document.getElementById('dp-items').innerHTML=its.map(i=>`
-    <div class="dp-it">
-      <div class="dp-it-ic">🛒</div>
-      <div class="dp-it-nm">${esc(i.name)}</div>
-      <span class="dp-it-q">×${i.quantity}</span>
-      <span class="dp-it-p">${(i.price||0).toFixed(0)} ج</span>
-    </div>`).join('');
-
-  // summary
+    <div class="dp-it"><div class="dp-it-ic">🛒</div><div class="dp-it-nm">${esc(i.name)}</div>
+    <span class="dp-it-q">×${i.quantity}</span><span class="dp-it-p">${(i.price||0).toFixed(0)} ج</span></div>`).join('');
   document.getElementById('dp-summary').innerHTML=`
     <div class="dp-tr"><span>إجمالي المنتجات</span><span>${(o.subtotal||0).toFixed(0)} ج.م</span></div>
     <div class="dp-tr"><span>سعر التوصيل</span><span>${(o.delivery||0).toFixed(0)} ج.م</span></div>
     <div class="dp-tr"><span>الخصم</span><span>0 ج.م</span></div>
     <div class="dp-tr total"><span>الإجمالي</span><span>${(o.total||0).toFixed(0)} ج.م</span></div>
     <div style="margin-top:8px;font-size:11px;color:var(--text2)">💳 ${o.paymentMethod==='cash'?'كاش عند الاستلام':'إلكتروني'}</div>`;
-
-  // actions
   let ac='';
   if(o.status==='pending') ac+=`<button class="dpbtn dpbtn-pk" onclick="upd('${id}','confirmed')">✅ تأكيد الطلب</button>`;
   if(o.status==='confirmed') ac+=`<button class="dpbtn dpbtn-pk" onclick="upd('${id}','preparing')">⚙️ بدء التجهيز</button>`;
-  if(o.status==='preparing') ac+=`<button class="dpbtn dpbtn-pk" onclick="upd('${id}','delivering')">🛵 إسناد لمندوب</button>`;
+  if(o.status==='preparing') ac+=`<button class="dpbtn dpbtn-pk" onclick="openAssign('${id}')">🛵 إسناد لمندوب</button>`;
   if(o.status==='delivering') ac+=`<button class="dpbtn dpbtn-pk" onclick="upd('${id}','completed')">✅ تم التوصيل</button>`;
   ac+=`<button class="dpbtn dpbtn-ol" onclick="printOrd('${id}')">🖨️ طباعة الفاتورة</button>`;
   ac+=`<button class="dpbtn dpbtn-ol" onclick="callCl('${o.phone||''}')">📞 اتصال بالعميل</button>`;
   if(!['cancelled','completed'].includes(o.status)) ac+=`<button class="dpbtn dpbtn-rd" onclick="upd('${id}','cancelled')">❌ إلغاء الطلب</button>`;
   document.getElementById('dp-actions').innerHTML=ac;
 }
-
 async function upd(id,status){
   try{
     await fetch(`${API}/api/orders/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
@@ -487,9 +650,259 @@ async function upd(id,status){
   }catch{toast('❌ فشل','err');}
 }
 
-function editRow(id){openPanel(id);}
-function callCl(ph){if(ph)window.open(`tel:${ph}`);}
+// ─── DRIVERS ───
+async function loadDrivers(){
+  try{
+    const r=await fetch(`${API}/api/drivers`);
+    const d=await r.json();
+    drivers=d.drivers||[];
+    if(curPage==='drivers')renderDrivers();
+  }catch{}
+}
+function renderDrivers(){
+  const srch=(document.getElementById('srch').value||'').toLowerCase();
+  const sf=document.getElementById('driverStatusFilter').value;
+  let f=drivers;
+  if(sf)f=f.filter(d=>d.status===sf);
+  if(srch)f=f.filter(d=>(d.name||'').toLowerCase().includes(srch)||(d.phone||'').includes(srch));
+  const rows=f.map(d=>`
+    <tr>
+      <td><div class="ord-cl"><div class="ord-av">🛵</div>
+        <div><div class="ord-nm">${esc(d.name)}</div><div class="ord-ph">${esc(d.phone)}</div></div>
+      </div></td>
+      <td><span class="badge ${d.status==='available'?'b-available':d.status==='busy'?'b-busy':'b-offline'}">${driverStatusLbl(d.status)}</span></td>
+      <td style="color:var(--text2)">${esc(d.zone||'-')}</td>
+      <td>${d.currentOrderId?`<span class="ord-id">#${String(d.currentOrderId).slice(-6).toUpperCase()}</span>`:'<span style="color:var(--text2)">—</span>'}</td>
+      <td style="font-weight:700">${d.totalDeliveries||0}</td>
+      <td><div class="ord-acts">
+        <div class="act-ic" onclick="callCl('${d.phone}')" title="اتصال">📞</div>
+        <div class="act-ic" onclick="openDriverModal('${d._id}')" title="تعديل">✏️</div>
+        <div class="act-ic" onclick="toggleDriverStatus('${d._id}','${d.status}')" title="تغيير الحالة">🔄</div>
+        <div class="act-ic" onclick="deleteDriver('${d._id}')" style="color:var(--red)" title="حذف">🗑️</div>
+      </div></td>
+    </tr>`).join('');
+  document.getElementById('driversTB').innerHTML=rows||`<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text2)">لا يوجد مندوبين</td></tr>`;
+}
+function openDriverModal(id){
+  editDriverId=id||null;
+  document.getElementById('driverModalTitle').textContent=id?'تعديل مندوب':'مندوب جديد';
+  // populate zones
+  const sel=document.getElementById('dm-zone');
+  sel.innerHTML='<option value="">اختر منطقة</option>'+zones.map(z=>`<option value="${z.name}">${z.name}</option>`).join('');
+  if(id){
+    const d=drivers.find(x=>x._id===id);
+    if(d){
+      document.getElementById('dm-name').value=d.name||'';
+      document.getElementById('dm-phone').value=d.phone||'';
+      document.getElementById('dm-zone').value=d.zone||'';
+      document.getElementById('dm-status').value=d.status||'offline';
+    }
+  }else{
+    document.getElementById('dm-name').value='';
+    document.getElementById('dm-phone').value='';
+    document.getElementById('dm-zone').value='';
+    document.getElementById('dm-status').value='available';
+  }
+  document.getElementById('driverModal').classList.add('open');
+}
+async function saveDriver(){
+  const name=document.getElementById('dm-name').value.trim();
+  const phone=document.getElementById('dm-phone').value.trim();
+  const zone=document.getElementById('dm-zone').value;
+  const status=document.getElementById('dm-status').value;
+  if(!name||!phone){toast('الاسم والموبايل مطلوبين','err');return;}
+  try{
+    const url=editDriverId?`${API}/api/drivers/${editDriverId}`:`${API}/api/drivers`;
+    const method=editDriverId?'PUT':'POST';
+    await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,zone,status})});
+    closeModal('driverModal');toast('✅ تم الحفظ','ok');await loadDrivers();
+  }catch{toast('❌ فشل','err');}
+}
+async function deleteDriver(id){
+  if(!confirm('حذف المندوب؟'))return;
+  await fetch(`${API}/api/drivers/${id}`,{method:'DELETE'});
+  toast('✅ تم الحذف','ok');await loadDrivers();
+}
+async function toggleDriverStatus(id,cur){
+  const next=cur==='available'?'offline':cur==='offline'?'available':'available';
+  await fetch(`${API}/api/drivers/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
+  await loadDrivers();
+}
 
+// ─── ASSIGN DRIVER ───
+function openAssign(orderId){
+  assignOrderId=orderId;
+  const o=orders.find(x=>x._id===orderId);
+  document.getElementById('assignOrderInfo').innerHTML=`<b>الطلب:</b> #${orderId.slice(-6)} &nbsp;|&nbsp; <b>العميل:</b> ${esc(o?.name||'-')} &nbsp;|&nbsp; <b>القيمة:</b> ${(o?.total||0).toFixed(0)} ج.م`;
+  const avail=drivers.filter(d=>d.status==='available');
+  document.getElementById('assign-driver').innerHTML=avail.length
+    ?avail.map(d=>`<option value="${d._id}">${d.name} — ${d.zone||'بدون منطقة'}</option>`).join('')
+    :`<option disabled>لا يوجد مندوبين متاحين</option>`;
+  document.getElementById('assignModal').classList.add('open');
+}
+async function confirmAssign(){
+  const driverId=document.getElementById('assign-driver').value;
+  if(!driverId){toast('اختر مندوب','err');return;}
+  try{
+    await fetch(`${API}/api/drivers/${driverId}/assign`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:assignOrderId})});
+    await fetch(`${API}/api/orders/${assignOrderId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'delivering',driverId})});
+    closeModal('assignModal');toast('✅ تم إسناد الطلب','ok');await loadAll();
+  }catch{toast('❌ فشل','err');}
+}
+
+// ─── CUSTOMERS ───
+function renderCustomers(){
+  const srch=(document.getElementById('srch').value||'').toLowerCase();
+  const map={};
+  orders.forEach(o=>{
+    const ph=o.phone||'unknown';
+    if(!map[ph])map[ph]={name:o.name,phone:ph,count:0,total:0,last:o.createdAt};
+    map[ph].count++;
+    map[ph].total+=(o.total||0);
+    if(new Date(o.createdAt)>new Date(map[ph].last))map[ph].last=o.createdAt;
+  });
+  let arr=Object.values(map).sort((a,b)=>b.count-a.count);
+  if(srch)arr=arr.filter(c=>(c.name||'').toLowerCase().includes(srch)||c.phone.includes(srch));
+  const rows=arr.map(c=>`
+    <tr>
+      <td><div class="ord-cl"><div class="ord-av">👤</div>
+        <div><div class="ord-nm">${esc(c.name||'-')}</div></div>
+      </div></td>
+      <td>${esc(c.phone)}</td>
+      <td style="font-weight:700;color:var(--pink)">${c.count}</td>
+      <td style="font-weight:700">${c.total.toFixed(0)} ج.م</td>
+      <td style="color:var(--text2)">${tago(c.last)}</td>
+      <td><div class="ord-acts">
+        <div class="act-ic" onclick="callCl('${c.phone}')">📞</div>
+        <div class="act-ic" onclick="viewCustomerOrders('${c.phone}')">👁️</div>
+      </div></td>
+    </tr>`).join('');
+  document.getElementById('customersTB').innerHTML=rows||`<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text2)">لا يوجد عملاء</td></tr>`;
+}
+function viewCustomerOrders(phone){
+  showPage('orders');
+  document.getElementById('srch').value=phone;
+  render();
+}
+
+// ─── ZONES ───
+async function loadZones(){
+  try{
+    const r=await fetch(`${API}/api/zones`);
+    const d=await r.json();
+    zones=d.zones||[];
+    if(curPage==='zones')renderZones();
+  }catch{}
+}
+function renderZones(){
+  const rows=zones.map(z=>`
+    <tr>
+      <td style="font-weight:700">${esc(z.name)}</td>
+      <td><span style="font-size:14px;font-weight:900;color:var(--pink)">${z.deliveryFee} ج.م</span></td>
+      <td style="color:var(--text2)">${z.minTime} - ${z.maxTime} دقيقة</td>
+      <td><span class="badge ${z.isActive?'b-available':'b-offline'}">${z.isActive?'نشطة':'متوقفة'}</span></td>
+      <td><div class="ord-acts">
+        <div class="act-ic" onclick="openZoneModal('${z._id}')">✏️</div>
+        <div class="act-ic" onclick="toggleZone('${z._id}',${z.isActive})">${z.isActive?'⏸️':'▶️'}</div>
+        <div class="act-ic" onclick="deleteZone('${z._id}')" style="color:var(--red)">🗑️</div>
+      </div></td>
+    </tr>`).join('');
+  document.getElementById('zonesTB').innerHTML=rows||`<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text2)">لا توجد مناطق</td></tr>`;
+}
+function openZoneModal(id){
+  editZoneId=id||null;
+  document.getElementById('zoneModalTitle').textContent=id?'تعديل منطقة':'منطقة جديدة';
+  if(id){
+    const z=zones.find(x=>x._id===id);
+    if(z){
+      document.getElementById('zm-name').value=z.name||'';
+      document.getElementById('zm-fee').value=z.deliveryFee||20;
+      document.getElementById('zm-min').value=z.minTime||30;
+      document.getElementById('zm-max').value=z.maxTime||60;
+    }
+  }else{
+    document.getElementById('zm-name').value='';
+    document.getElementById('zm-fee').value='20';
+    document.getElementById('zm-min').value='30';
+    document.getElementById('zm-max').value='60';
+  }
+  document.getElementById('zoneModal').classList.add('open');
+}
+async function saveZone(){
+  const name=document.getElementById('zm-name').value.trim();
+  const deliveryFee=Number(document.getElementById('zm-fee').value);
+  const minTime=Number(document.getElementById('zm-min').value);
+  const maxTime=Number(document.getElementById('zm-max').value);
+  if(!name||!deliveryFee){toast('اسم المنطقة والسعر مطلوبين','err');return;}
+  try{
+    const url=editZoneId?`${API}/api/zones/${editZoneId}`:`${API}/api/zones`;
+    const method=editZoneId?'PUT':'POST';
+    await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({name,deliveryFee,minTime,maxTime})});
+    closeModal('zoneModal');toast('✅ تم الحفظ','ok');await loadZones();
+  }catch{toast('❌ فشل','err');}
+}
+async function toggleZone(id,cur){
+  await fetch(`${API}/api/zones/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({isActive:!cur})});
+  await loadZones();
+}
+async function deleteZone(id){
+  if(!confirm('حذف المنطقة؟'))return;
+  await fetch(`${API}/api/zones/${id}`,{method:'DELETE'});
+  toast('✅ تم الحذف','ok');await loadZones();
+}
+
+// ─── CALLS ───
+function renderCalls(){
+  const calls=orders.filter(o=>o.phone).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,50);
+  document.getElementById('callsList').innerHTML=calls.length
+    ?calls.map(o=>`
+      <div class="call-card" onclick="callCl('${o.phone}')">
+        <div class="call-ic call-in">📞</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px">${esc(o.name||'-')}</div>
+          <div style="font-size:11px;color:var(--text2)">${esc(o.phone)} · ${tago(o.createdAt)}</div>
+        </div>
+        <span class="badge ${stClass(o.status)}">${stLbl(o.status)}</span>
+        <span style="font-size:13px;font-weight:900;color:var(--pink)">${(o.total||0).toFixed(0)} ج</span>
+      </div>`).join('')
+    :'<div style="text-align:center;padding:40px;color:var(--text2)">لا توجد مكالمات</div>';
+}
+
+// ─── REPORT ───
+function renderReport(){
+  const tod=new Date().toDateString();
+  const todOrders=orders.filter(o=>new Date(o.createdAt).toDateString()===tod);
+  const comp=todOrders.filter(o=>o.status==='completed');
+  const rev=comp.reduce((s,o)=>s+(o.total||0),0);
+  const avg=comp.length?rev/comp.length:0;
+  const canc=todOrders.filter(o=>o.status==='cancelled').length;
+  document.getElementById('r-total').textContent=todOrders.length;
+  document.getElementById('r-revenue').textContent=rev.toFixed(0);
+  document.getElementById('r-avg').textContent=avg.toFixed(0);
+  document.getElementById('r-cancelled').textContent=canc;
+  // zones chart
+  const zm={};
+  todOrders.forEach(o=>{const a=(o.address||'').split('-')[0].trim()||'أخرى';zm[a]=(zm[a]||0)+1;});
+  const zs=Object.entries(zm).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max=zs[0]?.[1]||1;
+  document.getElementById('zonesChart').innerHTML=zs.map(([k,v])=>`
+    <div class="bar-row">
+      <div class="bar-label">${esc(k)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(0)}%"></div></div>
+      <div class="bar-val">${v} طلب</div>
+    </div>`).join('')||'<div style="color:var(--text2);font-size:12px">لا توجد بيانات</div>';
+  // payment chart
+  const cash=todOrders.filter(o=>o.paymentMethod==='cash').length;
+  const online=todOrders.length-cash;
+  const pm=todOrders.length||1;
+  document.getElementById('payChart').innerHTML=`
+    <div class="bar-row"><div class="bar-label">كاش</div><div class="bar-track"><div class="bar-fill" style="width:${(cash/pm*100).toFixed(0)}%"></div></div><div class="bar-val">${cash}</div></div>
+    <div class="bar-row"><div class="bar-label">إلكتروني</div><div class="bar-track"><div class="bar-fill" style="width:${(online/pm*100).toFixed(0)}%;background:var(--blue)"></div></div><div class="bar-val">${online}</div></div>`;
+}
+
+// ─── UTILS ───
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function callCl(ph){if(ph)window.open(`tel:${ph}`);}
 function printOrd(id){
   const o=orders.find(x=>x._id===id);if(!o)return;
   const its=(o.items||[]).map(i=>`${i.name} × ${i.quantity} = ${(i.total||0).toFixed(0)} ج`).join('\n');
@@ -497,7 +910,6 @@ function printOrd(id){
   w.document.write(`<div style="font-family:Arial;direction:rtl;padding:20px;max-width:280px"><h2 style="color:#E91E8C">زورا</h2><hr><p>طلب: #${o._id.slice(-6)}</p><p>العميل: ${o.name}</p><p>الموبايل: ${o.phone}</p><p>العنوان: ${o.address}</p><hr><pre style="font-size:12px">${its}</pre><hr><p>الإجمالي: <b style="color:#E91E8C">${(o.total||0).toFixed(0)} ج</b></p><p style="text-align:center;margin-top:16px">شكراً لتسوقك مع زورا ❤️</p></div>`);
   w.print();
 }
-
 function doExport(){
   const rows=[['ID','الاسم','الموبايل','العنوان','الإجمالي','الحالة']];
   orders.forEach(o=>rows.push([o._id.slice(-6),o.name,o.phone,o.address,o.total,stLbl(o.status)]));
@@ -506,7 +918,6 @@ function doExport(){
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
   a.download='orders.csv';a.click();
 }
-
 function playAlert(){
   try{
     const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();
@@ -516,9 +927,9 @@ function playAlert(){
     o.start();o.stop(c.currentTime+0.5);
   }catch{}
 }
-
 function stLbl(s){return{pending:'جديد',confirmed:'مؤكد',preparing:'جاري التجهيز',delivering:'مع المندوب',completed:'مكتملة',cancelled:'ملغية'}[s]||s;}
 function stClass(s){return{pending:'b-new',confirmed:'b-confirmed',preparing:'b-preparing',delivering:'b-delivering',completed:'b-completed',cancelled:'b-cancelled'}[s]||'b-new';}
+function driverStatusLbl(s){return{available:'متاح',busy:'مشغول',offline:'غير متصل'}[s]||s;}
 function tago(d){const df=Math.floor((Date.now()-new Date(d))/1000);if(df<60)return'الآن';if(df<3600)return`منذ ${Math.floor(df/60)} دقيقة`;if(df<86400)return`منذ ${Math.floor(df/3600)} ساعة`;return`منذ ${Math.floor(df/86400)} يوم`;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m,t=''){const el=document.getElementById('T');el.textContent=m;el.className=`toast ${t} show`;setTimeout(()=>el.className='toast',3000);}
