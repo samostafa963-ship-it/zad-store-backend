@@ -2,6 +2,20 @@ const express = require('express');
 const router = express.Router();
 const Driver = require('../models/Driver');
 
+// POST driver login
+router.post('/login', async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+    if (!phone || !password) return res.status(400).json({ success: false, message: 'رقم الهاتف وكلمة المرور مطلوبين' });
+    const driver = await Driver.findOne({ phone });
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    if (driver.password !== password) return res.status(401).json({ success: false, message: 'كلمة المرور غلط' });
+    res.json({ success: true, driver });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // GET all drivers
 router.get('/', async (req, res) => {
   try {
@@ -26,9 +40,9 @@ router.get('/:id', async (req, res) => {
 // POST create driver
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, zone } = req.body;
+    const { name, phone, zone, password } = req.body;
     if (!name || !phone) return res.status(400).json({ success: false, message: 'الاسم والموبايل مطلوبين' });
-    const driver = new Driver({ name, phone, zone: zone || '' });
+    const driver = new Driver({ name, phone, zone: zone || '', password: password || '12345' });
     await driver.save();
     res.status(201).json({ success: true, driver });
   } catch (err) {
@@ -87,7 +101,7 @@ router.put('/:id/free', async (req, res) => {
   }
 });
 
-// PUT update driver location (called from Flutter app every 10 seconds)
+// PUT update driver location
 router.put('/:id/location', async (req, res) => {
   try {
     const { lat, lng } = req.body;
@@ -104,7 +118,7 @@ router.put('/:id/location', async (req, res) => {
   }
 });
 
-// GET driver location (called from Flutter customer app)
+// GET driver location
 router.get('/:id/location', async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id).select('location status name');

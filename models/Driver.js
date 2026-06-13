@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const driverSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true, unique: true },
+  password: { type: String, default: '12345' },
   avatar: { type: String, default: '' },
   status: { type: String, enum: ['available', 'busy', 'offline'], default: 'offline' },
   zone: { type: String, default: '' },
