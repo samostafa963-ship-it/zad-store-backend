@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>زورا - لوحة التحكم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD379pvOYPJTNrpUSJZpTGgdqizeKwcWJI"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -674,13 +675,8 @@ function selectDriver(id){
   if(mapDriver.location&&mapDriver.location.lat){
     document.getElementById('mapEmpty').style.display='none';
     if(!gmap)initMap();
-    const pos={lat:mapDriver.location.lat,lng:mapDriver.location.lng};
-    gmap.setCenter(pos);
-    gmap.setZoom(15);
-    // highlight marker
-    Object.values(markers).forEach(m=>m.setAnimation(null));
-    if(markers[id])markers[id].setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(()=>{if(markers[id])markers[id].setAnimation(null);},2000);
+    gmap.setView([mapDriver.location.lat,mapDriver.location.lng],16);
+    if(markers[id])markers[id].openPopup();
     // show info panel
     const locAge=Math.floor((Date.now()-new Date(mapDriver.location.updatedAt))/60000);
     document.getElementById('mapInfo').style.display='block';
@@ -695,57 +691,43 @@ function selectDriver(id){
 
 function initMap(){
   if(gmap)return;
-  const center={lat:29.9602,lng:30.9202}; // أكتوبر
-  gmap=new google.maps.Map(document.getElementById('gmap'),{
-    center,zoom:12,
-    styles:[{featureType:'poi',stylers:[{visibility:'off'}]}],
-    mapTypeControl:false,streetViewControl:false,fullscreenControl:false
-  });
+  const mapEl=document.getElementById('gmap');
+  if(!mapEl||mapEl.offsetWidth===0)return;
+  gmap=L.map('gmap').setView([29.9602,30.9202],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap',maxZoom:19
+  }).addTo(gmap);
   updateMapMarkers();
+}
+
+function makeDriverIcon(color){
+  return L.divIcon({
+    html:`<div style="background:${color};width:32px;height:32px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:14px">🛵</div>`,
+    className:'',iconSize:[32,32],iconAnchor:[16,16]
+  });
 }
 
 function updateMapMarkers(){
   if(!gmap)return;
-  document.getElementById('mapEmpty').style.display='none';
-  // clear old markers
-  Object.values(markers).forEach(m=>m.setMap(null));
+  Object.values(markers).forEach(m=>gmap.removeLayer(m));
   markers={};
   let hasAny=false;
   drivers.forEach(d=>{
     if(!d.location||!d.location.lat)return;
     hasAny=true;
     const color=d.status==='available'?'#10b981':d.status==='busy'?'#f59e0b':'#9ca3af';
-    const marker=new google.maps.Marker({
-      position:{lat:d.location.lat,lng:d.location.lng},
-      map:gmap,
-      title:d.name,
-      icon:{
-        path:google.maps.SymbolPath.CIRCLE,
-        scale:10,
-        fillColor:color,
-        fillOpacity:1,
-        strokeColor:'white',
-        strokeWeight:2
-      },
-      label:{text:d.name.charAt(0),color:'white',fontSize:'11px',fontWeight:'bold'}
-    });
-    const infoW=new google.maps.InfoWindow({
-      content:`<div style="font-family:Cairo,sans-serif;direction:rtl;padding:6px;min-width:140px">
-        <div style="font-weight:900;font-size:13px">${esc(d.name)}</div>
-        <div style="font-size:11px;color:#666">${esc(d.phone)}</div>
-        <div style="font-size:11px;margin-top:4px">${driverStatusLbl(d.status)}</div>
-        ${d.currentOrderId?`<div style="font-size:11px;color:#E91E8C">طلب: #${String(d.currentOrderId).slice(-6).toUpperCase()}</div>`:''}
-      </div>`
-    });
-    marker.addListener('click',()=>{
-      infoW.open(gmap,marker);
-      selectDriver(d._id);
-    });
+    const marker=L.marker([d.location.lat,d.location.lng],{icon:makeDriverIcon(color)})
+      .addTo(gmap)
+      .bindPopup(`<div style="font-family:Cairo,sans-serif;direction:rtl;min-width:130px">
+        <b>${esc(d.name)}</b><br>
+        <span style="color:#666;font-size:11px">${esc(d.phone)}</span><br>
+        <span style="font-size:11px">${driverStatusLbl(d.status)}</span>
+        ${d.currentOrderId?`<br><span style="color:#E91E8C;font-size:11px">طلب: #${String(d.currentOrderId).slice(-6).toUpperCase()}</span>`:''}
+      </div>`)
+      .on('click',()=>selectDriver(d._id));
     markers[d._id]=marker;
   });
-  if(!hasAny){
-    document.getElementById('mapEmpty').style.display='flex';
-  }
+  document.getElementById('mapEmpty').style.display=hasAny?'none':'flex';
 }
 
 async function refreshMap(){
