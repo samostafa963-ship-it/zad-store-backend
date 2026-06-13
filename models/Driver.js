@@ -10,6 +10,11 @@ const driverSchema = new mongoose.Schema({
   totalDeliveries: { type: Number, default: 0 },
   rating: { type: Number, default: 5.0 },
   isActive: { type: Boolean, default: true },
+  location: {
+    lat: { type: Number, default: null },
+    lng: { type: Number, default: null },
+    updatedAt: { type: Date, default: null },
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Driver', driverSchema);

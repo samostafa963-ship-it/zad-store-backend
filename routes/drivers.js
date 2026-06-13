@@ -87,4 +87,32 @@ router.put('/:id/free', async (req, res) => {
   }
 });
 
+// PUT update driver location (called from Flutter app every 10 seconds)
+router.put('/:id/location', async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+    if (!lat || !lng) return res.status(400).json({ success: false, message: 'lat و lng مطلوبين' });
+    const driver = await Driver.findByIdAndUpdate(
+      req.params.id,
+      { location: { lat, lng, updatedAt: new Date() } },
+      { new: true }
+    );
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    res.json({ success: true, driver });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// GET driver location (called from Flutter customer app)
+router.get('/:id/location', async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id).select('location status name');
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    res.json({ success: true, location: driver.location, status: driver.status, name: driver.name });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
