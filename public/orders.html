@@ -10,97 +10,126 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --pink:#E91E8C;--pink-d:#c4186f;--pink-l:#fce8f5;--pink-u:#fff5fb;
-  --green:#10b981;--green-l:#d1fae5;--red:#ef4444;--red-l:#fee2e2;
-  --orange:#f59e0b;--orange-l:#fef3c7;--blue:#3b82f6;--blue-l:#dbeafe;
-  --purple:#8b5cf6;--purple-l:#ede9fe;
-  --bg:#faf5fb;--white:#fff;--text:#111827;--text2:#6b7280;--border:#f0d6ea;
+  --pink:#E91E8C;--pink-d:#c4186f;--pink-l:rgba(233,30,140,0.15);--pink-u:rgba(233,30,140,0.08);
+  --green:#10b981;--green-l:rgba(16,185,129,0.15);
+  --red:#ef4444;--red-l:rgba(239,68,68,0.15);
+  --orange:#f59e0b;--orange-l:rgba(245,158,11,0.15);
+  --blue:#3b82f6;--blue-l:rgba(59,130,246,0.15);
+  --purple:#8b5cf6;--purple-l:rgba(139,92,246,0.15);
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#22263a;
+  --white:#fff;--text:#e2e8f0;--text2:#94a3b8;--border:rgba(255,255,255,0.08);
+  --card:#1e2235;--card2:#252a40;
 }
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-size:13px;overflow:hidden;height:100vh;display:flex;direction:rtl}
+
+/* LOGIN */
 #LS{display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:var(--bg);position:fixed;inset:0;z-index:999}
-.lbox{background:var(--white);border-radius:20px;padding:40px 36px;width:360px;text-align:center;border:1px solid var(--border);box-shadow:0 10px 40px rgba(233,30,140,0.1)}
+.lbox{background:var(--card);border-radius:20px;padding:40px 36px;width:360px;text-align:center;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
 .llogo{font-size:28px;font-weight:900;color:var(--pink);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
 .lsub{font-size:12px;color:var(--text2);margin-bottom:28px}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:var(--white);cursor:pointer;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;color:var(--text);transition:.15s}
-.gbtn:hover{border-color:var(--pink);color:var(--pink);background:var(--pink-u)}
-.sidebar{width:220px;background:var(--pink);display:flex;flex-direction:column;height:100vh;flex-shrink:0}
-.sb-logo{padding:20px 18px;display:flex;align-items:center;gap:8px}
-.sb-logo-txt{font-size:22px;font-weight:900;color:white;letter-spacing:-0.5px}
-.sb-nav{flex:1;padding:8px 0}
-.sb-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;transition:.15s;border-right:3px solid transparent}
-.sb-item:hover{background:rgba(255,255,255,0.1);color:white}
-.sb-item.active{background:rgba(255,255,255,0.15);color:white;border-right-color:white}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:var(--card2);cursor:pointer;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;color:var(--text);transition:.15s}
+.gbtn:hover{border-color:var(--pink);color:var(--pink)}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:var(--bg2);display:flex;flex-direction:column;height:100vh;flex-shrink:0;border-left:1px solid var(--border)}
+.sb-logo{padding:20px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.sb-logo-txt{font-size:22px;font-weight:900;color:var(--pink);letter-spacing:-0.5px}
+.sb-nav{flex:1;padding:12px 0}
+.sb-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:600;transition:.15s;border-radius:0;margin:2px 8px;border-radius:10px}
+.sb-item:hover{background:var(--border);color:var(--text)}
+.sb-item.active{background:var(--pink-l);color:var(--pink)}
 .sb-item .si{font-size:15px;width:20px;text-align:center;flex-shrink:0}
-.sb-user{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;gap:8px}
-.sb-av{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);object-fit:cover}
-.sb-nm{font-size:12px;font-weight:700;color:white}
-.sb-rl{font-size:10px;color:rgba(255,255,255,0.6)}
-.sb-out{padding:12px 18px;display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:700}
-.sb-out:hover{color:white}
+.sb-user{padding:14px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sb-av{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);object-fit:cover}
+.sb-nm{font-size:12px;font-weight:700;color:var(--text)}
+.sb-rl{font-size:10px;color:var(--text2)}
+.sb-out{padding:12px 18px;display:flex;align-items:center;gap:8px;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;border-top:1px solid var(--border)}
+.sb-out:hover{opacity:0.8}
+
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0}
-.topbar{background:var(--white);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
 .tb-title{font-size:16px;font-weight:900;color:var(--text)}
 .tb-r{display:flex;align-items:center;gap:10px}
-.tb-srch{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:7px 16px;width:340px}
-.tb-srch input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:12px;outline:none;width:100%;direction:rtl}
+.tb-srch{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:7px 16px;width:300px}
+.tb-srch input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:12px;outline:none;width:100%;direction:rtl;color:var(--text)}
 .tb-srch input::placeholder{color:var(--text2)}
-.tb-ic{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:14px}
-.nb{position:absolute;top:-4px;right:-4px;background:var(--pink);color:white;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid white}
+.tb-ic{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:14px}
+.tb-ic:hover{background:var(--card2)}
+.nb{position:absolute;top:-4px;right:-4px;background:var(--pink);color:white;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg2)}
+.live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:bl 1.5s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PAGE */
 .page{display:none;flex:1;flex-direction:column;overflow:hidden}
 .page.active{display:flex}
 .page-body{flex:1;overflow-y:auto;padding:16px 20px}
+.page-body::-webkit-scrollbar{width:4px}
+.page-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 20px;flex-shrink:0}
-.sc{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
-.sc:hover{border-color:var(--pink);box-shadow:0 2px 12px rgba(233,30,140,0.08)}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.sc:hover{border-color:var(--pink);box-shadow:0 2px 12px rgba(233,30,140,0.15)}
 .sc-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .sc-n{font-size:22px;font-weight:900;line-height:1;color:var(--text)}
 .sc-l{font-size:11px;color:var(--text2);margin-top:2px;font-weight:600}
 .sc-lnk{font-size:10px;color:var(--pink);font-weight:700;margin-top:3px;cursor:pointer}
-.sc.new-card{background:var(--pink);border-color:var(--pink)}
+.sc.new-card{background:linear-gradient(135deg,var(--pink),#9b1265);border-color:var(--pink)}
 .sc.new-card .sc-n{color:white;font-size:26px}
 .sc.new-card .sc-l{color:rgba(255,255,255,0.8)}
 .sc.new-card .sc-lnk{color:rgba(255,255,255,0.7)}
-.new-plus{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;color:white;cursor:pointer;font-weight:300}
+.new-plus{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;color:white;cursor:pointer;font-weight:300}
+
+/* TOOLBAR */
 .toolbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;flex-shrink:0}
 .tl-l{display:flex;gap:8px}
 .tl-r{display:flex;align-items:center;gap:8px}
 .btn{padding:8px 16px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;border:none;transition:.15s}
 .bp{background:var(--pink);color:white}.bp:hover{background:var(--pink-d)}
-.bo{background:var(--white);border:1.5px solid var(--border);color:var(--text)}.bo:hover{border-color:var(--pink);color:var(--pink)}
-.tl-sel{padding:7px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;background:var(--white);cursor:pointer;direction:rtl}
-.live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
-.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:bl 1.5s infinite}
-@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.bo{background:var(--card);border:1px solid var(--border);color:var(--text)}.bo:hover{border-color:var(--pink);color:var(--pink)}
+.tl-sel{padding:7px 12px;border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;background:var(--card);cursor:pointer;direction:rtl;color:var(--text)}
+
+/* TABLE */
 .table-wrap{flex:1;overflow-y:auto;padding:0 20px}
-table{width:100%;border-collapse:collapse;background:var(--white);border-radius:14px;overflow:hidden;border:1.5px solid var(--border)}
-thead{background:var(--white);border-bottom:1.5px solid var(--border)}
+.table-wrap::-webkit-scrollbar{width:4px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+thead{background:var(--card2);border-bottom:1px solid var(--border)}
 th{padding:11px 14px;text-align:right;font-size:11px;color:var(--text2);font-weight:700;white-space:nowrap}
-td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;color:var(--text)}
 tr:last-child td{border-bottom:none}
 tbody tr{cursor:pointer;transition:.1s}
-tbody tr:hover td{background:var(--pink-u)}
+tbody tr:hover td{background:var(--card2)}
 tbody tr.selected td{background:var(--pink-u)}
 .ord-id{font-size:13px;font-weight:900;color:var(--pink)}
 .ord-cl{display:flex;align-items:center;gap:8px}
-.ord-av{width:30px;height:30px;border-radius:50%;background:var(--pink-l);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:1.5px solid var(--border)}
-.ord-nm{font-size:12px;font-weight:700}
+.ord-av{width:30px;height:30px;border-radius:50%;background:var(--pink-l);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:1px solid var(--border)}
+.ord-nm{font-size:12px;font-weight:700;color:var(--text)}
 .ord-ph{font-size:10px;color:var(--text2)}
 .ord-price{font-size:13px;font-weight:900;color:var(--pink)}
 .ord-time{font-size:11px;color:var(--text2)}
 .ord-acts{display:flex;gap:6px;align-items:center}
-.act-ic{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.1s}
-.act-ic:hover{border-color:var(--pink);background:var(--pink-u)}
+.act-ic{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.1s}
+.act-ic:hover{border-color:var(--pink);background:var(--pink-l)}
+
+/* BADGES */
 .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.b-new{background:#fce7f3;color:#be185d}
-.b-confirmed{background:var(--blue-l);color:#1d4ed8}
-.b-preparing{background:var(--orange-l);color:#b45309}
-.b-delivering{background:var(--purple-l);color:#6d28d9}
-.b-completed{background:var(--green-l);color:#065f46}
-.b-cancelled{background:var(--red-l);color:#dc2626}
-.b-available{background:var(--green-l);color:#065f46}
-.b-busy{background:var(--orange-l);color:#b45309}
-.b-offline{background:#f3f4f6;color:#6b7280}
-.detail-panel{background:var(--white);border-top:1.5px solid var(--border);flex-shrink:0;max-height:0;overflow:hidden;transition:max-height .3s ease}
+.b-new{background:rgba(190,24,93,0.2);color:#f472b6}
+.b-confirmed{background:var(--blue-l);color:#60a5fa}
+.b-preparing{background:var(--orange-l);color:#fbbf24}
+.b-delivering{background:var(--purple-l);color:#a78bfa}
+.b-completed{background:var(--green-l);color:#34d399}
+.b-cancelled{background:var(--red-l);color:#f87171}
+.b-available{background:var(--green-l);color:#34d399}
+.b-busy{background:var(--orange-l);color:#fbbf24}
+.b-offline{background:rgba(148,163,184,0.15);color:#94a3b8}
+
+/* DETAIL PANEL */
+.detail-panel{background:var(--card);border-top:1px solid var(--border);flex-shrink:0;max-height:0;overflow:hidden;transition:max-height .3s ease}
 .detail-panel.open{max-height:320px}
 .dp-inner{display:flex;gap:0;height:100%}
 .dp-sec{flex:1;padding:16px 20px;border-left:1px solid var(--border);overflow-y:auto}
@@ -108,72 +137,125 @@ tbody tr.selected td{background:var(--pink-u)}
 .dp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .dp-title{font-size:12px;font-weight:900;color:var(--text)}
 .dp-id{font-size:14px;font-weight:900;color:var(--pink)}
-.dp-close{width:24px;height:24px;border-radius:6px;background:var(--bg);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2)}
+.dp-close{width:24px;height:24px;border-radius:6px;background:var(--card2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2)}
 .dp-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px}
 .dp-ic{color:var(--pink);font-size:12px;flex-shrink:0;margin-top:1px}
 .dp-val{font-weight:600;color:var(--text)}
 .dp-it{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dp-it-ic{width:28px;height:28px;border-radius:7px;background:var(--pink-u);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
-.dp-it-nm{flex:1;font-size:11px;font-weight:700}
+.dp-it-ic{width:28px;height:28px;border-radius:7px;background:var(--pink-l);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.dp-it-nm{flex:1;font-size:11px;font-weight:700;color:var(--text)}
 .dp-it-q{font-size:10px;color:var(--text2)}
 .dp-it-p{font-size:11px;font-weight:900;color:var(--pink)}
 .dp-tr{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:var(--text2)}
 .dp-tr.total{font-size:14px;font-weight:900;color:var(--pink);margin-top:6px}
 .dp-btns{display:flex;flex-direction:column;gap:7px}
 .dpbtn{width:100%;padding:9px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
-.dpbtn-pk{background:var(--pink);color:white}.dpbtn-pk:hover{background:var(--pink-d)}
-.dpbtn-ol{background:var(--white);border:1.5px solid var(--border);color:var(--text)}.dpbtn-ol:hover{border-color:var(--pink);color:var(--pink)}
+.dpbtn-pk{background:var(--pink);color:white}
+.dpbtn-ol{background:var(--card2);border:1px solid var(--border);color:var(--text)}.dpbtn-ol:hover{border-color:var(--pink);color:var(--pink)}
 .dpbtn-rd{background:var(--red-l);color:var(--red)}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
 .modal-bg.open{opacity:1;pointer-events:all}
-.modal{background:var(--white);border-radius:20px;padding:28px;width:420px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal{background:var(--card);border-radius:20px;padding:28px;width:420px;max-width:90vw;max-height:85vh;overflow-y:auto;border:1px solid var(--border)}
 .modal h3{font-size:16px;font-weight:900;margin-bottom:20px;color:var(--text)}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px}
-.form-group input,.form-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;direction:rtl;background:var(--white)}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;direction:rtl;background:var(--card2);color:var(--text)}
 .form-group input:focus,.form-group select:focus{border-color:var(--pink)}
 .modal-btns{display:flex;gap:8px;margin-top:20px}
 .modal-btns .btn{flex:1;justify-content:center}
+
+/* REPORT */
 .report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.rcard{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
 .rcard-n{font-size:28px;font-weight:900;color:var(--pink)}
 .rcard-l{font-size:12px;color:var(--text2);margin-top:4px;font-weight:600}
-.chart-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
-.chart-title{font-size:13px;font-weight:900;margin-bottom:16px}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:900;margin-bottom:16px;color:var(--text)}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .bar-label{width:100px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0}
-.bar-track{flex:1;background:var(--bg);border-radius:20px;height:10px;overflow:hidden}
+.bar-track{flex:1;background:var(--bg3);border-radius:20px;height:10px;overflow:hidden}
 .bar-fill{height:100%;background:var(--pink);border-radius:20px;transition:width .5s}
 .bar-val{width:50px;font-size:12px;font-weight:700;color:var(--text)}
-.call-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.call-card:hover{border-color:var(--pink)}
-.call-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.call-in{background:var(--green-l)}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:700;opacity:0;transition:.3s;z-index:9999;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
-.toast.ok{background:var(--green)}.toast.err{background:var(--red)}.toast.info{background:var(--pink)}
 
-/* DRIVERS PAGE */
+/* CALLS */
+.call-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.call-card:hover{border-color:var(--pink)}
+.call-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--green-l)}
+
+/* TOAST */
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card2);color:var(--text);padding:9px 20px;border-radius:20px;font-size:12px;font-weight:700;opacity:0;transition:.3s;z-index:9999;pointer-events:none;white-space:nowrap;border:1px solid var(--border)}
+.toast.show{opacity:1}
+.toast.ok{background:var(--green);color:white;border-color:var(--green)}
+.toast.err{background:var(--red);color:white;border-color:var(--red)}
+.toast.info{background:var(--pink);color:white;border-color:var(--pink)}
+
+/* DRIVERS PAGE - DARK MAP STYLE */
 .drivers-layout{display:flex;flex:1;overflow:hidden}
-.drivers-list{width:280px;flex-shrink:0;display:flex;flex-direction:column;border-left:1.5px solid var(--border);background:var(--white)}
+.drivers-sidebar{width:300px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2);border-left:1px solid var(--border)}
 .drivers-map{flex:1;position:relative}
 #gmap{width:100%;height:100%}
-.map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text2);gap:10px;position:absolute;inset:0;background:var(--bg);z-index:5}
-.driver-card{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px}
-.driver-card:hover{background:var(--pink-u)}
-.driver-card.selected{background:var(--pink-u);border-right:3px solid var(--pink)}
-.driver-card .dav{width:36px;height:36px;border-radius:50%;background:var(--pink-l);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;border:2px solid var(--border)}
-.driver-card .dav.online{border-color:var(--green)}
-.driver-card .dav.busy{border-color:var(--orange)}
-.driver-info{flex:1;min-width:0}
-.driver-info .dn{font-size:12px;font-weight:700}
-.driver-info .dp2{font-size:10px;color:var(--text2)}
-.driver-acts{display:flex;gap:4px}
-.loc-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700;margin-top:3px}
-.loc-live{background:var(--green-l);color:#065f46}
-.loc-none{background:#f3f4f6;color:#9ca3af}
-.map-info{position:absolute;top:12px;right:12px;background:white;border-radius:14px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-size:12px;min-width:180px;z-index:1000;border:1px solid var(--border)}
-.map-refresh{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--pink);color:white;border:none;border-radius:20px;padding:8px 20px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;z-index:1000;box-shadow:0 2px 10px rgba(233,30,140,0.3)}
+
+/* Driver Stats Bar */
+.driver-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);flex-shrink:0}
+.ds-card{padding:12px 10px;text-align:center;border-left:1px solid var(--border)}
+.ds-card:last-child{border-left:none}
+.ds-n{font-size:20px;font-weight:900;color:var(--text)}
+.ds-l{font-size:10px;color:var(--text2);margin-top:2px}
+.ds-ic{font-size:14px;margin-bottom:2px}
+
+/* Driver Search */
+.driver-search{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.driver-search input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none;direction:rtl}
+.driver-search input:focus{border-color:var(--pink)}
+
+/* Driver Tabs */
+.driver-tabs{display:flex;padding:8px 12px;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0}
+.dtab{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);transition:.15s}
+.dtab.active{background:var(--pink);color:white}
+.dtab:hover:not(.active){background:var(--border);color:var(--text)}
+
+/* Driver Cards */
+.driver-cards-list{flex:1;overflow-y:auto}
+.driver-cards-list::-webkit-scrollbar{width:3px}
+.driver-cards-list::-webkit-scrollbar-thumb{background:var(--border)}
+.dcard{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px}
+.dcard:hover{background:var(--bg3)}
+.dcard.selected{background:var(--pink-l);border-right:3px solid var(--pink)}
+.dcard-av{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid var(--border);position:relative}
+.dcard-av .status-dot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2)}
+.dcard-info{flex:1;min-width:0}
+.dcard-name{font-size:13px;font-weight:700;color:var(--text)}
+.dcard-phone{font-size:11px;color:var(--text2)}
+.dcard-meta{display:flex;align-items:center;gap:6px;margin-top:3px}
+.dcard-acts{display:flex;gap:4px}
+
+/* Map Info Panel */
+.map-panel{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(15,17,23,0.98) 0%,rgba(15,17,23,0.9) 100%);padding:16px 20px;z-index:1000;border-top:1px solid var(--border);display:none}
+.map-panel.open{display:block}
+.mp-driver{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mp-av{width:48px;height:48px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--pink)}
+.mp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.mp-stat{background:var(--bg3);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border)}
+.mp-stat-n{font-size:18px;font-weight:900;color:var(--pink)}
+.mp-stat-l{font-size:10px;color:var(--text2);margin-top:2px}
+.mp-addr{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.mp-close{position:absolute;top:12px;left:12px;width:28px;height:28px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:12px}
+
+/* Map Controls */
+.map-top-bar{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:1000}
+.map-follow-btn{background:var(--pink);color:white;border:none;border-radius:10px;padding:8px 14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(233,30,140,0.4)}
+.map-refresh-btn{background:rgba(15,17,23,0.9);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+
+.map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text2);gap:12px;position:absolute;inset:0;background:var(--bg);z-index:5}
+
+/* Leaflet dark overrides */
+.leaflet-container{background:#1a1d27}
+.leaflet-tile{filter:brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7)}
+.leaflet-popup-content-wrapper{background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text)}
+.leaflet-popup-tip{background:var(--card)}
+.leaflet-control-zoom a{background:var(--card2)!important;color:var(--text)!important;border-color:var(--border)!important}
 </style>
 </head>
 <body>
@@ -194,7 +276,7 @@ tbody tr.selected td{background:var(--pink-u)}
 </div>
 
 <div class="sidebar" id="SB" style="display:none">
-  <div class="sb-logo"><div class="sb-logo-txt">زúra</div></div>
+  <div class="sb-logo"><div class="sb-logo-txt">zura</div></div>
   <div class="sb-nav">
     <div class="sb-item active" onclick="showPage('orders')"><span class="si">🛍️</span><span>الطلبات</span></div>
     <div class="sb-item" onclick="showPage('drivers')"><span class="si">🛵</span><span>المندوبين</span></div>
@@ -205,16 +287,16 @@ tbody tr.selected td{background:var(--pink-u)}
   </div>
   <div class="sb-user">
     <img id="uAv" class="sb-av" src="" alt="">
-    <div><div class="sb-nm" id="uNm">—</div><div class="sb-rl">موظف استقبال</div></div>
+    <div><div class="sb-nm" id="uNm">—</div><div class="sb-rl">مدير النظام</div></div>
   </div>
-  <div class="sb-out" onclick="doLogout()"><span>🚪</span><span>تسجيل الخروج</span></div>
+  <div class="sb-out" onclick="doLogout()"><span>→</span><span>تسجيل الخروج</span></div>
 </div>
 
 <div class="main" id="MS" style="display:none">
   <div class="topbar">
     <div class="tb-title" id="pageTitle">الطلبات</div>
     <div class="tb-r">
-      <div class="tb-srch"><span style="color:var(--text2)">🔍</span><input placeholder="بحث..." id="srch" oninput="onSearch()"></div>
+      <div class="tb-srch"><span style="color:var(--text2)">🔍</span><input placeholder="ابحث عن مندوب أو طلب..." id="srch" oninput="onSearch()"></div>
       <div class="tb-ic">🔔<div class="nb" id="nbdg" style="display:none">0</div></div>
       <div class="live"><div class="ldot"></div><span id="lu">جارٍ التحميل...</span></div>
     </div>
@@ -296,39 +378,99 @@ tbody tr.selected td{background:var(--pink-u)}
 
   <!-- DRIVERS PAGE -->
   <div class="page" id="pg-drivers">
-    <div class="toolbar" style="padding-top:14px">
-      <div class="tl-l"><button class="btn bp" onclick="openDriverModal()">+ مندوب جديد</button></div>
-      <div class="tl-r">
-        <select class="tl-sel" id="driverStatusFilter" onchange="renderDrivers()">
-          <option value="">الكل</option>
-          <option value="available">متاح</option>
-          <option value="busy">مشغول</option>
-          <option value="offline">غير متصل</option>
-        </select>
-      </div>
-    </div>
     <div class="drivers-layout">
-      <div class="drivers-list">
-        <div style="padding:10px 14px;font-size:11px;color:var(--text2);border-bottom:1px solid var(--border);font-weight:700;background:var(--bg)">المندوبين</div>
-        <div id="driverCards" style="flex:1;overflow-y:auto"></div>
-      </div>
-      <div class="drivers-map">
-        <div id="gmap"></div>
-        <div class="map-info" id="mapInfo" style="display:none">
-          <div style="font-weight:900;font-size:14px;margin-bottom:6px" id="mi-name">—</div>
-          <div id="mi-status"></div>
-          <div style="font-size:10px;color:var(--text2);margin-top:4px" id="mi-time"></div>
-          <div style="font-size:10px;color:var(--text2);margin-top:2px" id="mi-coords"></div>
-          <div style="margin-top:10px;display:flex;gap:6px">
-            <button class="btn bp" style="padding:5px 10px;font-size:11px" onclick="callCl(mapDriver&&mapDriver.phone)">📞 اتصال</button>
-            <button class="btn bo" style="padding:5px 10px;font-size:11px" onclick="openDriverModal(mapDriver&&mapDriver._id)">✏️ تعديل</button>
+      <!-- RIGHT SIDEBAR -->
+      <div class="drivers-sidebar">
+        <!-- Stats -->
+        <div class="driver-stats-bar">
+          <div class="ds-card">
+            <div class="ds-ic">📡</div>
+            <div class="ds-n" id="ds-online">0</div>
+            <div class="ds-l">متصل الآن</div>
+          </div>
+          <div class="ds-card">
+            <div class="ds-ic">📦</div>
+            <div class="ds-n" id="ds-busy">0</div>
+            <div class="ds-l">في مهمة</div>
+          </div>
+          <div class="ds-card">
+            <div class="ds-ic">✅</div>
+            <div class="ds-n" id="ds-available">0</div>
+            <div class="ds-l">متاح</div>
+          </div>
+          <div class="ds-card">
+            <div class="ds-ic">🔇</div>
+            <div class="ds-n" id="ds-offline">0</div>
+            <div class="ds-l">غير متصل</div>
           </div>
         </div>
-        <button class="map-refresh" onclick="refreshMap()">🔄 تحديث المواقع</button>
+        <!-- Header -->
+        <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+          <span style="font-weight:900;font-size:14px">المندوبين</span>
+          <button class="btn bp" style="padding:5px 12px;font-size:11px" onclick="openDriverModal()">+ مندوب جديد</button>
+        </div>
+        <!-- Search -->
+        <div class="driver-search">
+          <input placeholder="ابحث عن مندوب..." id="driverSearch" oninput="renderDrivers()">
+        </div>
+        <!-- Tabs -->
+        <div class="driver-tabs">
+          <div class="dtab active" onclick="setDriverTab('all',this)">الكل</div>
+          <div class="dtab" onclick="setDriverTab('available',this)">متاح</div>
+          <div class="dtab" onclick="setDriverTab('busy',this)">في مهمة</div>
+          <div class="dtab" onclick="setDriverTab('offline',this)">غير متصل</div>
+        </div>
+        <!-- Driver List -->
+        <div class="driver-cards-list" id="driverCards"></div>
+        <!-- Show All -->
+        <div style="padding:10px 14px;border-top:1px solid var(--border);text-align:center">
+          <span style="font-size:11px;color:var(--pink);cursor:pointer;font-weight:700">عرض كل المندوبين ↗</span>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="drivers-map">
+        <div id="gmap"></div>
+        <!-- Map Controls -->
+        <div class="map-top-bar">
+          <button class="map-follow-btn" id="followBtn" onclick="toggleFollow()">📍 تتبع تلقائي</button>
+          <button class="map-refresh-btn" onclick="refreshMap()">🔄 تحديث</button>
+        </div>
+        <!-- Empty State -->
         <div id="mapEmpty" class="map-empty">
-          <div style="font-size:56px">🗺️</div>
-          <div style="font-weight:700;font-size:14px">لا يوجد مندوبين متاحين</div>
-          <div style="font-size:12px;color:var(--text2)">اختر مندوب من القائمة لعرض موقعه</div>
+          <div style="font-size:64px">🗺️</div>
+          <div style="font-weight:700;font-size:16px;color:var(--text)">خريطة المندوبين</div>
+          <div style="font-size:13px">لا يوجد مندوبين متاحين حالياً</div>
+        </div>
+        <!-- Driver Info Panel -->
+        <div class="map-panel" id="mapPanel">
+          <div class="mp-close" onclick="closeMapPanel()">✕</div>
+          <div class="mp-driver">
+            <div class="mp-av">🛵</div>
+            <div>
+              <div style="font-size:16px;font-weight:900" id="mp-name">—</div>
+              <div style="font-size:12px;color:var(--text2)" id="mp-phone">—</div>
+              <div style="margin-top:4px" id="mp-status"></div>
+            </div>
+            <div style="margin-right:auto;display:flex;gap:8px">
+              <button class="btn bp" style="padding:6px 12px;font-size:11px" onclick="callCl(mapDriver&&mapDriver.phone)">📞 اتصال</button>
+            </div>
+          </div>
+          <div class="mp-stats">
+            <div class="mp-stat">
+              <div class="mp-stat-n" id="mp-speed">—</div>
+              <div class="mp-stat-l">كم/س السرعة</div>
+            </div>
+            <div class="mp-stat">
+              <div class="mp-stat-n" id="mp-orders">—</div>
+              <div class="mp-stat-l">طلبات اليوم</div>
+            </div>
+            <div class="mp-stat">
+              <div class="mp-stat-n" id="mp-update">—</div>
+              <div class="mp-stat-l">آخر تحديث</div>
+            </div>
+          </div>
+          <div class="mp-addr">📍 <span id="mp-coords">—</span></div>
         </div>
       </div>
     </div>
@@ -421,7 +563,7 @@ tbody tr.selected td{background:var(--pink-u)}
 <div class="modal-bg" id="assignModal">
   <div class="modal">
     <h3>إسناد طلب لمندوب</h3>
-    <div id="assignOrderInfo" style="background:var(--pink-u);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px"></div>
+    <div id="assignOrderInfo" style="background:var(--pink-l);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px"></div>
     <div class="form-group"><label>اختر المندوب</label><select id="assign-driver"></select></div>
     <div class="modal-btns">
       <button class="btn bp" onclick="confirmAssign()">إسناد</button>
@@ -437,7 +579,7 @@ const API='https://zad-store-backend-production.up.railway.app';
 const ALLOWED=['samostafa963@gmail.com'];
 let orders=[],drivers=[],zones=[],prevIds=new Set(),timer=null,mapTimer=null,selId=null,curFilter='';
 let editDriverId=null,editZoneId=null,assignOrderId=null,curPage='orders';
-let gmap=null,markers={},selDriverId=null,mapDriver=null,autoFollow=true;
+let gmap=null,markers={},selDriverId=null,mapDriver=null,autoFollow=true,driverTab='all';
 
 function gLogin(){
   const cid='213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com';
@@ -486,7 +628,7 @@ function showPage(p){
   if(p==='calls')renderCalls();
   if(p==='customers')renderCustomers();
   if(p==='zones')renderZones();
-  if(p==='drivers'){renderDrivers();setTimeout(initMap,200);clearInterval(mapTimer);mapTimer=setInterval(()=>{loadDrivers();},5000);}
+  if(p==='drivers'){renderDrivers();setTimeout(initMap,200);clearInterval(mapTimer);mapTimer=setInterval(()=>loadDrivers(),5000);}
   else{clearInterval(mapTimer);}
 }
 
@@ -510,6 +652,7 @@ async function loadOrders(){
     if(selId)renderPanel(selId);
   }catch{toast('❌ فشل تحميل الطلبات','err');}
 }
+
 function setFilter(f){curFilter=f;document.getElementById('statusFilter').value=f==='all'?'':f;render();}
 function doFilter(){curFilter=document.getElementById('statusFilter').value;render();}
 function onSearch(){if(curPage==='orders')render();else if(curPage==='customers')renderCustomers();else if(curPage==='drivers')renderDrivers();}
@@ -542,6 +685,7 @@ function render(){
   }).join('');
   document.getElementById('TB').innerHTML=rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2)">📭 لا توجد طلبات</td></tr>`;
 }
+
 function updateStats(){
   const tod=new Date().toDateString();
   const t=o=>new Date(o.createdAt).toDateString()===tod;
@@ -551,6 +695,7 @@ function updateStats(){
   document.getElementById('sc2').textContent=orders.filter(o=>o.status==='completed'&&t(o)).length;
   document.getElementById('sx').textContent=orders.filter(o=>o.status==='cancelled').length;
 }
+
 function openPanel(id){
   selId=id;
   document.querySelectorAll('tbody tr').forEach(tr=>tr.classList.remove('selected'));
@@ -600,35 +745,55 @@ async function upd(id,status){
   }catch{toast('❌ فشل','err');}
 }
 
-// ─── DRIVERS ───
+// DRIVERS
 async function loadDrivers(){
   try{
     const r=await fetch(`${API}/api/drivers`);
     const d=await r.json();
     drivers=d.drivers||[];
     if(curPage==='drivers'){renderDrivers();updateMapMarkers();}
+    updateDriverStats();
   }catch{}
 }
 
+function updateDriverStats(){
+  document.getElementById('ds-online').textContent=drivers.filter(d=>d.status!=='offline').length;
+  document.getElementById('ds-busy').textContent=drivers.filter(d=>d.status==='busy').length;
+  document.getElementById('ds-available').textContent=drivers.filter(d=>d.status==='available').length;
+  document.getElementById('ds-offline').textContent=drivers.filter(d=>d.status==='offline').length;
+}
+
+function setDriverTab(tab,el){
+  driverTab=tab;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderDrivers();
+}
+
 function renderDrivers(){
-  const sf=document.getElementById('driverStatusFilter').value;
+  const srch=(document.getElementById('driverSearch')&&document.getElementById('driverSearch').value||'').toLowerCase();
   let f=drivers;
-  if(sf)f=f.filter(d=>d.status===sf);
+  if(driverTab!=='all')f=f.filter(d=>d.status===driverTab);
+  if(srch)f=f.filter(d=>(d.name||'').toLowerCase().includes(srch)||(d.phone||'').includes(srch));
   const html=f.map(d=>{
-    const hasLoc=d.location&&d.location.lat&&d.location.lng;
-    const locAge=hasLoc?Math.floor((Date.now()-new Date(d.location.updatedAt))/60000):null;
-    const isLive=locAge!==null&&locAge<2;
-    return `<div class="driver-card ${selDriverId===d._id?'selected':''}" onclick="selectDriver('${d._id}')">
-      <div class="dav ${d.status==='available'?'online':d.status==='busy'?'busy':''}">🛵</div>
-      <div class="driver-info">
-        <div class="dn">${esc(d.name)}</div>
-        <div class="dp2">${esc(d.phone)}</div>
-        <div style="display:flex;align-items:center;gap:5px;margin-top:3px">
-          <span class="badge ${d.status==='available'?'b-available':d.status==='busy'?'b-busy':'b-offline'}" style="padding:2px 6px;font-size:9px">${driverStatusLbl(d.status)}</span>
-          <span class="loc-badge ${isLive?'loc-live':'loc-none'}">${isLive?'🟢 live':hasLoc?`${locAge}د`:'—'}</span>
+    const hasLoc=d.location&&d.location.lat;
+    const locAge=hasLoc?Math.floor((Date.now()-new Date(d.location.updatedAt))/1000):null;
+    const isLive=locAge!==null&&locAge<10;
+    const dotColor=d.status==='available'?'#10b981':d.status==='busy'?'#f59e0b':'#64748b';
+    return `<div class="dcard ${selDriverId===d._id?'selected':''}" onclick="selectDriver('${d._id}')">
+      <div class="dcard-av">
+        🛵
+        <div class="status-dot" style="background:${dotColor}"></div>
+      </div>
+      <div class="dcard-info">
+        <div class="dcard-name">${esc(d.name)}</div>
+        <div class="dcard-phone">${esc(d.phone)}</div>
+        <div class="dcard-meta">
+          <span class="badge ${d.status==='available'?'b-available':d.status==='busy'?'b-busy':'b-offline'}" style="padding:2px 7px;font-size:9px">${driverStatusLbl(d.status)}</span>
+          ${isLive?'<span style="font-size:9px;color:var(--green)">● live</span>':hasLoc?`<span style="font-size:9px;color:var(--text2)">${locAge<60?locAge+'ث':Math.floor(locAge/60)+'د'}</span>`:''}
         </div>
       </div>
-      <div class="driver-acts">
+      <div class="dcard-acts">
         <div class="act-ic" onclick="event.stopPropagation();callCl('${d.phone}')">📞</div>
         <div class="act-ic" onclick="event.stopPropagation();openDriverModal('${d._id}')">✏️</div>
         <div class="act-ic" onclick="event.stopPropagation();deleteDriver('${d._id}')" style="color:var(--red)">🗑️</div>
@@ -642,6 +807,7 @@ function selectDriver(id){
   selDriverId=id;
   mapDriver=drivers.find(d=>d._id===id);
   autoFollow=true;
+  document.getElementById('followBtn').style.background='var(--pink)';
   renderDrivers();
   if(!mapDriver)return;
   if(mapDriver.location&&mapDriver.location.lat){
@@ -649,44 +815,63 @@ function selectDriver(id){
     if(!gmap)initMap();
     gmap.setView([mapDriver.location.lat,mapDriver.location.lng],17);
     if(markers[id])markers[id].openPopup();
-    updateMapInfo(mapDriver);
+    showMapPanel(mapDriver);
   }else{
     toast('📍 المندوب لم يشارك موقعه بعد','info');
-    document.getElementById('mapInfo').style.display='none';
+    document.getElementById('mapPanel').classList.remove('open');
   }
 }
 
-function updateMapInfo(d){
-  if(!d||!d.location||!d.location.lat)return;
+function showMapPanel(d){
+  if(!d||!d.location)return;
   const locAge=Math.floor((Date.now()-new Date(d.location.updatedAt))/1000);
-  const ageStr=locAge<60?`${locAge} ث`:locAge<3600?`${Math.floor(locAge/60)} د`:`${Math.floor(locAge/3600)} س`;
-  document.getElementById('mapInfo').style.display='block';
-  document.getElementById('mi-name').textContent=d.name;
-  document.getElementById('mi-status').innerHTML=`<span class="badge ${d.status==='available'?'b-available':d.status==='busy'?'b-busy':'b-offline'}">${driverStatusLbl(d.status)}</span>`;
-  document.getElementById('mi-time').textContent=`آخر تحديث: منذ ${ageStr}`;
-  document.getElementById('mi-coords').textContent=`${d.location.lat.toFixed(6)}, ${d.location.lng.toFixed(6)}`;
+  const ageStr=locAge<60?`${locAge}ث`:locAge<3600?`${Math.floor(locAge/60)}د`:`${Math.floor(locAge/3600)}س`;
+  document.getElementById('mapPanel').classList.add('open');
+  document.getElementById('mp-name').textContent=d.name;
+  document.getElementById('mp-phone').textContent=d.phone;
+  document.getElementById('mp-status').innerHTML=`<span class="badge ${d.status==='available'?'b-available':d.status==='busy'?'b-busy':'b-offline'}">${driverStatusLbl(d.status)}</span>`;
+  document.getElementById('mp-speed').textContent='—';
+  document.getElementById('mp-orders').textContent=d.totalDeliveries||0;
+  document.getElementById('mp-update').textContent=ageStr;
+  document.getElementById('mp-coords').textContent=`${d.location.lat.toFixed(5)}, ${d.location.lng.toFixed(5)}`;
+}
+
+function closeMapPanel(){
+  document.getElementById('mapPanel').classList.remove('open');
+  selDriverId=null;
+  autoFollow=false;
+  renderDrivers();
+}
+
+function toggleFollow(){
+  autoFollow=!autoFollow;
+  document.getElementById('followBtn').style.background=autoFollow?'var(--pink)':'var(--bg3)';
+  if(autoFollow&&mapDriver&&mapDriver.location)
+    gmap.setView([mapDriver.location.lat,mapDriver.location.lng],17);
 }
 
 function initMap(){
   if(gmap)return;
   const mapEl=document.getElementById('gmap');
   if(!mapEl||mapEl.offsetWidth===0)return;
-  gmap=L.map('gmap',{zoomControl:true}).setView([29.9602,30.9202],13);
+  gmap=L.map('gmap',{zoomControl:true,attributionControl:true}).setView([29.9602,30.9202],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© OpenStreetMap',maxZoom:20
   }).addTo(gmap);
-  // إيقاف auto-follow لما المستخدم يحرك الخريطة يدوياً
-  gmap.on('dragstart',()=>autoFollow=false);
+  gmap.on('dragstart',()=>{autoFollow=false;document.getElementById('followBtn').style.background='var(--bg3)';});
   updateMapMarkers();
 }
 
-function makeDriverIcon(color,name){
+function makeDriverIcon(color,name,isBusy){
+  const pulse=isBusy?`<div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ${color};opacity:0.4;animation:pulse 2s infinite"></div>`:'';
   return L.divIcon({
-    html:`<div style="position:relative">
-      <div style="background:${color};width:44px;height:44px;border-radius:50%;border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:22px">🛵</div>
-      <div style="position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;font-size:9px;padding:2px 5px;border-radius:4px;white-space:nowrap;font-family:Cairo,sans-serif">${esc(name)}</div>
+    html:`<style>@keyframes pulse{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.3);opacity:0}}</style>
+    <div style="position:relative;width:46px;height:56px">
+      ${pulse}
+      <div style="background:${color};width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,0.9);box-shadow:0 4px 15px rgba(0,0,0,0.5),0 0 0 3px ${color}40;display:flex;align-items:center;justify-content:center;font-size:22px">🛵</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;font-size:9px;padding:2px 6px;border-radius:4px;white-space:nowrap;font-family:Cairo,sans-serif;font-weight:700">${esc(name)}</div>
     </div>`,
-    className:'',iconSize:[44,62],iconAnchor:[22,22]
+    className:'',iconSize:[46,56],iconAnchor:[23,46]
   });
 }
 
@@ -697,30 +882,30 @@ function updateMapMarkers(){
   drivers.forEach(d=>{
     if(!d.location||!d.location.lat)return;
     hasAny=true;
-    const color=d.status==='available'?'#E91E8C':d.status==='busy'?'#f59e0b':'#9ca3af';
-    const popupContent=`<div style="font-family:Cairo,sans-serif;direction:rtl;min-width:150px;padding:4px">
-      <b style="font-size:14px">${esc(d.name)}</b><br>
-      <span style="color:#666;font-size:11px">${esc(d.phone)}</span><br>
-      <span style="font-size:12px;color:${color};font-weight:700">${driverStatusLbl(d.status)}</span><br>
-      <span style="font-size:10px;color:#888">${d.location.lat.toFixed(5)}, ${d.location.lng.toFixed(5)}</span>
+    const color=d.status==='available'?'#E91E8C':d.status==='busy'?'#f59e0b':'#64748b';
+    const isBusy=d.status==='busy';
+    const popupContent=`<div style="font-family:Cairo,sans-serif;direction:rtl;min-width:160px;padding:4px">
+      <b style="font-size:14px;color:#e2e8f0">${esc(d.name)}</b><br>
+      <span style="color:#94a3b8;font-size:11px">${esc(d.phone)}</span><br>
+      <span style="font-size:12px;color:${color};font-weight:700">${driverStatusLbl(d.status)}</span>
       ${d.currentOrderId?`<br><span style="font-size:11px;color:#E91E8C">طلب: #${String(d.currentOrderId).slice(-6).toUpperCase()}</span>`:''}
+      <br><span style="font-size:10px;color:#64748b">${d.location.lat.toFixed(5)}, ${d.location.lng.toFixed(5)}</span>
     </div>`;
     if(markers[d._id]){
       markers[d._id].setLatLng([d.location.lat,d.location.lng]);
-      markers[d._id].setIcon(makeDriverIcon(color,d.name));
+      markers[d._id].setIcon(makeDriverIcon(color,d.name,isBusy));
       markers[d._id].getPopup().setContent(popupContent);
     }else{
-      const marker=L.marker([d.location.lat,d.location.lng],{icon:makeDriverIcon(color,d.name)})
+      const marker=L.marker([d.location.lat,d.location.lng],{icon:makeDriverIcon(color,d.name,isBusy)})
         .addTo(gmap)
-        .bindPopup(popupContent)
-        .on('click',()=>{selectDriver(d._id);autoFollow=true;});
+        .bindPopup(popupContent,{className:'dark-popup'})
+        .on('click',()=>{selectDriver(d._id);autoFollow=true;document.getElementById('followBtn').style.background='var(--pink)';});
       markers[d._id]=marker;
     }
     existing.delete(d._id);
-    // تتبع تلقائي للمندوب المحدد
     if(d._id===selDriverId&&autoFollow){
       gmap.setView([d.location.lat,d.location.lng],gmap.getZoom());
-      updateMapInfo(d);
+      showMapPanel(d);
       mapDriver=d;
     }
   });
@@ -728,10 +913,7 @@ function updateMapMarkers(){
   document.getElementById('mapEmpty').style.display=hasAny?'none':'flex';
 }
 
-async function refreshMap(){
-  await loadDrivers();
-  toast('🗺️ تم تحديث المواقع','ok');
-}
+async function refreshMap(){await loadDrivers();toast('🗺️ تم التحديث','ok');}
 
 function openDriverModal(id){
   editDriverId=id||null;
@@ -864,7 +1046,7 @@ function renderCalls(){
   const calls=orders.filter(o=>o.phone).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,50);
   document.getElementById('callsList').innerHTML=calls.length
     ?calls.map(o=>`<div class="call-card" onclick="callCl('${o.phone}')">
-        <div class="call-ic call-in">📞</div>
+        <div class="call-ic">📞</div>
         <div style="flex:1"><div style="font-weight:700;font-size:13px">${esc(o.name||'-')}</div>
         <div style="font-size:11px;color:var(--text2)">${esc(o.phone)} · ${tago(o.createdAt)}</div></div>
         <span class="badge ${stClass(o.status)}">${stLbl(o.status)}</span>
@@ -927,7 +1109,7 @@ function playAlert(){
 }
 function stLbl(s){return{pending:'جديد',confirmed:'مؤكد',preparing:'جاري التجهيز',delivering:'مع المندوب',completed:'مكتملة',cancelled:'ملغية'}[s]||s;}
 function stClass(s){return{pending:'b-new',confirmed:'b-confirmed',preparing:'b-preparing',delivering:'b-delivering',completed:'b-completed',cancelled:'b-cancelled'}[s]||'b-new';}
-function driverStatusLbl(s){return{available:'متاح',busy:'مشغول',offline:'غير متصل'}[s]||s;}
+function driverStatusLbl(s){return{available:'متاح',busy:'في مهمة',offline:'غير متصل'}[s]||s;}
 function tago(d){const df=Math.floor((Date.now()-new Date(d))/1000);if(df<60)return'الآن';if(df<3600)return`منذ ${Math.floor(df/60)} دقيقة`;if(df<86400)return`منذ ${Math.floor(df/3600)} ساعة`;return`منذ ${Math.floor(df/86400)} يوم`;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m,t=''){const el=document.getElementById('T');el.textContent=m;el.className=`toast ${t} show`;setTimeout(()=>el.className='toast',3000);}
