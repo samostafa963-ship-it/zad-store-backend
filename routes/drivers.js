@@ -40,9 +40,9 @@ router.get('/:id', async (req, res) => {
 // POST create driver
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, zone, password } = req.body;
+    const { name, phone, email, zone, password, status } = req.body;
     if (!name || !phone) return res.status(400).json({ success: false, message: 'الاسم والموبايل مطلوبين' });
-    const driver = new Driver({ name, phone, zone: zone || '', password: password || '12345' });
+    const driver = new Driver({ name, phone, email: email || '', zone: zone || '', password: password || '12345', status: status || 'offline' });
     await driver.save();
     res.status(201).json({ success: true, driver });
   } catch (err) {
@@ -76,25 +76,82 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id/assign', async (req, res) => {
   try {
     const { orderId } = req.body;
-    const driver = await Driver.findByIdAndUpdate(
-      req.params.id,
-      { currentOrderId: orderId, status: 'busy' },
-      { new: true }
-    );
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    // لو مفيش current order → اسنده مباشرة
+    // لو عنده current order → ضيفه في pending
+    if (!driver.currentOrderId) {
+      driver.currentOrderId = orderId;
+      driver.status = 'busy';
+    } else {
+      if (!driver.pendingOrders.includes(orderId)) {
+        driver.pendingOrders.push(orderId);
+      }
+    }
+    await driver.save();
     res.json({ success: true, driver });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// PUT free driver
+// PUT pending accept - المندوب يقبل طلب مؤقت
+router.put('/:id/pending-accept', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    if (!driver.pendingOrders.includes(orderId)) {
+      driver.pendingOrders.push(orderId);
+    }
+    await driver.save();
+    res.json({ success: true, driver });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PUT confirm pending - تحويل طلب من pending لـ current بعد التسليم
+router.put('/:id/confirm-pending/:orderId', async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    const orderId = req.params.orderId;
+    // شيل من pending
+    driver.pendingOrders = driver.pendingOrders.filter(id => id !== orderId);
+    // حطه كـ current
+    driver.currentOrderId = orderId;
+    driver.status = 'busy';
+    await driver.save();
+    res.json({ success: true, driver });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PUT free driver - بعد التسليم شوف لو في pending
 router.put('/:id/free', async (req, res) => {
   try {
-    const driver = await Driver.findByIdAndUpdate(
-      req.params.id,
-      { currentOrderId: null, status: 'available', $inc: { totalDeliveries: 1 } },
-      { new: true }
-    );
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    driver.currentOrderId = null;
+    driver.totalDeliveries += 1;
+    // لو في pending orders → status يفضل busy، غير كده available
+    driver.status = driver.pendingOrders.length > 0 ? 'busy' : 'available';
+    await driver.save();
+    res.json({ success: true, driver, hasPending: driver.pendingOrders.length > 0, pendingOrders: driver.pendingOrders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PUT reject pending - المندوب يرفض طلب pending
+router.put('/:id/reject-pending/:orderId', async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
+    driver.pendingOrders = driver.pendingOrders.filter(id => id !== req.params.orderId);
+    await driver.save();
     res.json({ success: true, driver });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

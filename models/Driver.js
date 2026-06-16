@@ -9,6 +9,7 @@ const driverSchema = new mongoose.Schema({
   status: { type: String, enum: ['available', 'busy', 'offline'], default: 'offline' },
   zone: { type: String, default: '' },
   currentOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: null },
+  pendingOrders: [{ type: String, default: [] }],
   totalDeliveries: { type: Number, default: 0 },
   rating: { type: Number, default: 5.0 },
   isActive: { type: Boolean, default: true },
