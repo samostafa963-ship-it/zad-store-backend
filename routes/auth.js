@@ -89,7 +89,13 @@ router.post('/login', async (req, res) => {
 router.post('/google', async (req, res) => {
   try {
     const { idToken } = req.body;
-    const ticket = await client.verifyIdToken({ idToken, audience: '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com' });
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: [
+        '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com',
+        '213514981477-u193a3pu7hb2gnl4qgppu6ugloru1prd.apps.googleusercontent.com',
+      ]
+    });
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
     let user = await User.findOne({ email: email.toLowerCase() });
@@ -97,7 +103,8 @@ router.post('/google', async (req, res) => {
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar } });
   } catch (err) {
-    res.status(500).json({ message: 'فشل تسجيل الدخول بجوجل' });
+    console.error('google auth error:', err);
+    res.status(500).json({ message: 'فشل تسجيل الدخول بجوجل', error: err.message });
   }
 });
 
