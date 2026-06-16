@@ -20,9 +20,10 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'delivering', 'completed', 'cancelled'],
+    enum: ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'],
     default: 'pending'
   },
+  driverId: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);
