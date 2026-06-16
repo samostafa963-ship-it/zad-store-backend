@@ -7,7 +7,7 @@ const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_2026';
-const client = new OAuth2Client('213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com');
+const client = new OAuth2Client();
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -29,7 +29,6 @@ async function sendOTPEmail(email, otp, name) {
   });
 }
 
-// ── STEP 1: إرسال OTP ──
 router.post('/send-otp', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -49,7 +48,6 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-// ── STEP 2: تأكيد OTP ──
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -69,7 +67,6 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
-// ── تسجيل الدخول ──
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -85,15 +82,15 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ── جوجل ──
 router.post('/google', async (req, res) => {
   try {
     const { idToken } = req.body;
     const ticket = await client.verifyIdToken({
       idToken,
       audience: [
-        '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com',
+        '213514981477-ug7u2ucq39jmnkiu6s3hofmdjaii9dfh.apps.googleusercontent.com',
         '213514981477-u193a3pu7hb2gnl4qgppu6ugloru1prd.apps.googleusercontent.com',
+        '213514981477-2l4hcd7ohamopijd1c32090iii87pjad.apps.googleusercontent.com',
       ]
     });
     const payload = ticket.getPayload();
@@ -108,7 +105,6 @@ router.post('/google', async (req, res) => {
   }
 });
 
-// ── بيانات المستخدم ──
 router.get('/me', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -122,7 +118,6 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// ── تعديل بيانات المستخدم ──
 router.put('/update', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
