@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Driver = require('../models/Driver');
+const Order = require('../models/Order');
 
 // POST driver login
 router.post('/login', async (req, res) => {
@@ -78,13 +79,23 @@ router.put('/:id/assign', async (req, res) => {
     const { orderId } = req.body;
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
-    // لو مفيش current order → اسنده مباشرة
-    // لو عنده current order → ضيفه في pending
-    if (!driver.currentOrderId) {
+
+    // شوف لو الـ currentOrderId موجود وحالته إيه
+    let currentIsDone = true;
+    if (driver.currentOrderId) {
+      const currentOrder = await Order.findById(driver.currentOrderId);
+      if (currentOrder && !['completed', 'cancelled'].includes(currentOrder.status)) {
+        currentIsDone = false;
+      }
+    }
+
+    if (!driver.currentOrderId || currentIsDone) {
+      // مفيش طلب حالي أو الطلب الحالي خلص → اسند مباشرة
       driver.currentOrderId = orderId;
       driver.status = 'busy';
     } else {
-      if (!driver.pendingOrders.includes(orderId)) {
+      // في طلب حالي شغال → حط في pending
+      if (!driver.pendingOrders.map(String).includes(String(orderId))) {
         driver.pendingOrders.push(orderId);
       }
     }
@@ -101,7 +112,7 @@ router.put('/:id/pending-accept', async (req, res) => {
     const { orderId } = req.body;
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
-    if (!driver.pendingOrders.includes(orderId)) {
+    if (!driver.pendingOrders.map(String).includes(String(orderId))) {
       driver.pendingOrders.push(orderId);
     }
     await driver.save();
@@ -111,15 +122,13 @@ router.put('/:id/pending-accept', async (req, res) => {
   }
 });
 
-// PUT confirm pending - تحويل طلب من pending لـ current بعد التسليم
+// PUT confirm pending - تحويل طلب من pending لـ current
 router.put('/:id/confirm-pending/:orderId', async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
     const orderId = req.params.orderId;
-    // شيل من pending
-    driver.pendingOrders = driver.pendingOrders.filter(id => id !== orderId);
-    // حطه كـ current
+    driver.pendingOrders = driver.pendingOrders.filter(id => String(id) !== String(orderId));
     driver.currentOrderId = orderId;
     driver.status = 'busy';
     await driver.save();
@@ -129,28 +138,32 @@ router.put('/:id/confirm-pending/:orderId', async (req, res) => {
   }
 });
 
-// PUT free driver - بعد التسليم شوف لو في pending
+// PUT free driver
 router.put('/:id/free', async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
     driver.currentOrderId = null;
     driver.totalDeliveries += 1;
-    // لو في pending orders → status يفضل busy، غير كده available
     driver.status = driver.pendingOrders.length > 0 ? 'busy' : 'available';
     await driver.save();
-    res.json({ success: true, driver, hasPending: driver.pendingOrders.length > 0, pendingOrders: driver.pendingOrders });
+    res.json({
+      success: true,
+      driver,
+      hasPending: driver.pendingOrders.length > 0,
+      pendingOrders: driver.pendingOrders,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// PUT reject pending - المندوب يرفض طلب pending
+// PUT reject pending
 router.put('/:id/reject-pending/:orderId', async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ success: false, message: 'المندوب غير موجود' });
-    driver.pendingOrders = driver.pendingOrders.filter(id => id !== req.params.orderId);
+    driver.pendingOrders = driver.pendingOrders.filter(id => String(id) !== String(req.params.orderId));
     await driver.save();
     res.json({ success: true, driver });
   } catch (err) {
