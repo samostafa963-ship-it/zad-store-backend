@@ -4,26 +4,15 @@ const orderSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
   address: { type: String, required: true },
-  paymentMethod: { type: String, enum: ['cash', 'online'], default: 'cash' },
+  paymentMethod: { type: String, enum: ['cash', 'online', 'card', 'wallet'], default: 'cash' },
   notes: { type: String, default: '' },
-  items: [
-    {
-      productId: String,
-      name: String,
-      price: Number,
-      quantity: Number,
-      total: Number,
-    }
-  ],
+  items: [{ productId: String, name: String, price: Number, quantity: Number, total: Number }],
   subtotal: { type: Number, required: true },
   delivery: { type: Number, default: 20 },
   total: { type: Number, required: true },
-  status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'],
-    default: 'pending'
-  },
+  status: { type: String, enum: ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'], default: 'pending' },
   driverId: { type: String, default: null },
+  userId: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

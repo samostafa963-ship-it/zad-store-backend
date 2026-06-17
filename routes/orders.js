@@ -4,10 +4,10 @@ const Order = require('../models/Order');
 
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, address, paymentMethod, notes, items, subtotal, delivery, total } = req.body;
+    const { name, phone, address, paymentMethod, notes, items, subtotal, delivery, total, userId } = req.body;
     if (!name || !phone || !address || !items || items.length === 0)
       return res.status(400).json({ success: false, message: 'بيانات ناقصة' });
-    const order = new Order({ name, phone, address, paymentMethod: paymentMethod || 'cash', notes: notes || '', items, subtotal, delivery: delivery || 20, total });
+    const order = new Order({ name, phone, address, paymentMethod: paymentMethod || 'cash', notes: notes || '', items, subtotal, delivery: delivery || 20, total, userId: userId || null });
     await order.save();
     res.status(201).json({ success: true, message: 'تم تأكيد الطلب بنجاح', orderId: order._id });
   } catch (err) {
@@ -18,6 +18,15 @@ router.post('/', async (req, res) => {
 router.get('/phone/:phone', async (req, res) => {
   try {
     const orders = await Order.find({ phone: req.params.phone }).sort({ createdAt: -1 });
+    res.json({ success: true, orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
