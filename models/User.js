@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, default: '' },
   googleId: { type: String, default: '' },
   avatar: { type: String, default: '' },
+  favorites: [{ type: String }],
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {
