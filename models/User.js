@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const cartItemSchema = new mongoose.Schema({
+  productId: { type: String, required: true },
+  name: { type: String, default: '' },
+  image: { type: String, default: '' },
+  price: { type: Number, default: 0 },
+  quantity: { type: Number, default: 1 },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -9,6 +17,8 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String, default: '' },
   avatar: { type: String, default: '' },
   favorites: [{ type: String }],
+  savedAddress: { type: String, default: '' },
+  savedCart: [cartItemSchema],
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {

@@ -12,6 +12,7 @@ const categoriesRouter = require('./routes/categories');
 const productsRouter = require('./routes/products');
 const authRouter = require('./routes/auth');
 const favoritesRouter = require('./routes/favorites');
+const usersRouter = require('./routes/users');
 
 require('dotenv').config();
 
@@ -29,6 +30,7 @@ app.use('/api/banners', bannersRouter);
 app.use('/api/drivers', driversRouter);
 app.use('/api/zones', zonesRouter);
 app.use('/api/favorites', favoritesRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/ai', require('./routes/ai'));
 
 app.use(express.static('public'));
