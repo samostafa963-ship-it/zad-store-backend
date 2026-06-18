@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 
 // POST /api/fix/categories - يصلح كل المنتجات اللي عندها category = ObjectId
-router.post('/categories', async (req, res) => {
+router.get('/categories', async (req, res) => {
   try {
     // جيب كل الـ categories
     const categories = await Category.find({});
