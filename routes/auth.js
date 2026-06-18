@@ -20,6 +20,10 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function generateCoupon() {
+  return 'ZURA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 async function sendOTPEmail(email, otp, name) {
   await transporter.sendMail({
     from: `"زورا 🛍️" <${process.env.GMAIL_USER}>`,
@@ -56,11 +60,17 @@ router.post('/verify-otp', async (req, res) => {
     if (!stored) return res.status(400).json({ message: 'لم يتم إرسال كود لهذا البريد' });
     if (Date.now() > stored.expiresAt) { otpStore.delete(key); return res.status(400).json({ message: 'انتهت صلاحية الكود، أعد المحاولة' }); }
     if (stored.otp !== otp.trim()) return res.status(400).json({ message: 'الكود غير صحيح' });
-    const user = new User({ name: stored.name, email: key, password: stored.password });
+    const couponCode = generateCoupon();
+    const user = new User({
+      name: stored.name,
+      email: key,
+      password: stored.password,
+      coupon: { code: couponCode, used: false, type: 'free_delivery' }
+    });
     await user.save();
     otpStore.delete(key);
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
-    res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
+    res.status(201).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, coupon: user.coupon } });
   } catch (err) {
     console.error('verify-otp error:', err);
     res.status(500).json({ message: 'حدث خطأ، حاول مرة أخرى' });
@@ -76,7 +86,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'كلمة المرور غير صحيحة' });
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
+    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, coupon: user.coupon } });
   } catch (err) {
     res.status(500).json({ message: 'حدث خطأ' });
   }
@@ -96,9 +106,17 @@ router.post('/google', async (req, res) => {
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
     let user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) user = await User.create({ name, email: email.toLowerCase(), avatar: picture });
+    if (!user) {
+      const couponCode = generateCoupon();
+      user = await User.create({
+        name,
+        email: email.toLowerCase(),
+        avatar: picture,
+        coupon: { code: couponCode, used: false, type: 'free_delivery' }
+      });
+    }
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar } });
+    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, coupon: user.coupon } });
   } catch (err) {
     console.error('google auth error:', err);
     res.status(500).json({ message: 'فشل تسجيل الدخول بجوجل', error: err.message });
