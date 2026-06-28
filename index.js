@@ -36,6 +36,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/fix', fixRouter);
 app.use('/api/coupons', couponsRouter);
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/fcm', require('./routes/fcm')); // ← FCM
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
@@ -49,3 +50,4 @@ app.get('/', (req, res) => res.json({ message: "ZAD Backend is Live! 🚀" }));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ ZAD Server running on port: ${PORT}`));
+app.use('/api/fcm', require('./routes/fcm'));

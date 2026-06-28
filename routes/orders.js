@@ -1,63 +1,96 @@
+// ===================================================
+// routes/orders.js  — النسخة المحدثة مع FCM
+// ===================================================
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const User = require('../models/User');
+const { sendOrderNotification, sendCustomNotification } = require('../utils/sendNotification');
 
-router.post('/', async (req, res) => {
-  try {
-    const { name, phone, address, paymentMethod, notes, items, subtotal, delivery, total, userId } = req.body;
-    if (!name || !phone || !address || !items || items.length === 0)
-      return res.status(400).json({ success: false, message: 'بيانات ناقصة' });
-    const order = new Order({ name, phone, address, paymentMethod: paymentMethod || 'cash', notes: notes || '', items, subtotal, delivery: delivery || 20, total, userId: userId || null });
-    await order.save();
-    res.status(201).json({ success: true, message: 'تم تأكيد الطلب بنجاح', orderId: order._id });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
-  }
-});
-
-router.get('/phone/:phone', async (req, res) => {
-  try {
-    const orders = await Order.find({ phone: req.params.phone }).sort({ createdAt: -1 });
-    res.json({ success: true, orders });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-router.get('/user/:userId', async (req, res) => {
-  try {
-    const orders = await Order.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.json({ success: true, orders });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
+// GET /api/orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json({ success: true, orders });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    const orders = await Order.find().sort({ createdAt: -1 }).limit(200);
+    res.json({ orders });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-router.get('/:id', async (req, res) => {
+// POST /api/orders — طلب جديد
+router.post('/', async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
-    res.json({ success: true, order });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    const order = new Order(req.body);
+    await order.save();
+
+    // إشعار للأدمن (اختياري - لو عندك FCM token للأدمن)
+    // await sendCustomNotification(ADMIN_FCM_TOKEN, '🛍️ طلب جديد!', `${order.name} - ${order.total} ج.م`, { orderId: order._id.toString() });
+
+    res.status(201).json({ order });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
+// PUT /api/orders/:id — تحديث الطلب + FCM
 router.put('/:id', async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json({ success: true, order });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    const { status, ...rest } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status, ...rest, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    // ابعت إشعار للعميل
+    if (status && order.fcmToken) {
+      const result = await sendOrderNotification(order.fcmToken, status, order._id);
+      // لو الـ token منتهي، امسحه
+      if (result === 'expired') {
+        await Order.findByIdAndUpdate(order._id, { fcmToken: null });
+      }
+    }
+
+    // لو مش لاقي fcmToken في الأوردر، دور عليه في الـ User
+    if (status && !order.fcmToken && order.userId) {
+      const user = await User.findById(order.userId);
+      if (user?.fcmToken) {
+        await sendOrderNotification(user.fcmToken, status, order._id);
+      }
+    }
+
+    res.json({ order });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/orders/notify-all — إشعار لكل العملاء (كوبون / عرض)
+router.post('/notify-all', async (req, res) => {
+  try {
+    const { title, body } = req.body;
+    if (!title || !body) return res.status(400).json({ error: 'title and body required' });
+
+    // جيب كل الـ FCM tokens الفريدة
+    const users = await User.find({ fcmToken: { $exists: true, $ne: null } });
+    const tokens = [...new Set(users.map(u => u.fcmToken).filter(Boolean))];
+
+    if (!tokens.length) return res.json({ message: 'No tokens found', sent: 0 });
+
+    const { sendToMultiple } = require('../utils/sendNotification');
+
+    // FCM بيبعت max 500 في الـ batch
+    let totalSuccess = 0;
+    for (let i = 0; i < tokens.length; i += 500) {
+      const batch = tokens.slice(i, i + 500);
+      const result = await sendToMultiple(batch, title, body);
+      totalSuccess += result?.successCount || 0;
+    }
+
+    res.json({ message: 'Notifications sent', sent: totalSuccess, total: tokens.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
