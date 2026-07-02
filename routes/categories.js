@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
+    if (!category) return res.status(404).json({ error: 'القسم غير موجود' });
     res.json(category);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -39,9 +40,46 @@ router.post('/', async (req, res) => {
   }
 });
 
+// ── رفع أقسام كتير دفعة واحدة (bulk insert) ──
+// بيتخطى أي category_key موجود بالفعل عشان مايتكررش لو شغلت نفس الطلب أكتر من مرة
+router.post('/bulk', async (req, res) => {
+  try {
+    const items = req.body.categories;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'لازم تبعت { "categories": [...] } كـ array فيه عنصر واحد على الأقل',
+      });
+    }
+
+    const existingKeys = new Set(
+      (await Category.find({}, 'category_key')).map((c) => c.category_key)
+    );
+
+    const toInsert = items.filter(
+      (item) => item.category_key && !existingKeys.has(item.category_key)
+    );
+    const skipped = items.length - toInsert.length;
+
+    const inserted = toInsert.length > 0
+      ? await Category.insertMany(toInsert)
+      : [];
+
+    res.json({
+      success: true,
+      insertedCount: inserted.length,
+      skippedCount: skipped,
+      inserted,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.put('/:id', async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!category) return res.status(404).json({ error: 'القسم غير موجود' });
     res.json(category);
   } catch (err) {
     res.status(500).json({ error: err.message });
