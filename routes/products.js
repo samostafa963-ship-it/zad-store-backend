@@ -119,15 +119,10 @@ async function processBatch() {
   isRunning = false;
 }
 
-setTimeout(async () => {
-  console.log('⏰ بدأ أول batch...');
-  await processBatch();
-}, 5000);
-
-setInterval(async () => {
-  console.log('⏰ batch جديد...');
-  await processBatch();
-}, 2 * 60 * 1000);
+// ⚠️ تم حذف الـ setTimeout و setInterval اللي كانوا هنا وبيشغلوا processBatch()
+// تلقائياً كل ما السيرفر يشتغل وكل دقيقتين للأبد - وده كان سبب توقف السيرفر
+// (Application failed to respond). دلوقتي processBatch() بتتشغل يدوي بس عن طريق
+// GET /api/products/admin/upload-images لما تحب فعلاً ترفع صور المنتجات الناقصة.
 
 // ── GET /mini لازم قبل /:id ──
 router.get('/mini', async (req, res) => {
@@ -244,7 +239,7 @@ router.get('/admin/image-stats', async (req, res) => {
   }
 });
 
-// ── GET admin upload images ──
+// ── GET admin upload images (تشغيل يدوي بس) ──
 router.get('/admin/upload-images', async (req, res) => {
   res.json({ message: '🚀 بدأ رفع الصور...' });
   await processBatch();
