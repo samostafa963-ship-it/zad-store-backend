@@ -5,9 +5,20 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const admin = require('firebase-admin');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_2026';
 const client = new OAuth2Client();
+
+// تهيئة firebase-admin لتسجيل الدخول برقم الهاتف - محمية بشرط عشان
+// متتكررش لو firebase-admin أصلاً متهيأ في مكان تاني بالمشروع (زي ملف الـ FCM)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    ),
+  });
+}
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -120,6 +131,55 @@ router.post('/google', async (req, res) => {
   } catch (err) {
     console.error('google auth error:', err);
     res.status(500).json({ message: 'فشل تسجيل الدخول بجوجل', error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// تسجيل الدخول برقم الهاتف (بعد التحقق من كود الـ SMS عن طريق
+// Firebase Phone Authentication جوه التطبيق نفسه)
+// ═══════════════════════════════════════════════════════════════
+router.post('/firebase-phone', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ message: 'idToken مطلوب' });
+    }
+
+    // تحقق من الـ idToken مع Firebase واستخرج رقم الهاتف منه
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const phone = decoded.phone_number; // زي +201234567890
+
+    if (!phone) {
+      return res.status(400).json({ message: 'مفيش رقم هاتف في الـ token ده' });
+    }
+
+    // هات المستخدم لو موجود، أو اعمل حساب جديد بنفس نمط باقي الـ routes
+    let user = await User.findOne({ phone });
+    if (!user) {
+      const couponCode = generateCoupon();
+      user = await User.create({
+        phone,
+        name: '', // ينفع يتحدث بعدين من صفحة الملف الشخصي
+        coupon: { code: couponCode, used: false, type: 'free_delivery' },
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
+        coupon: user.coupon,
+      },
+    });
+  } catch (err) {
+    console.error('firebase-phone auth error:', err);
+    res.status(500).json({ message: 'تعذر التحقق من الهاتف', error: err.message });
   }
 });
 
