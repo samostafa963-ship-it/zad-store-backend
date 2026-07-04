@@ -1,4 +1,4 @@
-﻿const { getMessaging } = require('../firebase');
+﻿const admin = require('../firebase');
 
 const ORDER_MESSAGES = {
   confirmed:  { title: '✅ تم تأكيد طلبك!', body: 'طلبك اتأكد وجاري التجهيز 🎉' },
@@ -13,7 +13,7 @@ async function sendOrderNotification(fcmToken, status, orderId) {
   const msg = ORDER_MESSAGES[status];
   if (!msg) return;
   try {
-    await getMessaging().send({
+    await admin.messaging().send({
       token: fcmToken,
       notification: { title: msg.title, body: msg.body },
       data: { orderId: String(orderId), status },
@@ -29,7 +29,7 @@ async function sendOrderNotification(fcmToken, status, orderId) {
 async function sendToMultiple(tokens, title, body, data = {}) {
   if (!tokens?.length) return;
   try {
-    return await getMessaging().sendEachForMulticast({
+    return await admin.messaging().sendEachForMulticast({
       tokens, notification: { title, body }, data,
       android: { priority: 'high' }
     });
