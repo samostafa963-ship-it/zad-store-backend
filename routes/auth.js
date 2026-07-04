@@ -5,20 +5,13 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
-const admin = require('firebase-admin');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zad_secret_2026';
 const client = new OAuth2Client();
 
 // تهيئة firebase-admin لتسجيل الدخول برقم الهاتف - محمية بشرط عشان
 // متتكررش لو firebase-admin أصلاً متهيأ في مكان تاني بالمشروع (زي ملف الـ FCM)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    ),
-  });
-}
+const admin = require('../firebase');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
