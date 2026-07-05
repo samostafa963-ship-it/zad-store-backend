@@ -87,7 +87,7 @@ async function processBatch() {
   isRunning = true;
   try {
     const products = await Product.find({
-      $or: [{ image: '' }, { image: null }, { image: { $exists: false } }, { image: 'no_image' }],
+      image: { $nin: ['', null, 'no_image'] },
     }).limit(BATCH_LIMIT);
 
     if (products.length === 0) {
@@ -144,7 +144,6 @@ router.get('/', async (req, res) => {
 
     const products = await Product.find({
       image: { $nin: ['', null, 'no_image'] },
-      price: { $gt: 0 },
     })
       .skip(skip)
       .limit(limit);
