@@ -244,6 +244,30 @@ router.get('/admin/upload-images', async (req, res) => {
   await processBatch();
 });
 
+// ── GET admin fix new products (تشغيل يدوي مرة واحدة) ──
+router.get('/admin/fix-new-products', async (req, res) => {
+  try {
+    const products = await Product.find({ price: 0 });
+    let updated = 0;
+
+    for (const p of products) {
+      let newName = (p.name || '').trim();
+      if (!newName.startsWith('دومتي')) {
+        newName = `دومتي ${newName}`.trim();
+      }
+      p.name = newName;
+      p.description = 'نص كيلو';
+      p.price = 25;
+      await p.save();
+      updated++;
+    }
+
+    res.json({ message: `✅ تم تحديث ${updated} منتج`, updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── GET single product by id ──
 router.get('/:id', async (req, res) => {
   try {
