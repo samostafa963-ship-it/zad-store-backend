@@ -268,6 +268,17 @@ router.get('/admin/fix-new-products', async (req, res) => {
   }
 });
 
+// ── GET كل منتجات نفس مجموعة الأحجام (لاستخدامها في "اختر الكمية") ──
+router.get('/size-group/:value', async (req, res) => {
+  try {
+    if (!req.params.value) return res.json([]);
+    const products = await Product.find({ size_group: req.params.value }).sort({ price: 1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── GET single product by id ──
 router.get('/:id', async (req, res) => {
   try {

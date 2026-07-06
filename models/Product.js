@@ -3,13 +3,14 @@ const mongoose = require('mongoose');
 const ProductSchema = new mongoose.Schema({
   name: String,
   price: Number,
-  old_price: Number,       // السعر قبل الخصم (اختياري) - لو موجود وأكبر من price بيظهر شارة الخصم
-  is_bestseller: Boolean,  // لو true بتظهر شارة "الأكثر مبيعاً" بدل الخصم
+  old_price: Number,
+  is_bestseller: Boolean,
   image: String,
-  description: String,     // نص خفيف تحت الاسم (زي: 1 لتر / 900 مل)
+  description: String,
   category_key: String,
   sub_category: String,
   sub_type: String,
+  size_group: String, // بيربط بين نفس المنتج بأحجام مختلفة (زي: لتر / 200 مل)
   order: Number,
 });
 
