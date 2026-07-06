@@ -632,7 +632,9 @@ function startInline(el){
   if(field==='sub_type')inp.setAttribute('list','dlSubTypes');
   inp.style.cssText=`width:100%;padding:4px 6px;border:1.5px solid var(--primary);border-radius:5px;font-family:'Cairo',sans-serif;font-size:${isPrice?'13px':'12px'};font-weight:${isPrice?'900':'400'};color:${isPrice?'var(--primary)':'var(--text)'};outline:none;background:white`;
   el.innerHTML='';el.appendChild(inp);el.style.background='';
-  inp.focus();inp.select();
+  inp.focus();
+  const _len=inp.value.length;
+  inp.setSelectionRange(_len,_len);
   activeInline={el,id,field,inp};
   inp.addEventListener('blur',()=>finishInline({el,id,field,inp},true));
   inp.addEventListener('keydown',e=>{
