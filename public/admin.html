@@ -180,6 +180,13 @@ tr:hover td{background:var(--primary-ultra)}
 .pagination{display:flex;gap:5px;padding:10px 14px;justify-content:flex-end;flex-wrap:wrap}
 .pg-btn{width:28px;height:28px;border:1.5px solid var(--border);border-radius:7px;background:var(--white);cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;transition:all 0.15s}
 .pg-btn:hover,.pg-btn.on{background:var(--primary);color:white;border-color:var(--primary)}
+/* ── شريط النقل الجماعي ── */
+.move-bar{position:sticky;top:0;z-index:50;background:var(--text);color:white;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 6px 20px rgba(0,0,0,0.15)}
+.move-bar strong{font-size:13px;white-space:nowrap}
+.move-bar input,.move-bar select{padding:8px 10px;border-radius:8px;border:none;font-family:'Cairo',sans-serif;font-size:12.5px;outline:none;min-width:140px}
+.move-bar .btn{background:var(--primary)}
+.move-bar .clear-btn{background:transparent;border:1px solid rgba(255,255,255,0.4);color:white}
+.row-checkbox{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
 @media(max-width:900px){.preview-panel{display:none}}
 @media(max-width:768px){.sidebar{width:54px}.main{margin-right:54px}.nav-item span:not(.ni){display:none}.logo-txt{display:none}}
 </style>
@@ -457,14 +464,18 @@ async function uploadCatImg(inp,id){toast('⏳ ...','');const fd=new FormData();
 async function updateCat(id){await fetch(`${API}/api/categories/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:v('cN'),order:+v('cO'),color_class:v('cC'),image_url:v('cI')})});closeM();toast('✅ تم','ok');loadCats();}
 async function delCat(id,name){if(!confirm(`حذف "${name}"؟`))return;await fetch(`${API}/api/categories/${id}`,{method:'DELETE'});toast('🗑️ تم','ok');loadCats();}
 
-// ── EDIT PRODUCTS (inline) ──
+// ── EDIT PRODUCTS (inline + نقل جماعي) ──
+let selectedProdIds=new Set();
+let allProdsCache=[],allCatsCache=[];
+
 async function loadEditProducts(){
   setC('<div class="loading"><div class="spin"></div></div>');
+  selectedProdIds=new Set();
   try{
     const [prodsData,catsData]=await Promise.all([api('/api/products?limit=5000'),api('/api/categories')]);
-    const allProds=Array.isArray(prodsData)?prodsData:(prodsData.products||[]);
-    const allCats=Array.isArray(catsData)?catsData:[];
-    renderEditProducts(allProds,allCats);
+    allProdsCache=Array.isArray(prodsData)?prodsData:(prodsData.products||[]);
+    allCatsCache=Array.isArray(catsData)?catsData:[];
+    renderEditProducts(allProdsCache,allCatsCache);
   }catch{setC('<div class="loading">❌ فشل التحميل</div>');}
 }
 
@@ -475,11 +486,18 @@ function renderEditProducts(allProds,allCats){
   const catOrder=allCats.map(c=>c._id);
   const keys=Object.keys(grouped).sort((a,b)=>{const ai=catOrder.indexOf(a),bi=catOrder.indexOf(b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});
 
+  // قوائم اقتراح تلقائية (autocomplete) لكل الأقسام الفرعية والأنواع الداخلية الموجودة فعليًا
+  const allSubCats=[...new Set(allProds.map(p=>p.sub_category).filter(Boolean))];
+  const allSubTypes=[...new Set(allProds.map(p=>p.sub_type).filter(Boolean))];
+  const subCatsDatalist=`<datalist id="dlSubCats">${allSubCats.map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`;
+  const subTypesDatalist=`<datalist id="dlSubTypes">${allSubTypes.map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`;
+
   const sectionsHtml=keys.map(key=>{
     const cat=allCats.find(c=>c._id===key);
     const nm=cat?cat.name:key;
     const rows=grouped[key].map(p=>`
       <tr id="erow-${p._id}">
+        <td style="width:32px"><input type="checkbox" class="row-checkbox" onchange="toggleProdSelect('${p._id}',this.checked)" ${selectedProdIds.has(p._id)?'checked':''}></td>
         <td style="width:44px">
           <div style="position:relative;cursor:pointer" onclick="editProdImg('${p._id}','${esc(p.image||'')}')">
             ${p.image&&p.image!==''&&p.image!=='no_image'
@@ -490,7 +508,8 @@ function renderEditProducts(allProds,allCats){
         </td>
         <td><div class="ev" data-id="${p._id}" data-field="name" style="font-weight:700;cursor:text;padding:4px 6px;border-radius:5px;min-width:120px" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${esc(p.name||'-')}</div></td>
         <td><div class="ev" data-id="${p._id}" data-field="sub_category" style="font-size:11px;color:var(--gray);cursor:text;padding:4px 6px;border-radius:5px" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${esc(p.sub_category||'-')}</div></td>
-        <td><div class="ev" data-id="${p._id}" data-field="description" style="font-size:11px;color:var(--gray);cursor:text;padding:4px 6px;border-radius:5px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${esc(p.description||'أضف وصفاً...')}</div></td>
+        <td><div class="ev" data-id="${p._id}" data-field="sub_type" style="font-size:11px;color:var(--gray);cursor:text;padding:4px 6px;border-radius:5px" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${esc(p.sub_type||'بدون نوع')}</div></td>
+        <td><div class="ev" data-id="${p._id}" data-field="description" style="font-size:11px;color:var(--gray);cursor:text;padding:4px 6px;border-radius:5px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${esc(p.description||'أضف وصفاً...')}</div></td>
         <td><div class="ev" data-id="${p._id}" data-field="price" style="font-weight:900;color:var(--primary);cursor:text;padding:4px 6px;border-radius:5px;white-space:nowrap" onmouseover="this.style.background='var(--primary-ultra)'" onmouseout="this.style.background=''" onclick="startInline(this)">${p.price||0} ج</div></td>
         <td id="est-${p._id}" style="width:30px"></td>
       </tr>`).join('');
@@ -503,14 +522,61 @@ function renderEditProducts(allProds,allCats){
       </div>
       <div id="esec-${key}">
         <div class="card"><div style="overflow-x:auto"><table>
-          <thead><tr><th>صورة</th><th>الاسم</th><th>القسم الفرعي</th><th>الوصف</th><th>السعر</th><th></th></tr></thead>
+          <thead><tr><th></th><th>صورة</th><th>الاسم</th><th>القسم الفرعي</th><th>النوع الداخلي</th><th>الوصف</th><th>السعر</th><th></th></tr></thead>
           <tbody>${rows}</tbody>
         </table></div></div>
       </div>
     </div>`;
   }).join('');
 
-  setC(`<div class="page-hd"><h2>✏️ تعديل المنتجات</h2><span style="font-size:12px;color:var(--gray)">اضغط على أي خلية للتعديل مباشرة</span></div>${sectionsHtml}`);
+  setC(`<div class="page-hd"><h2>✏️ تعديل المنتجات</h2><span style="font-size:12px;color:var(--gray)">اضغط على أي خلية للتعديل مباشرة، أو حدد منتجات بالـ checkbox عشان تنقلهم دفعة واحدة</span></div>
+    <div id="moveBarWrap"></div>
+    ${subCatsDatalist}${subTypesDatalist}
+    ${sectionsHtml}`);
+  renderMoveBar();
+}
+
+function toggleProdSelect(id,checked){
+  if(checked)selectedProdIds.add(id);else selectedProdIds.delete(id);
+  renderMoveBar();
+}
+
+function clearProdSelection(){
+  selectedProdIds.clear();
+  document.querySelectorAll('.row-checkbox').forEach(cb=>cb.checked=false);
+  renderMoveBar();
+}
+
+function renderMoveBar(){
+  const wrap=document.getElementById('moveBarWrap');
+  if(!wrap)return;
+  if(selectedProdIds.size===0){wrap.innerHTML='';return;}
+  wrap.innerHTML=`<div class="move-bar">
+    <strong>📦 ${selectedProdIds.size} منتج محدد</strong>
+    <input class="fi" id="moveSubCat" list="dlSubCats" placeholder="انقل لقسم فرعي... (اكتب اسم جديد أو اختر)" style="flex:1">
+    <input class="fi" id="moveSubType" list="dlSubTypes" placeholder="انقل لنوع داخلي... (اختياري)" style="flex:1">
+    <button class="btn" onclick="bulkMoveSelected()">➡️ نقل</button>
+    <button class="btn clear-btn" onclick="clearProdSelection()">إلغاء التحديد</button>
+  </div>`;
+}
+
+async function bulkMoveSelected(){
+  const newSubCat=document.getElementById('moveSubCat')?.value.trim()||'';
+  const newSubType=document.getElementById('moveSubType')?.value.trim()||'';
+  if(!newSubCat&&!newSubType){toast('اكتب القسم الفرعي أو النوع الداخلي الجديد الأول','err');return;}
+  const ids=[...selectedProdIds];
+  toast(`⏳ جاري نقل ${ids.length} منتج...`,'');
+  const body={};
+  if(newSubCat)body.sub_category=newSubCat;
+  if(newSubType)body.sub_type=newSubType;
+  try{
+    await Promise.all(ids.map(id=>fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})));
+    toast(`✅ تم نقل ${ids.length} منتج بنجاح`,'ok');
+    selectedProdIds=new Set();
+    loadEditProducts();
+  }catch{
+    toast('❌ حصل خطأ أثناء النقل','err');
+  }
 }
 
 function toggleEditSec(id,hd){
@@ -528,10 +594,12 @@ function startInline(el){
   const isPrice=field==='price';
   let curVal=el.textContent.trim();
   if(isPrice)curVal=curVal.replace(' ج','');
-  if(curVal==='-'||curVal==='أضف وصفاً...')curVal='';
+  if(curVal==='-'||curVal==='أضف وصفاً...'||curVal==='بدون نوع')curVal='';
   const inp=document.createElement('input');
   inp.type=isPrice?'number':'text';
   inp.value=curVal;
+  if(field==='sub_category')inp.setAttribute('list','dlSubCats');
+  if(field==='sub_type')inp.setAttribute('list','dlSubTypes');
   inp.style.cssText=`width:100%;padding:4px 6px;border:1.5px solid var(--primary);border-radius:5px;font-family:'Cairo',sans-serif;font-size:${isPrice?'13px':'12px'};font-weight:${isPrice?'900':'400'};color:${isPrice?'var(--primary)':'var(--text)'};outline:none;background:white`;
   el.innerHTML='';el.appendChild(inp);el.style.background='';
   inp.focus();inp.select();
@@ -547,7 +615,11 @@ async function finishInline({el,id,field,inp},save){
   if(!inp||!el)return;
   const isPrice=field==='price';
   const newVal=isPrice?(parseFloat(inp.value)||0):inp.value.trim();
-  el.textContent=isPrice?(newVal+' ج'):(newVal||'-');
+  if(field==='sub_type'){
+    el.textContent=newVal||'بدون نوع';
+  }else{
+    el.textContent=isPrice?(newVal+' ج'):(newVal||'-');
+  }
   activeInline=null;
   if(!save)return;
   const status=document.getElementById(`est-${id}`);
@@ -581,7 +653,7 @@ async function saveEditProdImg(id){
   await fetch(`${API}/api/products/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:img})});
   // update row img
   const row=document.getElementById(`erow-${id}`);
-  if(row){const td=row.querySelector('td:first-child div');if(td&&img)td.innerHTML=`<img src="${img}" style="width:40px;height:40px;border-radius:7px;object-fit:cover"><div style="position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:white">✏️</div>`;}
+  if(row){const td=row.querySelector('td:nth-child(2) div');if(td&&img)td.innerHTML=`<img src="${img}" style="width:40px;height:40px;border-radius:7px;object-fit:cover"><div style="position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:white">✏️</div>`;}
   closeM();toast('✅ تم','ok');
 }
 
