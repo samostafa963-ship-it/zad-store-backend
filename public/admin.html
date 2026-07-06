@@ -467,6 +467,7 @@ async function delCat(id,name){if(!confirm(`حذف "${name}"؟`))return;await fe
 // ── EDIT PRODUCTS (inline + نقل جماعي) ──
 let selectedProdIds=new Set();
 let allProdsCache=[],allCatsCache=[];
+let epSearch='';
 
 async function loadEditProducts(){
   setC('<div class="loading"><div class="spin"></div></div>');
@@ -475,8 +476,31 @@ async function loadEditProducts(){
     const [prodsData,catsData]=await Promise.all([api('/api/products?limit=5000'),api('/api/categories')]);
     allProdsCache=Array.isArray(prodsData)?prodsData:(prodsData.products||[]);
     allCatsCache=Array.isArray(catsData)?catsData:[];
-    renderEditProducts(allProdsCache,allCatsCache);
+    filterAndRenderEditProducts();
   }catch{setC('<div class="loading">❌ فشل التحميل</div>');}
+}
+
+function filterAndRenderEditProducts(){
+  const q=epSearch.trim().toLowerCase();
+  const filtered=!q?allProdsCache:allProdsCache.filter(p=>
+    (p.name||'').toLowerCase().includes(q)||
+    (p.sub_category||'').toLowerCase().includes(q)||
+    (p.sub_type||'').toLowerCase().includes(q)||
+    (p.category_key||'').toLowerCase().includes(q));
+  renderEditProducts(filtered,allCatsCache);
+}
+
+function onEpSearchInput(val){
+  epSearch=val;
+  filterAndRenderEditProducts();
+  // نرجّع التركيز (focus) للخانة ونحط المؤشر في الآخر بعد كل إعادة رسم
+  const inp=document.getElementById('epSearchInput');
+  if(inp){inp.focus();const l=inp.value.length;inp.setSelectionRange(l,l);}
+}
+
+function clearEpSearch(){
+  epSearch='';
+  filterAndRenderEditProducts();
 }
 
 function renderEditProducts(allProds,allCats){
@@ -487,8 +511,9 @@ function renderEditProducts(allProds,allCats){
   const keys=Object.keys(grouped).sort((a,b)=>{const ai=catOrder.indexOf(a),bi=catOrder.indexOf(b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});
 
   // قوائم اقتراح تلقائية (autocomplete) لكل الأقسام الفرعية والأنواع الداخلية الموجودة فعليًا
-  const allSubCats=[...new Set(allProds.map(p=>p.sub_category).filter(Boolean))];
-  const allSubTypes=[...new Set(allProds.map(p=>p.sub_type).filter(Boolean))];
+  // (دايمًا من القائمة الكاملة مش المفلترة، عشان الاقتراحات تفضل شاملة)
+  const allSubCats=[...new Set(allProdsCache.map(p=>p.sub_category).filter(Boolean))];
+  const allSubTypes=[...new Set(allProdsCache.map(p=>p.sub_type).filter(Boolean))];
   const subCatsDatalist=`<datalist id="dlSubCats">${allSubCats.map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`;
   const subTypesDatalist=`<datalist id="dlSubTypes">${allSubTypes.map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`;
 
@@ -529,10 +554,15 @@ function renderEditProducts(allProds,allCats){
     </div>`;
   }).join('');
 
-  setC(`<div class="page-hd"><h2>✏️ تعديل المنتجات</h2><span style="font-size:12px;color:var(--gray)">اضغط على أي خلية للتعديل مباشرة، أو حدد منتجات بالـ checkbox عشان تنقلهم دفعة واحدة</span></div>
+  setC(`<div class="page-hd"><h2>✏️ تعديل المنتجات</h2>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input class="search-input" id="epSearchInput" placeholder="🔍 بحث بالاسم أو القسم أو النوع..." value="${esc(epSearch)}" oninput="onEpSearchInput(this.value)" style="width:220px">
+        ${epSearch?`<button class="btn btn-ghost btn-sm" onclick="clearEpSearch()">✕ إلغاء البحث</button>`:''}
+      </div>
+    </div>
     <div id="moveBarWrap"></div>
     ${subCatsDatalist}${subTypesDatalist}
-    ${sectionsHtml}`);
+    ${sectionsHtml||(epSearch?'<div class="card" style="padding:30px;text-align:center;color:var(--gray)">مفيش نتائج لـ "'+esc(epSearch)+'"</div>':'')}`);
   renderMoveBar();
 }
 
