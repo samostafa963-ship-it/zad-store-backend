@@ -17,6 +17,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/orders/user/:userId — طلبات مستخدم معيّن (بيُستخدم من شاشة "طلباتي")
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.params.userId })
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json({ orders });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/orders/phone/:phone — طلبات برقم الهاتف (احتياطي لو مفيش userId)
+router.get('/phone/:phone', async (req, res) => {
+  try {
+    const orders = await Order.find({ phone: req.params.phone })
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json({ orders });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/orders — طلب جديد
 router.post('/', async (req, res) => {
   try {
@@ -89,6 +113,18 @@ router.post('/notify-all', async (req, res) => {
     }
 
     res.json({ message: 'Notifications sent', sent: totalSuccess, total: tokens.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/orders/:id — طلب واحد بمفرده (بيُستخدم في شاشة "تتبع الطلب")
+// ⚠️ لازم يفضل آخر route، عشان مايبلعش المسارات التانية زي /user و /phone
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json({ order });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
