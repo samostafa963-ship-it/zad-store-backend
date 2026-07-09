@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const orderSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
@@ -13,6 +12,10 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'], default: 'pending' },
   driverId: { type: String, default: null },
   userId: { type: String, default: null },
-}, { timestamps: true });
 
+  // ── وقت التوصيل: asap (أسرع وقت) | specific (وقت محدد) | scheduled (جدولة لاحقاً) ──
+  deliveryTimeType: { type: String, enum: ['asap', 'specific', 'scheduled'], default: 'asap' },
+  scheduledDateTime: { type: Date, default: null }, // لو deliveryTimeType = scheduled
+  specificTime: { type: String, default: null }, // لو deliveryTimeType = specific، شكله "HH:mm"
+}, { timestamps: true });
 module.exports = mongoose.model('Order', orderSchema);
