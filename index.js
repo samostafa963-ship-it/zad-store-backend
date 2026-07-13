@@ -74,5 +74,14 @@ connectDB();
 
 app.get('/', (req, res) => res.json({ message: "ZAD Backend is Live! 🚀" }));
 
+app.get('/health', async (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({
+    status: 'ok',
+    db: dbStatus,
+    time: new Date().toISOString()
+  });
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`✅ ZAD Server running on port: ${PORT}`));
