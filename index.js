@@ -42,7 +42,12 @@ app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use('/admin', express.static(path.join(__dirname, 'public')));
 
-mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family: 4 })
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 60000,
+  connectTimeoutMS: 60000,
+  socketTimeoutMS: 90000,
+  family: 4
+})
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => console.error('❌ Connection failed:', err.message));
 
