@@ -36,26 +36,43 @@ app.use('/api/users', usersRouter);
 app.use('/api/fix', fixRouter);
 app.use('/api/coupons', couponsRouter);
 app.use('/api/ai', require('./routes/ai'));
-app.use('/api/fcm', require('./routes/fcm')); // ← FCM
+app.use('/api/fcm', require('./routes/fcm'));
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use('/admin', express.static(path.join(__dirname, 'public')));
 
-// ⚠️ بيزود مهلة "الانتظار" بتاعت mongoose نفسه، منفصلة عن مهلة الشبكة
-mongoose.set('bufferTimeoutMS', 60000);
+mongoose.set('bufferTimeoutMS', 120000);
 
-mongoose.connect(process.env.MONGO_URI, {
-  serverSelectionTimeoutMS: 60000,
-  connectTimeoutMS: 60000,
-  socketTimeoutMS: 90000,
-  family: 4
-})
-  .then(() => console.log('✅ Connected to MongoDB Atlas'))
-  .catch(err => console.error('❌ Connection failed:', err.message));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 60000,
+      family: 4,
+      maxPoolSize: 10,
+      retryWrites: true,
+    });
+    console.log('✅ Connected to MongoDB Atlas');
+  } catch (err) {
+    console.error('❌ Connection failed:', err.message);
+    setTimeout(connectDB, 5000);
+  }
+};
+
+mongoose.connection.on('disconnected', () => {
+  console.log('❌ MongoDB disconnected, reconnecting...');
+  setTimeout(connectDB, 5000);
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB error:', err.message);
+});
+
+connectDB();
 
 app.get('/', (req, res) => res.json({ message: "ZAD Backend is Live! 🚀" }));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`✅ ZAD Server running on port: ${PORT}`));
-app.use('/api/fcm', require('./routes/fcm'));
