@@ -42,6 +42,9 @@ app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use('/admin', express.static(path.join(__dirname, 'public')));
 
+// ⚠️ بيزود مهلة "الانتظار" بتاعت mongoose نفسه، منفصلة عن مهلة الشبكة
+mongoose.set('bufferTimeoutMS', 60000);
+
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 60000,
   connectTimeoutMS: 60000,
