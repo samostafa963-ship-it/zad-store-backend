@@ -15,6 +15,7 @@ const favoritesRouter = require('./routes/favorites');
 const usersRouter = require('./routes/users');
 const fixRouter = require('./routes/fix');
 const couponsRouter = require('./routes/coupons');
+const ratingsRouter = require('./routes/ratings');
 
 require('dotenv').config();
 
@@ -35,6 +36,7 @@ app.use('/api/favorites', favoritesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/fix', fixRouter);
 app.use('/api/coupons', couponsRouter);
+app.use('/api/ratings', ratingsRouter);
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/fcm', require('./routes/fcm'));
 
