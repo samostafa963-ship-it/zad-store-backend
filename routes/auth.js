@@ -199,7 +199,7 @@ router.post('/firebase-sync', async (req, res) => {
     const phone = decoded.phone_number;
     const name = decoded.name || '';
     const avatar = decoded.picture || '';
-    const fallbackEmail = `${decoded.uid}@firebase.local`;
+    const fallbackEmail = `${decoded.uid.toLowerCase()}@firebase.local`;
 
     let user = null;
     if (email) user = await User.findOne({ email: email.toLowerCase() });
