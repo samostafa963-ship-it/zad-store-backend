@@ -39,6 +39,7 @@ app.use('/api/coupons', couponsRouter);
 app.use('/api/ratings', ratingsRouter);
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/fcm', require('./routes/fcm'));
+app.use('/api/home', require('./routes/home'));
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
