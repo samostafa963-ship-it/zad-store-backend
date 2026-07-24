@@ -3,9 +3,9 @@
 // وفي ملف السيرفر الرئيسي (server.js / index.js / app.js) ضيف:
 // app.use('/api/home', require('./routes/home'));
 //
-// مبني على الـ schema الفعلي بتاعك:
-// Product: { name, price, old_price, is_bestseller, image, description, category_key, sub_category, sub_type, size_group, order }
-// Order:   { items: [{ productId (String), name, price, quantity, total }], status, userId (String), createdAt (timestamps) }
+// كل منتج راجع من هنا متحول لنفس شكل الـ JSON اللي ProductModel.fromJson
+// في الفلاتر متوقعه بالظبط (original_price, category_path, ...) عشان
+// تستخدمه في الشاشة من غير ما تلمس ProductModel خالص.
 
 const express = require('express');
 const router = express.Router();
@@ -15,15 +15,30 @@ const Product = require('../models/Product'); // غيّر المسار لو مخ
 const Order = require('../models/Order');     // غيّر المسار لو مختلف
 
 // ⚠️ حط هنا قيم category_key الحقيقية بتاعة فئات الاحتياجات اليومية عندك بالظبط
-// (زي: 'dairy', 'eggs', 'bakery' ... حسب اللي مسجل فعليًا في الداتابيز)
 const DAILY_ESSENTIAL_CATEGORY_KEYS = ['dairy', 'eggs', 'bakery', 'vegetables', 'beverages'];
 
 const LIMIT_PER_SECTION = 10;
 
-// يحول productId (String) لـ ObjectId بأمان، ولو مش صالح يرجع null بدل ما يعمل throw
 const toObjectIdSafe = {
   $convert: { input: '$items.productId', to: 'objectId', onError: null, onNull: null },
 };
+
+// بيحول doc المنتج الخام (من الـ schema بتاعك) لنفس شكل الـ JSON
+// اللي ProductModel.fromJson في الفلاتر متوقعه
+function mapProduct(doc) {
+  const categoryPath = [doc.category_key, doc.sub_category, doc.sub_type].filter(Boolean);
+  return {
+    _id: doc._id.toString(),
+    name: doc.name || '',
+    price: doc.price || 0,
+    original_price: doc.old_price || 0,
+    image: doc.image || '',
+    size_group: doc.size_group || '',
+    category: doc.category_key || '',
+    category_path: categoryPath,
+    is_available: true,
+  };
+}
 
 router.get('/', async (req, res) => {
   try {
@@ -40,7 +55,7 @@ router.get('/', async (req, res) => {
     };
 
     // ─────────────────────────────────────────────
-    // 1) احتياجات يومية: فئات ثابتة، عينة عشوائية
+    // 1) احتياجات يومية
     // ─────────────────────────────────────────────
     let dailyEssentials = await Product.aggregate([
       { $match: { category_key: { $in: DAILY_ESSENTIAL_CATEGORY_KEYS } } },
@@ -49,7 +64,7 @@ router.get('/', async (req, res) => {
     dailyEssentials = markUsed(dailyEssentials);
 
     // ─────────────────────────────────────────────
-    // 2) عروض اليوم: old_price > price فعليًا
+    // 2) عروض اليوم
     // ─────────────────────────────────────────────
     let offers = await Product.aggregate([
       {
@@ -66,7 +81,7 @@ router.get('/', async (req, res) => {
     offers = markUsed(offers);
 
     // ─────────────────────────────────────────────
-    // 3) الأكثر طلبًا (كل الأوقات) - من الأوردرات الفعلية، غير الملغية
+    // 3) الأكثر طلبًا (كل الأوقات)
     // ─────────────────────────────────────────────
     const mostOrderedAgg = await Order.aggregate([
       { $match: { status: { $ne: 'cancelled' } } },
@@ -84,7 +99,7 @@ router.get('/', async (req, res) => {
     mostOrdered = markUsed(mostOrdered);
 
     // ─────────────────────────────────────────────
-    // 4) يطلبه الآخرون الآن: أوردرات آخر 3 أيام فقط
+    // 4) يطلبه الآخرون الآن (آخر 3 أيام)
     // ─────────────────────────────────────────────
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     const recentAgg = await Order.aggregate([
@@ -103,8 +118,7 @@ router.get('/', async (req, res) => {
     trendingNow = markUsed(trendingNow);
 
     // ─────────────────────────────────────────────
-    // 5) رائج لك: فئات المستخدم المفضلة (من تاريخ طلباته)
-    //    لو مفيش userId أو مفيش تاريخ: fallback عشوائي
+    // 5) رائج لك (فئات المستخدم المفضلة، fallback عشوائي)
     // ─────────────────────────────────────────────
     let trendingForYou = [];
     if (userId) {
@@ -143,8 +157,7 @@ router.get('/', async (req, res) => {
     trendingForYou = markUsed(trendingForYou);
 
     // ─────────────────────────────────────────────
-    // 6) مقترح لك: فئات لسه المستخدم ما جربهاش (اكتشاف فئات جديدة)
-    //    لو مفيش userId: fallback عشوائي تاني مختلف
+    // 6) مقترح لك (فئات لسه ما جربهاش، fallback عشوائي)
     // ─────────────────────────────────────────────
     let forYou = [];
     if (userId) {
@@ -166,12 +179,7 @@ router.get('/', async (req, res) => {
       ]);
       const triedCategories = orderedCategories.map(c => c._id).filter(Boolean);
       forYou = await Product.aggregate([
-        {
-          $match: {
-            category_key: { $nin: triedCategories },
-            ...excludeUsed(),
-          },
-        },
+        { $match: { category_key: { $nin: triedCategories }, ...excludeUsed() } },
         { $sample: { size: LIMIT_PER_SECTION } },
       ]);
     }
@@ -186,12 +194,12 @@ router.get('/', async (req, res) => {
     res.json({
       success: true,
       sections: {
-        dailyEssentials,
-        offers,
-        mostOrdered,
-        trendingNow,
-        trendingForYou,
-        forYou,
+        dailyOffers: offers.map(mapProduct),
+        dailyNeeds: dailyEssentials.map(mapProduct),
+        mostOrdered: mostOrdered.map(mapProduct),
+        othersOrder: trendingNow.map(mapProduct),
+        trending: trendingForYou.map(mapProduct),
+        suggested: forYou.map(mapProduct),
       },
     });
   } catch (err) {
