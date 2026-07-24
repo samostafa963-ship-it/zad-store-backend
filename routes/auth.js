@@ -180,6 +180,12 @@ router.post('/firebase-phone', async (req, res) => {
 // بيغطي حالة login_page.dart اللي بتستخدم Firebase مباشرة من غير ما
 // تعدي على /google أو /login بتوعنا. بيدور على المستخدم بالإيميل أو
 // رقم الهاتف المستخرجين من الـ idToken، ولو مش موجود بيعمله حساب جديد.
+//
+// ⚠️ بيدور كمان بالإيميل الوهمي المولّد (uid@firebase.local) قبل ما
+// يعمل حساب جديد - عشان لو الحساب اتعمل قبل كده بنفس الـ uid (من خلال
+// /firebase-phone أو محاولة sync سابقة) بصيغة رقم هاتف مختلفة شكليًا
+// (زي +20 بدل الصفر)، منحاولش نعمله حساب تاني بنفس الإيميل الوهمي
+// فيدّي duplicate key error زي اللي كان بيحصل.
 // ═══════════════════════════════════════════════════════════════
 router.post('/firebase-sync', async (req, res) => {
   try {
@@ -193,24 +199,41 @@ router.post('/firebase-sync', async (req, res) => {
     const phone = decoded.phone_number;
     const name = decoded.name || '';
     const avatar = decoded.picture || '';
+    const fallbackEmail = `${decoded.uid}@firebase.local`;
 
     let user = null;
     if (email) user = await User.findOne({ email: email.toLowerCase() });
     if (!user && phone) user = await User.findOne({ phone });
+    // فحص إضافي: نفس الـ uid يمكن يكون له حساب اتعمل قبل كده بإيميل وهمي
+    if (!user) user = await User.findOne({ email: fallbackEmail });
 
     if (!user) {
       const couponCode = generateCoupon();
-      user = await User.create({
-        name: name || 'مستخدم زورا',
-        // الحقل مطلوب وunique في الموديل - لو مفيش إيميل حقيقي (تسجيل
-        // بالهاتف بس) بنستخدم إيميل وهمي فريد مبني على الـ uid
-        email: email
-            ? email.toLowerCase()
-            : `${decoded.uid}@firebase.local`,
-        phone: phone || '',
-        avatar,
-        coupon: { code: couponCode, used: false, type: 'free_delivery' },
-      });
+      try {
+        user = await User.create({
+          name: name || 'مستخدم زورا',
+          // الحقل مطلوب وunique في الموديل - لو مفيش إيميل حقيقي (تسجيل
+          // بالهاتف بس) بنستخدم إيميل وهمي فريد مبني على الـ uid
+          email: email ? email.toLowerCase() : fallbackEmail,
+          phone: phone || '',
+          avatar,
+          coupon: { code: couponCode, used: false, type: 'free_delivery' },
+        });
+      } catch (createErr) {
+        // لو حصل تصادم إيميل رغم كل الفحوصات (سباق بين طلبين في نفس
+        // اللحظة)، نجيب اليوزر الموجود فعلاً بدل ما نكسر الطلب بالكامل
+        if (createErr.code === 11000) {
+          user = await User.findOne({
+            email: email ? email.toLowerCase() : fallbackEmail,
+          });
+        } else {
+          throw createErr;
+        }
+      }
+    }
+
+    if (!user) {
+      return res.status(500).json({ message: 'تعذر إنشاء أو إيجاد الحساب' });
     }
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
