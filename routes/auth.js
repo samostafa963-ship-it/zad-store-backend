@@ -138,21 +138,19 @@ router.post('/firebase-phone', async (req, res) => {
       return res.status(400).json({ message: 'idToken مطلوب' });
     }
 
-    // تحقق من الـ idToken مع Firebase واستخرج رقم الهاتف منه
     const decoded = await admin.auth().verifyIdToken(idToken);
-    const phone = decoded.phone_number; // زي +201234567890
+    const phone = decoded.phone_number;
 
     if (!phone) {
       return res.status(400).json({ message: 'مفيش رقم هاتف في الـ token ده' });
     }
 
-    // هات المستخدم لو موجود، أو اعمل حساب جديد بنفس نمط باقي الـ routes
     let user = await User.findOne({ phone });
     if (!user) {
       const couponCode = generateCoupon();
       user = await User.create({
         phone,
-        name: '', // ينفع يتحدث بعدين من صفحة الملف الشخصي
+        name: '',
         coupon: { code: couponCode, used: false, type: 'free_delivery' },
       });
     }
@@ -173,6 +171,64 @@ router.post('/firebase-phone', async (req, res) => {
   } catch (err) {
     console.error('firebase-phone auth error:', err);
     res.status(500).json({ message: 'تعذر التحقق من الهاتف', error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// مزامنة عامة لأي مستخدم مسجّل دخول في Firebase مباشرة (إيميل/باسورد
+// أو جوجل عن طريق FirebaseAuth.instance.signInWithCredential) - ده
+// بيغطي حالة login_page.dart اللي بتستخدم Firebase مباشرة من غير ما
+// تعدي على /google أو /login بتوعنا. بيدور على المستخدم بالإيميل أو
+// رقم الهاتف المستخرجين من الـ idToken، ولو مش موجود بيعمله حساب جديد.
+// ═══════════════════════════════════════════════════════════════
+router.post('/firebase-sync', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ message: 'idToken مطلوب' });
+    }
+
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const email = decoded.email;
+    const phone = decoded.phone_number;
+    const name = decoded.name || '';
+    const avatar = decoded.picture || '';
+
+    let user = null;
+    if (email) user = await User.findOne({ email: email.toLowerCase() });
+    if (!user && phone) user = await User.findOne({ phone });
+
+    if (!user) {
+      const couponCode = generateCoupon();
+      user = await User.create({
+        name: name || 'مستخدم زورا',
+        // الحقل مطلوب وunique في الموديل - لو مفيش إيميل حقيقي (تسجيل
+        // بالهاتف بس) بنستخدم إيميل وهمي فريد مبني على الـ uid
+        email: email
+            ? email.toLowerCase()
+            : `${decoded.uid}@firebase.local`,
+        phone: phone || '',
+        avatar,
+        coupon: { code: couponCode, used: false, type: 'free_delivery' },
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
+        coupon: user.coupon,
+      },
+    });
+  } catch (err) {
+    console.error('firebase-sync error:', err);
+    res.status(500).json({ message: 'تعذر مزامنة الحساب', error: err.message });
   }
 });
 
