@@ -70,7 +70,7 @@ async function uploadToCloudinary(imagePath, productName) {
       folder: 'zad_products',
       public_id: productName.replace(/\s+/g, '_').replace(/[^\w]/g, '').substring(0, 50) + '_' + Date.now(),
       transformation: [
-        { width: 800, height: 800, crop: 'pad', background: 'white' },
+        { width: 800, height: 800, crop: 'pad', background: 'transparent' },
         { quality: 'auto', fetch_format: 'auto' },
       ],
     });
