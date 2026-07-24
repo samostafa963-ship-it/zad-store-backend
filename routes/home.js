@@ -15,7 +15,7 @@ const Product = require('../models/Product'); // غيّر المسار لو مخ
 const Order = require('../models/Order');     // غيّر المسار لو مختلف
 
 // ⚠️ حط هنا قيم category_key الحقيقية بتاعة فئات الاحتياجات اليومية عندك بالظبط
-const DAILY_ESSENTIAL_CATEGORY_KEYS = ['dairy', 'eggs', 'bakery', 'vegetables', 'beverages'];
+const DAILY_ESSENTIAL_CATEGORY_KEYS = ['dairy_cheese', 'bakery', 'beverages', 'fruits_vegetables', 'proteins'];
 
 const LIMIT_PER_SECTION = 10;
 
