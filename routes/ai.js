@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
 // ═══════════════════════════════════════════════════════════════
 // روبوت زورا - ردود جاهزة (Rule-based) بدون أي تكلفة API خارجية.
@@ -90,9 +91,18 @@ const INTENTS = [
   },
   {
     key: 'human_agent',
-    keywords: ['موظف', 'خدمة عملاء', 'حد يكلمني', 'مسؤول', 'انسان', 'إنسان', 'أكلم خدمة العملاء'],
-    reply: 'بالتأكيد، سأقوم بتحويل محادثتك إلى أحد ممثلي خدمة العملاء، يرجى الانتظار قليلًا.',
-    action: 'escalate_human',
+    keywords: [
+      'موظف', 'خدمة عملاء', 'حد يكلمني', 'مسؤول', 'انسان', 'إنسان',
+      'أكلم خدمة العملاء', 'الأدمن', 'ادمن', 'المدير', 'الوصول للادمن',
+      'الوصول للأدمن',
+    ],
+    reply: 'تقدر تتواصل مباشرة مع الأدمن/المدير على الإيميل ده:\nsamostafa963@gmail.com 📧\nوهيتم الرد عليك في أقرب وقت.',
+  },
+  {
+    key: 'exchange_product',
+    keywords: ['استبدال', 'استبدل', 'عايز استبدل', 'أستبدل'],
+    reply: 'تمام، من فضلك أرسل رقم الطلب اللي عايز تستبدل منتج منه.',
+    nextContext: { pendingIntent: 'exchange_awaiting_id' },
   },
   {
     key: 'who_is_zura',
@@ -310,6 +320,7 @@ async function handlePendingIntent(context, raw, identity, res) {
     'missing_product_awaiting_id',
     'wrong_product_awaiting_id',
     'invoice',
+    'exchange_awaiting_id',
   ];
 
   if (needsOrderIdFirst.includes(pendingIntent)) {
@@ -384,6 +395,23 @@ async function handlePendingIntent(context, raw, identity, res) {
 
       case 'invoice':
         return res.json({ reply: invoiceText(order) });
+
+      case 'exchange_awaiting_id': {
+        const exchangeable = ['pending', 'confirmed', 'preparing'].includes(order.status);
+        if (!exchangeable) {
+          return res.json({
+            reply: `للأسف الطلب ده بقى ${STATUS_LABELS[order.status]} ومش هينفع نستبدل منتج فيه دلوقتي. تقدر تتواصل مع الأدمن على samostafa963@gmail.com لو محتاج مساعدة.`,
+          });
+        }
+        if (!order.items || order.items.length === 0) {
+          return res.json({ reply: 'الطلب ده مفيهوش أي منتجات أستبدلها.' });
+        }
+        const itemsList = order.items.map((it) => `- ${it.name}`).join('\n');
+        return res.json({
+          reply: `تمام، دي منتجات الطلب:\n${itemsList}\n\nاكتبلي اسم المنتج اللي عايز تستبدله.`,
+          context: { pendingIntent: 'exchange_awaiting_old_product', orderId: order._id.toString() },
+        });
+      }
     }
   }
 
@@ -405,9 +433,71 @@ async function handlePendingIntent(context, raw, identity, res) {
   }
   if (pendingIntent === 'payment_issue') {
     return res.json({
-      reply: `شكرًا لتوضيح طريقة الدفع (${raw}). لو المبلغ اتخصم من حسابك ومحصلش تأكيد للطلب، محتاج تتكلم مع فريق الدعم عشان يتأكدوا من حالة العملية.`,
-      action: 'escalate_human',
-      suggestions: ['أكلم موظف دعم'],
+      reply: `شكرًا لتوضيح طريقة الدفع (${raw}). لو المبلغ اتخصم من حسابك ومحصلش تأكيد للطلب، محتاج تتكلم مع الأدمن على samostafa963@gmail.com عشان يتأكد من حالة العملية.`,
+    });
+  }
+
+  // ── الاستبدال: خطوة اختيار المنتج المطلوب استبداله من الطلب ──
+  if (pendingIntent === 'exchange_awaiting_old_product') {
+    const order = await Order.findById(context.orderId);
+    if (!order) {
+      return res.json({ reply: 'معلش، حصلت مشكلة والطلب مبقاش موجود، ابدأ الاستبدال تاني من الأول.' });
+    }
+    const query = raw.trim().toLowerCase();
+    const matchIndex = (order.items || []).findIndex((it) =>
+      (it.name || '').toLowerCase().includes(query)
+    );
+    if (matchIndex === -1) {
+      const itemsList = order.items.map((it) => `- ${it.name}`).join('\n');
+      return res.json({
+        reply: `مش لاقي منتج بالاسم ده في الطلب. دي منتجات الطلب تاني:\n${itemsList}\n\nاكتب اسم المنتج بالظبط.`,
+        context,
+      });
+    }
+    return res.json({
+      reply: `تمام، هنستبدل "${order.items[matchIndex].name}". اكتبلي اسم المنتج البديل اللي عايزه.`,
+      context: {
+        pendingIntent: 'exchange_awaiting_new_product',
+        orderId: context.orderId,
+        oldItemIndex: matchIndex,
+      },
+    });
+  }
+
+  // ── الاستبدال: خطوة اختيار المنتج البديل وتنفيذ الاستبدال فعليًا ──
+  if (pendingIntent === 'exchange_awaiting_new_product') {
+    const order = await Order.findById(context.orderId);
+    if (!order) {
+      return res.json({ reply: 'معلش، حصلت مشكلة والطلب مبقاش موجود، ابدأ الاستبدال تاني من الأول.' });
+    }
+    const query = raw.trim();
+    const newProduct = await Product.findOne({
+      name: { $regex: query, $options: 'i' },
+    });
+    if (!newProduct) {
+      return res.json({
+        reply: `مش لاقي منتج اسمه "${query}" عندنا. جرب تكتب اسم مختلف أو تأكد من الإملاء.`,
+        context,
+      });
+    }
+
+    const oldItem = order.items[context.oldItemIndex];
+    const newLineTotal = newProduct.price * oldItem.quantity;
+    order.items[context.oldItemIndex] = {
+      productId: newProduct._id.toString(),
+      name: newProduct.name,
+      price: newProduct.price,
+      quantity: oldItem.quantity,
+      total: newLineTotal,
+    };
+    order.subtotal = order.items.reduce((sum, it) => sum + (it.total || 0), 0);
+    order.total = order.subtotal + (order.delivery || 0);
+    await order.save();
+
+    return res.json({
+      reply:
+        `تم الاستبدال بنجاح ✅\n"${oldItem.name}" اتستبدل بـ"${newProduct.name}".\n` +
+        `الإجمالي الجديد للطلب: ${order.total} ج.م`,
     });
   }
 
