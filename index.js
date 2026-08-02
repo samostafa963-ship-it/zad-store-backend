@@ -24,6 +24,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const app = express();
 app.use(cors());
 app.use(express.json());
+// ⚠️ ضروري عشان Twilio (وأي خدمة تانية بتبعت form-urlencoded زي ده)
+// تقدر تبعت بيانات الـwebhook - من غيره req.body هتفضل فاضية.
+app.use(express.urlencoded({ extended: false }));
 
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
@@ -41,6 +44,7 @@ app.use('/api/ai', require('./routes/ai'));
 app.use('/api/fcm', require('./routes/fcm'));
 app.use('/api/home', require('./routes/home'));
 app.use('/api/geocode', require('./routes/geocode'));
+app.use('/api/support', require('./routes/support'));
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
