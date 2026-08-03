@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema({
   // ⚠️ رصيد زورا الحقيقي - ده اللي كان ناقص بالكامل
   walletBalance: { type: Number, default: 0 },
   walletTransactions: [walletTransactionSchema],
+  // ⚠️ كان ناقص تمامًا - من غيره routes/fcm.js مبيقدرش يحفظ توكن
+  // الإشعارات للمستخدم خالص
+  fcmToken: { type: String, default: null },
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {

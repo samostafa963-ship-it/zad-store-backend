@@ -13,6 +13,8 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   status: { type: String, enum: ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'], default: 'pending' },
   driverId: { type: String, default: null },
+  // ⚠️ كان ناقص تمامًا - fcm.js و orders.js بيحاولوا يقروا/يكتبوا فيه
+  fcmToken: { type: String, default: null },
   userId: { type: String, default: null },
 
   // ── وقت التوصيل: asap (أسرع وقت) | specific (وقت محدد) | scheduled (جدولة لاحقاً) ──
