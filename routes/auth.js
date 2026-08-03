@@ -146,13 +146,28 @@ router.post('/firebase-phone', async (req, res) => {
     }
 
     let user = await User.findOne({ phone });
+
     if (!user) {
       const couponCode = generateCoupon();
-      user = await User.create({
-        phone,
-        name: '',
-        coupon: { code: couponCode, used: false, type: 'free_delivery' },
-      });
+      try {
+        // ⚠️ الاسم والإيميل بقوا اختياريين في الموديل - الحساب بيتعمل
+        // برقم الهاتف الحقيقي بس، من غير أي بيانات وهمية. الاسم
+        // الحقيقي بيتحفظ بعدين لما المستخدم يكمّل بياناته بنفسه.
+        user = await User.create({
+          phone,
+          coupon: { code: couponCode, used: false, type: 'free_delivery' },
+        });
+      } catch (createErr) {
+        if (createErr.code === 11000) {
+          user = await User.findOne({ phone });
+        } else {
+          throw createErr;
+        }
+      }
+    }
+
+    if (!user) {
+      return res.status(500).json({ message: 'تعذر إنشاء أو إيجاد الحساب' });
     }
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '30d' });
@@ -197,35 +212,35 @@ router.post('/firebase-sync', async (req, res) => {
     const decoded = await admin.auth().verifyIdToken(idToken);
     const email = decoded.email;
     const phone = decoded.phone_number;
-    const name = decoded.name || '';
-    const avatar = decoded.picture || '';
-    const fallbackEmail = `${decoded.uid.toLowerCase()}@firebase.local`;
+    const name = decoded.name;
+    const avatar = decoded.picture;
 
     let user = null;
     if (email) user = await User.findOne({ email: email.toLowerCase() });
     if (!user && phone) user = await User.findOne({ phone });
-    // فحص إضافي: نفس الـ uid يمكن يكون له حساب اتعمل قبل كده بإيميل وهمي
-    if (!user) user = await User.findOne({ email: fallbackEmail });
 
     if (!user) {
       const couponCode = generateCoupon();
+      // ⚠️ كل حقل بيتحفظ بس لو حقيقي وموجود فعلاً - من غير أي اسم أو
+      // إيميل وهمي. لو مفيش إيميل (تسجيل بالهاتف بس)، بيتسجل بدونه
+      // تمامًا (الحقل بقى اختياري في الموديل).
+      const createData = {
+        coupon: { code: couponCode, used: false, type: 'free_delivery' },
+      };
+      if (name) createData.name = name;
+      if (email) createData.email = email.toLowerCase();
+      if (phone) createData.phone = phone;
+      if (avatar) createData.avatar = avatar;
+
       try {
-        user = await User.create({
-          name: name || 'مستخدم زورا',
-          // الحقل مطلوب وunique في الموديل - لو مفيش إيميل حقيقي (تسجيل
-          // بالهاتف بس) بنستخدم إيميل وهمي فريد مبني على الـ uid
-          email: email ? email.toLowerCase() : fallbackEmail,
-          phone: phone || '',
-          avatar,
-          coupon: { code: couponCode, used: false, type: 'free_delivery' },
-        });
+        user = await User.create(createData);
       } catch (createErr) {
-        // لو حصل تصادم إيميل رغم كل الفحوصات (سباق بين طلبين في نفس
-        // اللحظة)، نجيب اليوزر الموجود فعلاً بدل ما نكسر الطلب بالكامل
+        // لو حصل تصادم رغم الفحوصات (سباق بين طلبين في نفس اللحظة)،
+        // نجيب اليوزر الموجود فعلاً بدل ما نكسر الطلب بالكامل
         if (createErr.code === 11000) {
-          user = await User.findOne({
-            email: email ? email.toLowerCase() : fallbackEmail,
-          });
+          user = email
+              ? await User.findOne({ email: email.toLowerCase() })
+              : await User.findOne({ phone });
         } else {
           throw createErr;
         }
