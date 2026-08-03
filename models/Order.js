@@ -5,7 +5,9 @@ const orderSchema = new mongoose.Schema({
   address: { type: String, required: true },
   paymentMethod: { type: String, enum: ['cash', 'online', 'card', 'wallet'], default: 'cash' },
   notes: { type: String, default: '' },
-  items: [{ productId: String, name: String, price: Number, quantity: Number, total: Number }],
+  // ⚠️ ضفت image هنا - كانت ناقصة تمامًا، عشان كده صور المنتجات
+  // مكانتش بتظهر في تفاصيل الطلب خالص (البيانات نفسها مكنتش بتتحفظ).
+  items: [{ productId: String, name: String, image: { type: String, default: '' }, price: Number, quantity: Number, total: Number }],
   subtotal: { type: Number, required: true },
   delivery: { type: Number, default: 20 },
   total: { type: Number, required: true },
