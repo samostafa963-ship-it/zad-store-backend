@@ -15,14 +15,17 @@ const couponSchema = new mongoose.Schema({
   type: { type: String, default: 'free_delivery' },
 }, { _id: false });
 
+// ⚠️ سجل عمليات الرصيد (زيادة/خصم) - كل عملية بتتسجل هنا عشان "سجل
+// العمليات" في شاشة تفاصيل الرصيد يعرضها فعليًا بدل ما تفضل فاضية
+const walletTransactionSchema = new mongoose.Schema({
+  amount: { type: Number, required: true }, // موجب = مكتسب، سالب = مستخدم
+  title: { type: String, required: true }, // "هدية ترحيب"، "تم استخدامه في طلب"...
+  orderCode: { type: String, default: null },
+  createdAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
-  // ⚠️ الاسم والإيميل بقوا اختياريين - عشان حساب رقم الهاتف يتعمل
-  // بمعلومات حقيقية بس (رقم الهاتف)، من غير أي اسم أو إيميل وهمي.
-  // بيتحفظوا فعليًا لما المستخدم يكمّل بياناته بنفسه بعد كده.
   name: { type: String, trim: true },
-  // sparse:true ضروري هنا - من غيرها لو أكتر من مستخدم اتعمل بدون
-  // إيميل (تسجيل بالهاتف)، الفهرس الفريد (unique) كان هيرفض التاني
-  // بحجة "إيميل مكرر" رغم إن الاتنين أصلاً مفيش عندهم إيميل خالص.
   email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
   password: { type: String, minlength: 6, default: null },
   phone: { type: String, default: '' },
@@ -32,6 +35,9 @@ const userSchema = new mongoose.Schema({
   savedAddress: { type: String, default: '' },
   savedCart: [cartItemSchema],
   coupon: { type: couponSchema, default: () => ({}) },
+  // ⚠️ رصيد زورا الحقيقي - ده اللي كان ناقص بالكامل
+  walletBalance: { type: Number, default: 0 },
+  walletTransactions: [walletTransactionSchema],
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function (password) {
