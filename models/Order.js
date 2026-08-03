@@ -15,6 +15,8 @@ const orderSchema = new mongoose.Schema({
   driverId: { type: String, default: null },
   // ⚠️ كان ناقص تمامًا - fcm.js و orders.js بيحاولوا يقروا/يكتبوا فيه
   fcmToken: { type: String, default: null },
+  // ⚠️ كام جنيه اتخصم من رصيد زورا بتاع العميل في الطلب ده (لو استخدمه)
+  walletUsed: { type: Number, default: 0 },
   userId: { type: String, default: null },
 
   // ── وقت التوصيل: asap (أسرع وقت) | specific (وقت محدد) | scheduled (جدولة لاحقاً) ──
