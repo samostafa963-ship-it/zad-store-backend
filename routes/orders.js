@@ -3,6 +3,7 @@
 // ===================================================
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const { sendOrderNotification, sendCustomNotification } = require('../utils/sendNotification');
@@ -67,21 +68,35 @@ router.put('/:id', async (req, res) => {
     );
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
-    // ابعت إشعار للعميل
-    if (status && order.fcmToken) {
-      const result = await sendOrderNotification(order.fcmToken, status, order._id);
-      // لو الـ token منتهي، امسحه
-      if (result === 'expired') {
-        await Order.findByIdAndUpdate(order._id, { fcmToken: null });
+    // ⚠️ كل كود الإشعارات ده بقى في try/catch منفصل عن التحديث نفسه.
+    // من غيرها، لو حصل أي خطأ هنا (زي order.userId يكون Firebase UID
+    // مش Mongo ObjectId صحيح، فـUser.findById بيكسر) كان بيوصل
+    // للـcatch الرئيسي ويرجّع 500 "فشل" للعميل، رغم إن التحديث نفسه
+    // (اللي هو الأهم) يكون نجح بالفعل قبل الكراش.
+    try {
+      if (status && order.fcmToken) {
+        const result = await sendOrderNotification(order.fcmToken, status, order._id);
+        if (result === 'expired') {
+          await Order.findByIdAndUpdate(order._id, { fcmToken: null });
+        }
       }
-    }
 
-    // لو مش لاقي fcmToken في الأوردر، دور عليه في الـ User
-    if (status && !order.fcmToken && order.userId) {
-      const user = await User.findById(order.userId);
-      if (user?.fcmToken) {
-        await sendOrderNotification(user.fcmToken, status, order._id);
+      // ⚠️ order.userId ممكن يكون Firebase UID (مش Mongo ObjectId) لو
+      // الطلب اتعمل من التطبيق مباشرة - findById بيكسر مع صيغة زي دي،
+      // فبنتأكد إنه ObjectId صحيح الأول قبل ما نستخدمه.
+      if (
+        status &&
+        !order.fcmToken &&
+        order.userId &&
+        mongoose.Types.ObjectId.isValid(order.userId)
+      ) {
+        const user = await User.findById(order.userId);
+        if (user?.fcmToken) {
+          await sendOrderNotification(user.fcmToken, status, order._id);
+        }
       }
+    } catch (notifyErr) {
+      console.error('order update: notification step failed (ignored):', notifyErr.message);
     }
 
     res.json({ order });
