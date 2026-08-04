@@ -76,7 +76,10 @@ router.get('/nearby-place', async (req, res) => {
     if (!GOOGLE_GEOCODING_KEY) {
       return res.status(500).json({ status: 'ERROR', error_message: 'GOOGLE_GEOCODING_KEY مش متسجل في متغيرات البيئة' });
     }
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&rankby=distance&key=${GOOGLE_GEOCODING_KEY}&language=ar`;
+    // ⚠️ type=point_of_interest مطلوب إجباريًا من جوجل مع rankby=distance
+    // (بدونه الطلب يترفض بـINVALID_REQUEST) - النوع ده شامل تقريبًا
+    // كل أنواع الأماكن (محلات/كافيهات/معالم...) مش نوع واحد بس.
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&rankby=distance&type=point_of_interest&key=${GOOGLE_GEOCODING_KEY}&language=ar`;
     const response = await fetch(url);
     const data = await response.json();
     res.json(data);
