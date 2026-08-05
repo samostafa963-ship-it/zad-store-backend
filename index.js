@@ -46,6 +46,7 @@ app.use('/api/home', require('./routes/home'));
 app.use('/api/geocode', require('./routes/geocode'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/wallet', require('./routes/wallet'));
+app.use('/api/driver', require('./routes/driverDocuments'));
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
