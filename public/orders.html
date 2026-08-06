@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --pink:#EC1C7A;
@@ -286,7 +287,18 @@
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ===== LOGIN GATE - شاشة تسجيل دخول حقيقية بجوجل، بتغطي كل حاجة
+     لحد ما يتحقق تسجيل الدخول فعليًا ===== -->
+<div id="loginGate" style="position:fixed;inset:0;background:#fff;z-index:5000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="width:64px;height:64px;border-radius:18px;background:#EC1C7A;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px"><i class="fa-solid fa-dove"></i></div>
+  <div style="font-size:18px;font-weight:800;color:#22232B">لوحة تحكم زورا</div>
+  <div style="font-size:12px;color:#8B8D98;margin-bottom:8px">سجّل دخولك بحساب جوجل المصرح له للوصول</div>
+  <div id="gsiBtn"></div>
+  <div id="loginError" style="color:#F0324C;font-size:12px;display:none"></div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -317,12 +329,8 @@
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <div class="profile">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mostafa" alt="">
-        <div>
-          <div class="name" id="uNm2">مصطفى أحمد <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="role">مدير النظام</div>
-        </div>
+      <div class="profile" id="profileArea">
+        <!-- بيتملى ديناميكيًا من renderProfileArea() حسب حالة تسجيل الدخول -->
       </div>
       <div class="topbar-icons">
         <div class="icon-badge" onclick="toggleNotif()"><i class="fa-regular fa-bell"></i><span class="dot" id="nbdg" style="display:none">0</span></div>
@@ -343,7 +351,7 @@
         <div class="kpi-card lg" onclick="setFilter('cancelled');nav('orders')"><div class="info"><div class="label">الملغاة اليوم</div><div class="value" id="k-cancelled">0</div><div class="delta" id="kd-cancelled"></div></div><div class="kpi-icon" style="background:var(--red)"><i class="fa-solid fa-xmark"></i></div></div>
         <div class="kpi-card lg" onclick="setFilter('completed');nav('orders')"><div class="info"><div class="label">المكتملة اليوم</div><div class="value" id="k-completed">0</div><div class="delta" id="kd-completed"></div></div><div class="kpi-icon" style="background:var(--green)"><i class="fa-solid fa-check"></i></div></div>
         <div class="kpi-card lg" onclick="setFilter('preparing');nav('orders')"><div class="info"><div class="label">قيد التجهيز</div><div class="value" id="k-preparing">0</div><div class="delta" id="kd-preparing"></div></div><div class="kpi-icon" style="background:var(--orange)"><i class="fa-solid fa-kitchen-set"></i></div></div>
-        <div class="kpi-card lg" onclick="setFilter('delivering');nav('orders')"><div class="info"><div class="label">قيد التليفري</div><div class="value" id="k-delivering">0</div><div class="delta" id="kd-delivering"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-motorcycle"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('delivering');nav('orders')"><div class="info"><div class="label">جاري التوصيل</div><div class="value" id="k-delivering">0</div><div class="delta" id="kd-delivering"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-motorcycle"></i></div></div>
         <div class="kpi-card lg" onclick="setFilter('pending');nav('orders')"><div class="info"><div class="label">الطلبات الجديدة</div><div class="value" id="k-new">0</div><div class="delta" id="kd-new"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-file-lines"></i></div></div>
         <div class="kpi-card lg" onclick="setFilter('');nav('orders')"><div class="info"><div class="label">الطلبات الحالية</div><div class="value" id="k-total">0</div><div class="delta" id="kd-total"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-bag-shopping"></i></div></div>
       </div>
@@ -706,8 +714,67 @@ let mainTimer=null, mapTimer=null, currentPage='dashboard';
 let donutChart=null, salesChart=null, ringChart=null;
 let dashMapMarkers=[];
 
+// ===== AUTH (Google Sign-In حقيقي) =====
+// نفس الـ Web Client ID الموجود أصلاً في google-services.json بتاع
+// مشروع Firebase (zad-752ea) - مفيش داعي لمشروع Firebase Web منفصل.
+const GOOGLE_CLIENT_ID = '213514981477-ug7u2ucq39jmnkiu6s3hofmdjaii9dfh.apps.googleusercontent.com';
+const ALLOWED = ['samostafa963@gmail.com','zura70425@gmail.com'];
+
+function decodeJwt(token){
+  try{
+    const b = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(decodeURIComponent(escape(atob(b))));
+  } catch(e){ return null; }
+}
+
+function handleCredentialResponse(response){
+  const payload = decodeJwt(response.credential);
+  const errEl = document.getElementById('loginError');
+  if(!payload || !payload.email){
+    errEl.textContent = 'تعذر قراءة بيانات الحساب، حاول تاني';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!ALLOWED.includes(payload.email)){
+    errEl.textContent = `الحساب ${payload.email} مش مصرح له بالدخول للوحة`;
+    errEl.style.display = 'block';
+    return;
+  }
+  const user = { name: payload.name || payload.email, email: payload.email, avatar: payload.picture || '' };
+  localStorage.setItem('zu', JSON.stringify(user));
+  startApp(user);
+}
+
+function renderProfileArea(u){
+  document.getElementById('profileArea').innerHTML = `
+    ${u.avatar ? `<img src="${u.avatar}" alt="">` : `<div style="width:42px;height:42px;border-radius:50%;background:#FDEAF3;display:flex;align-items:center;justify-content:center;color:#EC1C7A"><i class="fa-solid fa-user"></i></div>`}
+    <div>
+      <div class="name">${esc(u.name)}</div>
+      <div class="role" style="cursor:pointer;color:#EC1C7A" onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</div>
+    </div>`;
+}
+
 // ===== INIT =====
 window.onload = () => {
+  // زرار جوجل الحقيقي في شاشة الدخول
+  if(window.google && google.accounts){
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+    google.accounts.id.renderButton(document.getElementById('gsiBtn'), { theme:'outline', size:'large', text:'signin_with', shape:'pill' });
+  }
+
+  const saved = localStorage.getItem('zu');
+  if(saved){
+    try{ startApp(JSON.parse(saved)); return; } catch(e){ localStorage.removeItem('zu'); }
+  }
+  // لسه مش مسجل دخول - شاشة الدخول ظاهرة والداشبورد مخفي (زي ما هي
+  // في HTML بالفعل: #loginGate ظاهر و#mainApp مخفي)
+};
+
+function startApp(u){
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  renderProfileArea(u);
+
   const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   const d=new Date();
@@ -718,9 +785,13 @@ window.onload = () => {
   loadNotifs();
   loadAll();
   mainTimer = setInterval(loadAll, 15000);
-};
+}
 
-function doLogout(){ clearInterval(mainTimer); clearInterval(mapTimer); toast('👋 تم تسجيل الخروج','info'); }
+function doLogout(){
+  clearInterval(mainTimer); clearInterval(mapTimer);
+  localStorage.removeItem('zu');
+  location.reload();
+}
 
 // ===== NAV =====
 function nav(p){
