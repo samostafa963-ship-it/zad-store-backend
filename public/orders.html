@@ -6,8 +6,7 @@
 <title>زورا | لوحة المعلومات</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjQKtCMP3AvT7u5JY3FkdmGOPNA7sFlms"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
@@ -564,6 +563,7 @@
             <button class="map-btn active" id="followBtn" onclick="toggleFollow()">📍 تتبع تلقائي</button>
             <button class="map-btn" onclick="refreshDrivers()">🔄 تحديث</button>
             <button class="map-btn" onclick="fitAllDrivers()">🗺️ عرض الكل</button>
+            <button class="map-btn" onclick="locateAdmin(mapInstance)">🧭 موقعي أنا</button>
           </div>
           <div class="driver-panel" id="driverPanel">
             <div class="dp-close" onclick="closeDriverPanel()">✕</div>
@@ -782,6 +782,7 @@ function startApp(u){
   loadNotifs();
   loadAll();
   mainTimer = setInterval(loadAll, 15000);
+  setInterval(() => locateAdmin(mapInstance || dashMap), 120000);
 }
 
 function doLogout(){
@@ -826,7 +827,7 @@ function initCharts(){
 }
 
 // ===== LOAD DATA =====
-async function loadAll(){ await Promise.all([loadOrders(), loadDrivers(), loadZones()]); }
+async function loadAll(){ await Promise.all([loadOrders(), loadDrivers(), loadZones(), loadStaffLocations()]); }
 
 async function loadOrders(){
   try{
@@ -1025,13 +1026,30 @@ function renderOrderDistribution(){
 let dashMap = null;
 let dashMapMarkersObj = {};
 
+// بيعمل أيقونة دايرة ملونة مع إيموجي جواها - بديل بسيط لأيقونات
+// Leaflet المخصصة، شغال مع Google Maps Marker العادي من غير أي
+// مكتبات إضافية.
+function svgMarkerIcon(color, emoji, size){
+  size = size || 34;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2-2.5}" fill="${color}" stroke="white" stroke-width="3"/><text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" font-size="${Math.round(size*0.5)}">${emoji}</text></svg>`;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size/2, size/2),
+  };
+}
+
 function initDashMap(){
   if(dashMap) return;
   const el = document.getElementById('dashMapView');
   if(!el || el.offsetWidth === 0) return;
-  dashMap = L.map('dashMapView', { zoomControl: true, attributionControl: false })
-    .setView([30.0444, 31.2357], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(dashMap);
+  dashMap = new google.maps.Map(el, {
+    center: { lat: 30.0444, lng: 31.2357 },
+    zoom: 11,
+    disableDefaultUI: true,
+    zoomControl: true,
+  });
+  locateAdmin(dashMap);
 }
 
 function updateDashMapPins(){
@@ -1041,21 +1059,20 @@ function updateDashMapPins(){
   drivers.forEach(d => {
     if(!d.location?.lat) return;
     const color = d.status==='available' ? '#22B573' : d.status==='busy' ? '#F5941F' : '#9ca3af';
-    const icon = L.divIcon({
-      html: `<div style="background:${color};width:28px;height:28px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff"><i class="fa-solid fa-motorcycle"></i></div>`,
-      className: '', iconSize: [28, 28], iconAnchor: [14, 14],
-    });
+    const pos = { lat: d.location.lat, lng: d.location.lng };
     if(dashMapMarkersObj[d._id]){
-      dashMapMarkersObj[d._id].setLatLng([d.location.lat, d.location.lng]);
+      dashMapMarkersObj[d._id].setPosition(pos);
     } else {
-      dashMapMarkersObj[d._id] = L.marker([d.location.lat, d.location.lng], { icon })
-        .addTo(dashMap)
-        .bindTooltip(d.name)
-        .on('click', () => nav('drivers'));
+      const m = new google.maps.Marker({
+        position: pos, map: dashMap, title: d.name,
+        icon: svgMarkerIcon(color, '🛵', 28),
+      });
+      m.addListener('click', () => nav('drivers'));
+      dashMapMarkersObj[d._id] = m;
     }
     existing.delete(d._id);
   });
-  existing.forEach(id => { dashMap.removeLayer(dashMapMarkersObj[id]); delete dashMapMarkersObj[id]; });
+  existing.forEach(id => { dashMapMarkersObj[id].setMap(null); delete dashMapMarkersObj[id]; });
 }
 
 // ===== ORDERS =====
@@ -1301,7 +1318,7 @@ function selectDriver(id){
   if(d.location?.lat){
     document.getElementById('mapEmpty').style.display='none';
     if(!mapInstance) initMap();
-    if(autoFollow) mapInstance.setView([d.location.lat,d.location.lng],16);
+    if(autoFollow){ mapInstance.setCenter({lat:d.location.lat,lng:d.location.lng}); mapInstance.setZoom(16); }
     showDriverPanel(d);
   } else { toast('📍 المندوب لم يشارك موقعه بعد','info'); document.getElementById('driverPanel').classList.remove('open'); }
 }
@@ -1321,11 +1338,88 @@ function initMap(){
   if(mapInstance) return;
   const el=document.getElementById('gmap');
   if(!el||el.offsetWidth===0) return;
-  mapInstance=L.map('gmap',{zoomControl:true}).setView([30.0444,31.2357],12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(mapInstance);
-  mapInstance.on('dragstart',()=>{autoFollow=false;document.getElementById('followBtn').classList.remove('active');});
+  mapInstance = new google.maps.Map(el, {
+    center: { lat: 30.0444, lng: 31.2357 },
+    zoom: 12,
+  });
+  mapInstance.addListener('dragstart', () => { autoFollow=false; document.getElementById('followBtn').classList.remove('active'); });
   updateMapMarkers();
+  locateAdmin(mapInstance);
 }
+
+// بيحدد موقع الجهاز نفسه (اللي فاتح اللوحة دلوقتي) عن طريق متصفحه
+// فعليًا، ويحطه على الخريطة بأيقونة مميزة باسم الحساب المسجل دخول
+// بيه (من نفس بيانات تسجيل الدخول بجوجل - مش لازم يكون مندوب، ممكن
+// يكون موظف/أدمن). ده منفصل تمامًا عن مواقع المندوبين اللي بييجي من
+// الباك اند.
+let adminMarker = null;
+let adminMarkerDash = null;
+function locateAdmin(targetMap){
+  if(!navigator.geolocation || !targetMap) return;
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const { latitude, longitude } = pos.coords;
+    const saved = localStorage.getItem('zu');
+    let label = 'أنت هنا';
+    let u = null;
+    if(saved){
+      try{
+        u = JSON.parse(saved);
+        label = u.name || 'أنت هنا';
+      } catch(e){}
+    }
+    const posObj = { lat: latitude, lng: longitude };
+    const icon = svgMarkerIcon('#3B82F6', '🧑‍💼', 34);
+    if(targetMap === mapInstance){
+      if(adminMarker) adminMarker.setPosition(posObj);
+      else adminMarker = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
+    } else {
+      if(adminMarkerDash) adminMarkerDash.setPosition(posObj);
+      else adminMarkerDash = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
+    }
+    targetMap.setCenter(posObj);
+    targetMap.setZoom(14);
+
+    // نبعت موقعنا فعليًا للباك اند عشان أي حد تاني فاتح اللوحة يشوفنا
+    if(u){
+      fetch(`${API}/api/staff/location`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:u.email,name:u.name,avatar:u.avatar,lat:latitude,lng:longitude})}).catch(()=>{});
+    }
+  }, (err) => {
+    console.warn('تعذر تحديد موقع الجهاز:', err.message);
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+// كل الموظفين/الأدمن اللي فاتحين اللوحة دلوقتي - بنجيبهم من الباك اند
+// (مش بس جهازك إنت) ونعرضهم على الخريطتين كمان.
+let staffMarkersMain = {};
+let staffMarkersDash = {};
+async function loadStaffLocations(){
+  try{
+    const r = await fetch(`${API}/api/staff/locations`);
+    const d = await r.json();
+    const list = (d.staff || []);
+    const myEmail = (() => { try{ return JSON.parse(localStorage.getItem('zu')||'{}').email; } catch(e){ return null; } })();
+
+    [{ map: mapInstance, store: staffMarkersMain }, { map: dashMap, store: staffMarkersDash }].forEach(({ map, store }) => {
+      if(!map) return;
+      const existing = new Set(Object.keys(store));
+      list.forEach(s => {
+        if(s.email === myEmail) return; // إحنا أصلاً ظاهرين بعلامة "أنت" المنفصلة
+        const pos = { lat: s.lat, lng: s.lng };
+        if(store[s.email]){
+          store[s.email].setPosition(pos);
+        } else {
+          store[s.email] = new google.maps.Marker({
+            position: pos, map, title: s.name || s.email,
+            icon: svgMarkerIcon('#8B5CF6', '🧑‍💼', 30),
+          });
+        }
+        existing.delete(s.email);
+      });
+      existing.forEach(email => { store[email].setMap(null); delete store[email]; });
+    });
+  } catch(e){}
+}
+
 function updateMapMarkers(){
   if(!mapInstance) return;
   const existing=new Set(Object.keys(mapMarkers));
@@ -1334,12 +1428,20 @@ function updateMapMarkers(){
     if(!d.location?.lat) return;
     hasAny=true;
     const color=d.status==='available'?'#EC1C7A':d.status==='busy'?'#F5941F':'#9ca3af';
-    const icon=L.divIcon({html:`<div style="background:${color};width:40px;height:40px;border-radius:50%;border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:18px">🛵</div>`,className:'',iconSize:[40,40],iconAnchor:[20,20]});
-    if(mapMarkers[d._id]) mapMarkers[d._id].setLatLng([d.location.lat,d.location.lng]);
-    else mapMarkers[d._id]=L.marker([d.location.lat,d.location.lng],{icon}).addTo(mapInstance).on('click',()=>{selDriverId=d._id;selectDriver(d._id);});
+    const pos = { lat: d.location.lat, lng: d.location.lng };
+    if(mapMarkers[d._id]){
+      mapMarkers[d._id].setPosition(pos);
+    } else {
+      const m = new google.maps.Marker({
+        position: pos, map: mapInstance, title: d.name,
+        icon: svgMarkerIcon(color, '🛵', 40),
+      });
+      m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
+      mapMarkers[d._id] = m;
+    }
     existing.delete(d._id);
   });
-  existing.forEach(id=>{ mapInstance.removeLayer(mapMarkers[id]); delete mapMarkers[id]; });
+  existing.forEach(id=>{ mapMarkers[id].setMap(null); delete mapMarkers[id]; });
   document.getElementById('mapEmpty').style.display=hasAny?'none':'flex';
 }
 function toggleFollow(){
@@ -1349,8 +1451,12 @@ function toggleFollow(){
 async function refreshDrivers(){ await loadDrivers(); toast('🔄 تم التحديث','ok'); }
 function fitAllDrivers(){
   if(!mapInstance) return;
-  const pts=drivers.filter(d=>d.location?.lat).map(d=>L.latLng(d.location.lat,d.location.lng));
-  if(pts.length>0) mapInstance.fitBounds(L.latLngBounds(pts),{padding:[50,50]});
+  const withLoc = drivers.filter(d=>d.location?.lat);
+  if(withLoc.length>0){
+    const bounds = new google.maps.LatLngBounds();
+    withLoc.forEach(d => bounds.extend({ lat: d.location.lat, lng: d.location.lng }));
+    mapInstance.fitBounds(bounds, 50);
+  }
   else toast('لا يوجد مندوبين بموقع محدد','info');
 }
 function openDriverModal(id){
