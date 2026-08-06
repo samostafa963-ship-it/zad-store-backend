@@ -554,10 +554,8 @@
         </div>
         <div class="drv-map-wrap">
           <div id="gmap"></div>
-          <div id="mapEmpty" class="map-empty">
-            <div style="font-size:64px">🗺️</div>
-            <div style="font-size:16px;font-weight:700;color:var(--text-dark)">خريطة تتبع المندوبين</div>
-            <div style="font-size:13px">اختر مندوباً من القائمة</div>
+          <div id="mapEmpty" style="display:none;position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,.95);padding:8px 14px;border-radius:12px;font-size:11px;color:var(--text-gray);box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:5">
+            مفيش حساب حدد موقعه لسه
           </div>
           <div class="map-overlay">
             <button class="map-btn active" id="followBtn" onclick="toggleFollow()">📍 تتبع تلقائي</button>
@@ -684,6 +682,7 @@
     <div class="modal-title" id="drvModalTitle">مندوب جديد</div>
     <div class="fg"><label>الاسم</label><input id="dm-name" class="fi" style="width:100%"></div>
     <div class="fg"><label>الموبايل</label><input id="dm-phone" class="fi" style="width:100%"></div>
+    <div class="fg"><label>الإيميل (نفس حساب جوجل اللي هيسجل بيه دخول في التطبيق)</label><input id="dm-email" type="email" class="fi" style="width:100%" placeholder="driver@gmail.com"></div>
     <div class="fg"><label>المنطقة</label><input id="dm-zone" class="fi" style="width:100%"></div>
     <div class="fg"><label>الحالة</label>
       <select id="dm-status" class="fi" style="width:100%">
@@ -1059,13 +1058,16 @@ function updateDashMapPins(){
   drivers.forEach(d => {
     if(!d.location?.lat) return;
     const color = d.status==='available' ? '#22B573' : d.status==='busy' ? '#F5941F' : '#9ca3af';
+    const online = d.status && d.status!=='offline';
     const pos = { lat: d.location.lat, lng: d.location.lng };
     if(dashMapMarkersObj[d._id]){
       dashMapMarkersObj[d._id].setPosition(pos);
+      dashMapMarkersObj[d._id].setOpacity(online?1:0.4);
     } else {
       const m = new google.maps.Marker({
         position: pos, map: dashMap, title: d.name,
         icon: svgMarkerIcon(color, '🛵', 28),
+        opacity: online?1:0.4,
       });
       m.addListener('click', () => nav('drivers'));
       dashMapMarkersObj[d._id] = m;
@@ -1354,6 +1356,20 @@ function initMap(){
 // الباك اند.
 let adminMarker = null;
 let adminMarkerDash = null;
+// أيقونة مندوب/موظف - لو عنده صورة بروفايل حقيقية (من جوجل) بنستخدمها
+// هي نفسها كأيقونة على الخريطة، ولو مفيش بنرجع لدايرة+إيموجي زي قبل.
+function personMarkerIcon(avatarUrl, size){
+  size = size || 34;
+  if(avatarUrl){
+    return {
+      url: avatarUrl,
+      scaledSize: new google.maps.Size(size, size),
+      anchor: new google.maps.Point(size/2, size/2),
+    };
+  }
+  return svgMarkerIcon('#8B5CF6', '🧑‍💼', size);
+}
+
 function locateAdmin(targetMap){
   if(!navigator.geolocation || !targetMap) return;
   navigator.geolocation.getCurrentPosition((pos) => {
@@ -1367,8 +1383,13 @@ function locateAdmin(targetMap){
         label = u.name || 'أنت هنا';
       } catch(e){}
     }
+    // لو الإيميل اللي سجل بيه دخول ده متسجل أصلاً كمندوب (نفس الإيميل
+    // في سجل المندوبين)، بنعرض أيقونة موتوسيكل بدل صورة الموظف العادية
+    const matchedDriver = u ? drivers.find(d => d.email && d.email === u.email) : null;
     const posObj = { lat: latitude, lng: longitude };
-    const icon = svgMarkerIcon('#3B82F6', '🧑‍💼', 34);
+    const icon = matchedDriver
+      ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🛵', 34)
+      : personMarkerIcon(u?.avatar, 34);
     if(targetMap === mapInstance){
       if(adminMarker) adminMarker.setPosition(posObj);
       else adminMarker = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
@@ -1405,12 +1426,16 @@ async function loadStaffLocations(){
       list.forEach(s => {
         if(s.email === myEmail) return; // إحنا أصلاً ظاهرين بعلامة "أنت" المنفصلة
         const pos = { lat: s.lat, lng: s.lng };
+        const matchedDriver = drivers.find(d => d.email && d.email === s.email);
+        const icon = matchedDriver
+          ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🛵', 30)
+          : personMarkerIcon(s.avatar, 30);
         if(store[s.email]){
           store[s.email].setPosition(pos);
         } else {
           store[s.email] = new google.maps.Marker({
             position: pos, map, title: s.name || s.email,
-            icon: svgMarkerIcon('#8B5CF6', '🧑‍💼', 30),
+            icon,
           });
         }
         existing.delete(s.email);
@@ -1428,13 +1453,16 @@ function updateMapMarkers(){
     if(!d.location?.lat) return;
     hasAny=true;
     const color=d.status==='available'?'#EC1C7A':d.status==='busy'?'#F5941F':'#9ca3af';
+    const online = d.status && d.status!=='offline';
     const pos = { lat: d.location.lat, lng: d.location.lng };
     if(mapMarkers[d._id]){
       mapMarkers[d._id].setPosition(pos);
+      mapMarkers[d._id].setOpacity(online?1:0.4);
     } else {
       const m = new google.maps.Marker({
         position: pos, map: mapInstance, title: d.name,
         icon: svgMarkerIcon(color, '🛵', 40),
+        opacity: online?1:0.4,
       });
       m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
       mapMarkers[d._id] = m;
@@ -1442,7 +1470,7 @@ function updateMapMarkers(){
     existing.delete(d._id);
   });
   existing.forEach(id=>{ mapMarkers[id].setMap(null); delete mapMarkers[id]; });
-  document.getElementById('mapEmpty').style.display=hasAny?'none':'flex';
+  document.getElementById('mapEmpty').style.display=hasAny?'none':'block';
 }
 function toggleFollow(){
   autoFollow=!autoFollow;
@@ -1462,15 +1490,16 @@ function fitAllDrivers(){
 function openDriverModal(id){
   editDrvId=id||null;
   document.getElementById('drvModalTitle').textContent=id?'تعديل مندوب':'مندوب جديد';
-  if(id){ const d=drivers.find(x=>x._id===id); if(d){ document.getElementById('dm-name').value=d.name||''; document.getElementById('dm-phone').value=d.phone||''; document.getElementById('dm-zone').value=d.zone||''; document.getElementById('dm-status').value=d.status||'offline'; } }
-  else { ['dm-name','dm-phone','dm-zone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('dm-status').value='available'; }
+  if(id){ const d=drivers.find(x=>x._id===id); if(d){ document.getElementById('dm-name').value=d.name||''; document.getElementById('dm-phone').value=d.phone||''; document.getElementById('dm-email').value=d.email||''; document.getElementById('dm-zone').value=d.zone||''; document.getElementById('dm-status').value=d.status||'offline'; } }
+  else { ['dm-name','dm-phone','dm-email','dm-zone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('dm-status').value='available'; }
   document.getElementById('driverModal').classList.add('open');
 }
 async function saveDriver(){
   const name=document.getElementById('dm-name').value.trim();
   const phone=document.getElementById('dm-phone').value.trim();
+  const email=document.getElementById('dm-email').value.trim();
   if(!name||!phone){ toast('الاسم والموبايل مطلوبين','err'); return; }
-  const body={name,phone,zone:document.getElementById('dm-zone').value,status:document.getElementById('dm-status').value};
+  const body={name,phone,email,zone:document.getElementById('dm-zone').value,status:document.getElementById('dm-status').value};
   try{
     const url=editDrvId?`${API}/api/drivers/${editDrvId}`:`${API}/api/drivers`;
     await fetch(url,{method:editDrvId?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
