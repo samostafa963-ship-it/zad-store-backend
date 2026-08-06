@@ -18,6 +18,7 @@ const driverSchema = new mongoose.Schema({
     lng: { type: Number, default: null },
     updatedAt: { type: Date, default: null },
   },
+  shiftStartTime: { type: Date, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Driver', driverSchema);
