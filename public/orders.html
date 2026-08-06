@@ -370,10 +370,7 @@
       <div class="mid-grid" style="grid-template-columns:1.6fr 1.4fr 1.1fr">
         <div class="card map-card">
           <div class="card-head"><div class="link" onclick="nav('drivers')">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
-          <div class="map-view" id="dashMapView">
-            <div class="zoom-ctrl"><div>+</div><div>−</div></div>
-            <div class="locate-ctrl"><i class="fa-solid fa-location-crosshairs"></i></div>
-          </div>
+          <div id="dashMapView" style="height:220px;border-radius:12px;overflow:hidden"></div>
         </div>
 
         <div class="card">
@@ -712,7 +709,6 @@ let mapInstance=null, mapMarkers={}, autoFollow=true;
 let editDrvId=null, assignOrderId=null, soundOn=true;
 let mainTimer=null, mapTimer=null, currentPage='dashboard';
 let donutChart=null, salesChart=null, ringChart=null;
-let dashMapMarkers=[];
 
 // ===== AUTH (Google Sign-In حقيقي) =====
 // نفس الـ Web Client ID الموجود أصلاً في google-services.json بتاع
@@ -782,6 +778,7 @@ function startApp(u){
   document.getElementById('repDate').value = d.toISOString().slice(0,10);
 
   initCharts();
+  setTimeout(initDashMap, 200);
   loadNotifs();
   loadAll();
   mainTimer = setInterval(loadAll, 15000);
@@ -1022,40 +1019,43 @@ function renderOrderDistribution(){
   ringChart.update();
 }
 
-// خريطة الداشبورد المصغرة - نفس تصميم الـ CSS بتاعك (شبكة رمادية) بس
-// بنحط فيها نقط حقيقية لمواقع المندوبين المتاحة، بمقياس تقريبي حوالين
-// القاهرة الكبرى. مفيش Leaflet هنا عشان نحافظ على شكل التصميم بالظبط.
-const DASH_BOUNDS = {latMin:29.95,latMax:30.15,lngMin:31.10,lngMax:31.40};
+// خريطة الداشبورد المصغرة - خريطة Leaflet حقيقية (زي خريطة صفحة
+// الدليفري بالظبط، بس أصغر) بدل الشبكة الرمادية القديمة اللي كانت
+// مجرد ديكور.
+let dashMap = null;
+let dashMapMarkersObj = {};
+
+function initDashMap(){
+  if(dashMap) return;
+  const el = document.getElementById('dashMapView');
+  if(!el || el.offsetWidth === 0) return;
+  dashMap = L.map('dashMapView', { zoomControl: true, attributionControl: false })
+    .setView([30.0444, 31.2357], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(dashMap);
+}
+
 function updateDashMapPins(){
-  const wrap = document.getElementById('dashMapView');
-  if(!wrap) return;
-  dashMapMarkers.forEach(el=>el.remove());
-  dashMapMarkers = [];
-  const withLoc = drivers.filter(d=>d.location?.lat);
-  if(!withLoc.length){
-    if(!wrap.querySelector('.map-empty-note')){
-      const note=document.createElement('div');
-      note.className='map-empty-note';
-      note.textContent='مفيش مندوبين شاركوا موقعهم دلوقتي';
-      wrap.appendChild(note);
-      dashMapMarkers.push(note);
+  if(!dashMap) initDashMap();
+  if(!dashMap) return;
+  const existing = new Set(Object.keys(dashMapMarkersObj));
+  drivers.forEach(d => {
+    if(!d.location?.lat) return;
+    const color = d.status==='available' ? '#22B573' : d.status==='busy' ? '#F5941F' : '#9ca3af';
+    const icon = L.divIcon({
+      html: `<div style="background:${color};width:28px;height:28px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff"><i class="fa-solid fa-motorcycle"></i></div>`,
+      className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+    });
+    if(dashMapMarkersObj[d._id]){
+      dashMapMarkersObj[d._id].setLatLng([d.location.lat, d.location.lng]);
+    } else {
+      dashMapMarkersObj[d._id] = L.marker([d.location.lat, d.location.lng], { icon })
+        .addTo(dashMap)
+        .bindTooltip(d.name)
+        .on('click', () => nav('drivers'));
     }
-    return;
-  }
-  wrap.querySelectorAll('.map-empty-note').forEach(n=>n.remove());
-  withLoc.forEach(d=>{
-    const top = ((DASH_BOUNDS.latMax - d.location.lat)/(DASH_BOUNDS.latMax-DASH_BOUNDS.latMin))*100;
-    const right = ((d.location.lng - DASH_BOUNDS.lngMin)/(DASH_BOUNDS.lngMax-DASH_BOUNDS.lngMin))*100;
-    const pin=document.createElement('div');
-    pin.className='map-pin rider';
-    pin.style.top=Math.max(4,Math.min(96,top))+'%';
-    pin.style.right=Math.max(4,Math.min(96,right))+'%';
-    pin.innerHTML='<i class="fa-solid fa-motorcycle"></i>';
-    pin.title=d.name;
-    pin.onclick=()=>nav('drivers');
-    wrap.appendChild(pin);
-    dashMapMarkers.push(pin);
+    existing.delete(d._id);
   });
+  existing.forEach(id => { dashMap.removeLayer(dashMapMarkersObj[id]); delete dashMapMarkersObj[id]; });
 }
 
 // ===== ORDERS =====
@@ -1265,7 +1265,9 @@ function renderDriverCards(){
   if(drvTabFilter!=='all') f=f.filter(d=>d.status===drvTabFilter);
   if(srch) f=f.filter(d=>(d.name||'').toLowerCase().includes(srch)||(d.phone||'').includes(srch));
   const dotColor={available:'#22B573',busy:'#F5941F',offline:'#9ca3af'};
-  document.getElementById('drvCards').innerHTML=f.map(d=>`
+  document.getElementById('drvCards').innerHTML=f.map(d=>{
+    const online = d.status && d.status!=='offline';
+    return `
     <div class="dcard ${selDriverId===d._id?'sel':''}" onclick="selectDriver('${d._id}')">
       <div class="dav">🛵<div class="sdot" style="background:${dotColor[d.status]||'#9ca3af'}"></div></div>
       <div style="flex:1;min-width:0">
@@ -1274,10 +1276,22 @@ function renderDriverCards(){
       </div>
       <div class="acts">
         <div class="aic" onclick="event.stopPropagation();callCl('${d.phone}')"><i class="fa-solid fa-phone"></i></div>
+        <button class="btn btn-sm ${online?'btn-red':'btn-pink'}" onclick="event.stopPropagation();toggleDriverShift('${d._id}',${online})" style="padding:4px 8px;font-size:10px">${online?'إنهاء الشيفت':'بدء الشيفت'}</button>
         <div class="aic" onclick="event.stopPropagation();openDriverModal('${d._id}')"><i class="fa-solid fa-pen"></i></div>
         <div class="aic r" onclick="event.stopPropagation();deleteDriver('${d._id}')"><i class="fa-solid fa-trash"></i></div>
       </div>
-    </div>`).join('') || '<div style="padding:30px;text-align:center;color:var(--text-gray)">لا يوجد مندوبين</div>';
+    </div>`;
+  }).join('') || '<div style="padding:30px;text-align:center;color:var(--text-gray)">لا يوجد مندوبين</div>';
+}
+
+// المندوب مالوش تحكم في الشيفت بتاعه من التطبيق - الأدمن بس هو اللي
+// بيبدأ/بينهي الشيفت من هنا، وده بينعكس فورًا على شاشة المندوب.
+async function toggleDriverShift(id, currentlyOnline){
+  try{
+    await fetch(`${API}/api/drivers/${id}/shift`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({isOnline:!currentlyOnline})});
+    toast(currentlyOnline?'⏹️ تم إنهاء الشيفت':'▶️ تم بدء الشيفت','ok');
+    await loadDrivers();
+  } catch(e){ toast('❌ فشل تحديث الشيفت','err'); }
 }
 function selectDriver(id){
   selDriverId=id;
