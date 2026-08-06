@@ -26,10 +26,10 @@
     --border:#F1EFF4;
   }
   *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;}
-  body{background:linear-gradient(180deg,var(--pink) 0%,var(--pink) 100%);padding:18px;}
+  body{background:#fff;padding:18px;}
   .app{
     display:flex;
-    background:var(--page-bg);
+    background:#fff;
     border-radius:26px;
     overflow:hidden;
     min-height:calc(100vh - 36px);
@@ -39,7 +39,7 @@
   .sidebar{
     width:250px;
     flex-shrink:0;
-    background:var(--card-bg);
+    background:var(--pink);
     display:flex;
     flex-direction:column;
     border-radius:22px;
@@ -63,23 +63,25 @@
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:10px 12px;border-radius:12px;color:var(--text-dark);text-decoration:none;
     font-size:13px;font-weight:600;transition:.15s;cursor:pointer;
+    background:#fff;margin-bottom:4px;
   }
   .nav li a .left{display:flex;align-items:center;gap:10px;}
-  .nav li a i{width:18px;text-align:center;font-size:14px;color:var(--text-gray);}
+  .nav li a i{width:18px;text-align:center;font-size:14px;color:var(--pink);}
   .nav li a:hover{background:var(--pink-light);}
-  .nav li a.active{background:var(--pink);color:#fff;}
+  .nav li a.active{background:var(--pink-dark);color:#fff;}
   .nav li a.active i{color:#fff;}
-  .nav li a.disabled{opacity:.45;cursor:default;}
-  .nav li a .live-badge{background:#fff;color:var(--pink);font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;}
+  .nav li a.disabled{background:#fff;opacity:.85;cursor:default;}
+  .nav li a.disabled i{color:var(--pink);}
+  .nav li a .live-badge{background:var(--pink);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;}
   .nav li a .count-badge{background:var(--pink);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;}
   .nav li a.active .count-badge{background:rgba(255,255,255,.3);}
   .logout-btn{
-    margin-top:12px;background:var(--pink);color:#fff;border:none;border-radius:14px;
+    margin-top:12px;background:#fff;color:var(--pink-dark);border:none;border-radius:14px;
     padding:13px;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
   }
   /* ===== MAIN ===== */
   .main{flex:1;padding:18px 22px;overflow-y:auto;}
-  .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--card-bg);border-radius:18px;padding:10px 18px;margin-bottom:18px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--card-bg);border:1px solid #F1EFF4;border-radius:18px;padding:10px 18px;margin-bottom:18px;}
   .profile{display:flex;align-items:center;gap:10px;position:relative;}
   .profile img{width:42px;height:42px;border-radius:50%;object-fit:cover;}
   .profile .name{font-size:14px;font-weight:700;color:var(--text-dark);}
@@ -95,7 +97,12 @@
   .date-box i{color:var(--pink);}
 
   .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:14px;}
-  .kpi-card{background:var(--card-bg);border-radius:16px;padding:14px 14px;display:flex;align-items:flex-start;justify-content:space-between;cursor:pointer;transition:.15s;}
+  .kpi-card{background:var(--card-bg);border:1px solid #F1EFF4;border-radius:16px;padding:14px 14px;display:flex;align-items:flex-start;justify-content:space-between;cursor:pointer;transition:.15s;}
+  .kpi-card.lg{padding:20px 20px;}
+  .kpi-card.lg .label{font-size:13px;}
+  .kpi-card.lg .value{font-size:30px;}
+  .kpi-card.lg .delta{font-size:12px;}
+  .kpi-card.lg .kpi-icon{width:44px;height:44px;font-size:18px;border-radius:14px;}
   .kpi-card:hover{box-shadow:0 8px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
   .kpi-card .info{display:flex;flex-direction:column;gap:6px;}
   .kpi-card .label{font-size:12px;color:var(--text-gray);font-weight:600;}
@@ -106,7 +113,7 @@
   .kpi-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;}
 
   .mid-grid{display:grid;grid-template-columns:1.1fr 1.4fr 1.6fr;gap:14px;margin-bottom:14px;}
-  .card{background:var(--card-bg);border-radius:18px;padding:16px;}
+  .card{background:var(--card-bg);border:1px solid #F1EFF4;border-radius:18px;padding:16px;}
   .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
   .card-head h3{font-size:14px;font-weight:800;color:var(--text-dark);}
   .card-head .select{font-size:11px;color:var(--text-gray);background:var(--pink-light);padding:5px 10px;border-radius:8px;display:flex;align-items:center;gap:5px;font-weight:600;}
@@ -177,7 +184,7 @@
   .ring-legend .lbl{font-size:11px;color:var(--text-gray);font-weight:600;margin-top:2px;}
 
   .footer-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px;}
-  .fa-card{background:var(--card-bg);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;}
+  .fa-card{background:var(--card-bg);border:1px solid #F1EFF4;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;}
   .fa-card:hover{box-shadow:0 8px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
   .fa-card .fa-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;}
   .fa-card .fa-title{font-size:13px;font-weight:800;color:var(--text-dark);}
@@ -283,11 +290,7 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="brand-strip">
-      <div class="logo"><i class="fa-solid fa-dove"></i> زورا ZORA</div>
-      <i class="fa-solid fa-bars hamburger"></i>
-    </div>
-    <ul class="nav">
+    <ul class="nav" style="margin-top:6px">
       <li><a onclick="nav('dashboard')" class="active" data-page="dashboard"><span class="left"><i class="fa-solid fa-house"></i> لوحة المعلومات</span></a></li>
       <li><a onclick="nav('orders')" data-page="orders"><span class="left"><i class="fa-solid fa-bag-shopping"></i> إدارة الطلبات</span> <span class="count-badge" id="sb-ord" style="display:none">0</span></a></li>
       <li><a onclick="nav('drivers')" data-page="drivers"><span class="left"><i class="fa-solid fa-motorcycle"></i> إدارة الدليفري</span></a></li>
@@ -337,12 +340,12 @@
     <div class="page active" id="pg-dashboard">
       <!-- KPI ROW 1 -->
       <div class="kpi-grid">
-        <div class="kpi-card" onclick="setFilter('cancelled');nav('orders')"><div class="info"><div class="label">الملغاة اليوم</div><div class="value" id="k-cancelled">0</div><div class="delta" id="kd-cancelled"></div></div><div class="kpi-icon" style="background:var(--red)"><i class="fa-solid fa-xmark"></i></div></div>
-        <div class="kpi-card" onclick="setFilter('completed');nav('orders')"><div class="info"><div class="label">المكتملة اليوم</div><div class="value" id="k-completed">0</div><div class="delta" id="kd-completed"></div></div><div class="kpi-icon" style="background:var(--green)"><i class="fa-solid fa-check"></i></div></div>
-        <div class="kpi-card" onclick="setFilter('preparing');nav('orders')"><div class="info"><div class="label">قيد التجهيز</div><div class="value" id="k-preparing">0</div><div class="delta" id="kd-preparing"></div></div><div class="kpi-icon" style="background:var(--orange)"><i class="fa-solid fa-kitchen-set"></i></div></div>
-        <div class="kpi-card" onclick="setFilter('delivering');nav('orders')"><div class="info"><div class="label">قيد التليفري</div><div class="value" id="k-delivering">0</div><div class="delta" id="kd-delivering"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-motorcycle"></i></div></div>
-        <div class="kpi-card" onclick="setFilter('pending');nav('orders')"><div class="info"><div class="label">الطلبات الجديدة</div><div class="value" id="k-new">0</div><div class="delta" id="kd-new"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-file-lines"></i></div></div>
-        <div class="kpi-card" onclick="setFilter('');nav('orders')"><div class="info"><div class="label">الطلبات الحالية</div><div class="value" id="k-total">0</div><div class="delta" id="kd-total"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-bag-shopping"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('cancelled');nav('orders')"><div class="info"><div class="label">الملغاة اليوم</div><div class="value" id="k-cancelled">0</div><div class="delta" id="kd-cancelled"></div></div><div class="kpi-icon" style="background:var(--red)"><i class="fa-solid fa-xmark"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('completed');nav('orders')"><div class="info"><div class="label">المكتملة اليوم</div><div class="value" id="k-completed">0</div><div class="delta" id="kd-completed"></div></div><div class="kpi-icon" style="background:var(--green)"><i class="fa-solid fa-check"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('preparing');nav('orders')"><div class="info"><div class="label">قيد التجهيز</div><div class="value" id="k-preparing">0</div><div class="delta" id="kd-preparing"></div></div><div class="kpi-icon" style="background:var(--orange)"><i class="fa-solid fa-kitchen-set"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('delivering');nav('orders')"><div class="info"><div class="label">قيد التليفري</div><div class="value" id="k-delivering">0</div><div class="delta" id="kd-delivering"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-motorcycle"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('pending');nav('orders')"><div class="info"><div class="label">الطلبات الجديدة</div><div class="value" id="k-new">0</div><div class="delta" id="kd-new"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-file-lines"></i></div></div>
+        <div class="kpi-card lg" onclick="setFilter('');nav('orders')"><div class="info"><div class="label">الطلبات الحالية</div><div class="value" id="k-total">0</div><div class="delta" id="kd-total"></div></div><div class="kpi-icon" style="background:var(--pink)"><i class="fa-solid fa-bag-shopping"></i></div></div>
       </div>
 
       <!-- KPI ROW 2 -->
@@ -356,7 +359,20 @@
       </div>
 
       <!-- MID ROW: donut / line chart / map -->
-      <div class="mid-grid">
+      <div class="mid-grid" style="grid-template-columns:1.6fr 1.4fr 1.1fr">
+        <div class="card map-card">
+          <div class="card-head"><div class="link" onclick="nav('drivers')">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
+          <div class="map-view" id="dashMapView">
+            <div class="zoom-ctrl"><div>+</div><div>−</div></div>
+            <div class="locate-ctrl"><i class="fa-solid fa-location-crosshairs"></i></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="select">آخر 7 أيام <i class="fa-solid fa-chevron-down"></i></div><h3>المبيعات (آخر 7 أيام)</h3></div>
+          <canvas id="salesChart" height="200"></canvas>
+        </div>
+
         <div class="card">
           <div class="card-head"><div class="select">اليوم <i class="fa-solid fa-chevron-down"></i></div><h3>حالة الطلبات</h3></div>
           <div class="donut-wrap">
@@ -368,36 +384,10 @@
           </div>
           <button class="view-all-btn" onclick="nav('orders')">عرض جميع الطلبات</button>
         </div>
-
-        <div class="card">
-          <div class="card-head"><div class="select">آخر 7 أيام <i class="fa-solid fa-chevron-down"></i></div><h3>المبيعات (آخر 7 أيام)</h3></div>
-          <canvas id="salesChart" height="200"></canvas>
-        </div>
-
-        <div class="card map-card">
-          <div class="card-head"><div class="link" onclick="nav('drivers')">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
-          <div class="map-view" id="dashMapView">
-            <div class="zoom-ctrl"><div>+</div><div>−</div></div>
-            <div class="locate-ctrl"><i class="fa-solid fa-location-crosshairs"></i></div>
-          </div>
-        </div>
       </div>
 
       <!-- BOTTOM ROW: table / activity / ring -->
-      <div class="bottom-grid">
-        <div class="card">
-          <div class="card-head"><div class="link" onclick="nav('orders')">عرض الكل</div><h3>أحدث الطلبات</h3></div>
-          <table>
-            <thead><tr><th></th><th>رقم الطلب</th><th>العميل</th><th>المتجر</th><th>الحالة</th><th>المبلغ</th><th>الوقت</th></tr></thead>
-            <tbody id="dashRecentOrders"></tbody>
-          </table>
-        </div>
-
-        <div class="card">
-          <div class="card-head"><div class="link" onclick="nav('notifications')">عرض الكل</div><h3>آخر الأنشطة</h3></div>
-          <div class="activity-list" id="dashActivities"></div>
-        </div>
-
+      <div class="bottom-grid" style="grid-template-columns:1fr 1fr 1.6fr">
         <div class="card">
           <div class="card-head"><div class="select">اليوم <i class="fa-solid fa-chevron-down"></i></div><h3>توزيع الطلبات</h3></div>
           <div class="ring-wrap">
@@ -411,6 +401,19 @@
               <div class="item"><div class="num" style="color:var(--red)" id="dist-stuck">0</div><div class="lbl">معلقة</div></div>
             </div>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="link" onclick="nav('notifications')">عرض الكل</div><h3>آخر الأنشطة</h3></div>
+          <div class="activity-list" id="dashActivities"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="link" onclick="nav('orders')">عرض الكل</div><h3>أحدث الطلبات</h3></div>
+          <table>
+            <thead><tr><th></th><th>رقم الطلب</th><th>العميل</th><th>المتجر</th><th>الحالة</th><th>المبلغ</th><th>الوقت</th></tr></thead>
+            <tbody id="dashRecentOrders"></tbody>
+          </table>
         </div>
       </div>
 
@@ -749,7 +752,7 @@ function initCharts(){
   });
   ringChart = new Chart(document.getElementById('ringChart'), {
     type:'doughnut',
-    data:{labels:['تلقائي','يدوي','معلقة'],datasets:[{data:[0,0,0],backgroundColor:['#EC1C7A','#F5941F','#F0324C'],borderWidth:0}]},
+    data:{labels:['تلقائي','يدوي','معلقة'],datasets:[{data:[1],backgroundColor:['#F1EFF4'],borderWidth:0}]},
     options:{cutout:'78%',plugins:{legend:{display:false}}}
   });
 }
@@ -894,8 +897,10 @@ function renderStatusDonut(){
   const total=Object.values(counts).reduce((a,b)=>a+b,0);
   document.getElementById('donutTotal').textContent = total;
   donutChart.data.labels = Object.keys(counts).map(k=>labels[k]);
-  donutChart.data.datasets[0].data = Object.values(counts);
-  donutChart.data.datasets[0].backgroundColor = Object.keys(counts).map(k=>colors[k]);
+  // لو مفيش طلبات لسه، بنرسم دايرة كاملة رمادية فاتحة عشان الشكل
+  // يفضل موجود بصريًا (مش يختفي) - مش أرقام وهمية، مجرد حالة فاضية.
+  donutChart.data.datasets[0].data = total>0 ? Object.values(counts) : [1];
+  donutChart.data.datasets[0].backgroundColor = total>0 ? Object.keys(counts).map(k=>colors[k]) : ['#F1EFF4'];
   donutChart.update();
   document.getElementById('donutLegend').innerHTML = Object.keys(counts).map(k=>
     `<div class="row"><span class="dot" style="background:${colors[k]}"></span>${labels[k]}<span class="num">${counts[k]}</span></div>`).join('');
@@ -934,7 +939,15 @@ function renderOrderDistribution(){
   document.getElementById('dist-manual').textContent=manual;
   document.getElementById('dist-stuck').textContent=stuck;
   document.getElementById('distTotal').textContent=pending.length;
-  ringChart.data.datasets[0].data = [auto, manual, stuck];
+  // زي الدونات - لو مفيش طلبات معلّقة لسه، دايرة كاملة رمادية فاتحة
+  // بدل ما تختفي خالص.
+  if(pending.length>0){
+    ringChart.data.datasets[0].data = [auto, manual, stuck];
+    ringChart.data.datasets[0].backgroundColor = ['#EC1C7A','#F5941F','#F0324C'];
+  } else {
+    ringChart.data.datasets[0].data = [1];
+    ringChart.data.datasets[0].backgroundColor = ['#F1EFF4'];
+  }
   ringChart.update();
 }
 
