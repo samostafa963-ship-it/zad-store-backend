@@ -19,6 +19,7 @@ const driverSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: null },
   },
   shiftStartTime: { type: Date, default: null },
+  firebaseUid: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Driver', driverSchema);

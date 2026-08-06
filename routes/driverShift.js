@@ -1,27 +1,26 @@
-// ملف جديد: routes/driverShift.js
-// محتاج تركيبه في server.js/index.js:
-//   app.use('/api', require('./routes/driverShift'));
-//
-// بيستخدم middleware/firebaseAdminAuth.js اللي عملناه قبل كده لأي
-// نداء من التطبيق نفسه (المندوب)، وبيفترض إن عندك موديل Driver فيه
-// حقل "status" (available/busy/offline) و"firebaseUid" أصلاً -
-// نفس الموديل اللي بتستخدمه صفحة orders.html.
-//
-// ⚠️ حط حقل shiftStartTime في models/Driver.js لو مش موجود:
-//   shiftStartTime: { type: Date, default: null }
-
+// ملف: routes/driverShift.js (نسخة مُصلَّحة)
 const express = require('express');
 const router = express.Router();
 const { verifyFirebaseToken } = require('../middleware/firebaseAdminAuth');
-const Driver = require('../models/Driver'); // عدّل المسار لو مختلف عندك
+const Driver = require('../models/Driver');
 
 // ---------------- GET /api/driver/shift-status ----------------
-// بينادى من تطبيق الفلاتر (المندوب) بتوكن Firebase حقيقي - بيرجع
-// حالة الاتصال ومعاد بداية الشيفت اللي الأدمن ضبطهم من لوحة التحكم.
-// المندوب مش بيقدر يغيّرهم من هنا - القراءة بس.
 router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
   try {
-    const driver = await Driver.findOne({ firebaseUid: req.driverUid });
+    // أول محاولة: لو الحساب اتربط بالـ UID قبل كده (زيارة سابقة)
+    let driver = await Driver.findOne({ firebaseUid: req.driverUid });
+
+    // لو لسه مش مربوط، ندوّر بالإيميل (اللي الأدمن حطه وقت إضافة
+    // المندوب) - ولو لقيناه، نربط الـ UID بيه فورًا عشان المرة الجاية
+    // تبقى أسرع ومباشرة.
+    if (!driver && req.driverEmail) {
+      driver = await Driver.findOne({ email: req.driverEmail });
+      if (driver) {
+        driver.firebaseUid = req.driverUid;
+        await driver.save();
+      }
+    }
+
     if (!driver) {
       return res.json({ isOnline: false, shiftStartTime: null });
     }
@@ -35,10 +34,6 @@ router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
 });
 
 // ---------------- PATCH /api/drivers/:id/shift ----------------
-// بينادى من لوحة التحكم (orders.html) بس - الأدمن هو اللي بيبدأ أو
-// ينهي شيفت المندوب، مش المندوب نفسه.
-// TODO: لسه من غير حماية صلاحية أدمن (زي باقي راوتس اللوحة الحالية) -
-// اربطه بنظام تسجيل دخول الأدمن (Google Sign-In) لو حبيت تحميه أكتر.
 router.patch('/drivers/:id/shift', async (req, res) => {
   try {
     const { isOnline } = req.body;

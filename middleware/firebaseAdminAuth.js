@@ -1,12 +1,10 @@
-// ملف جديد: middleware/firebaseAdminAuth.js
+// ملف: middleware/firebaseAdminAuth.js (نسخة مُصلَّحة)
 // بيتحقق من توكن Firebase اللي جاي من تطبيق الفلاتر (Bearer token)
-// ويحط UID المندوب في req.driverUid عشان الراوتس تستخدمه.
+// وبيحط UID المندوب وإيميله في req عشان الراوتس تستخدمهم.
 //
 // المتطلبات: npm install firebase-admin
-// محتاج ملف مفتاح خدمة (service account JSON) من Firebase Console:
-// Project Settings → Service accounts → Generate new private key
-// وحطه كـ env var اسمه FIREBASE_SERVICE_ACCOUNT (JSON string) أو
-// ملف منفصل حسب إعدادك الحالي.
+// محتاج ملف مفتاح خدمة (service account JSON) من Firebase Console -
+// نفس FIREBASE_SERVICE_ACCOUNT اللي ضفناه في .env قبل كده.
 
 const admin = require('firebase-admin');
 
@@ -27,6 +25,10 @@ async function verifyFirebaseToken(req, res, next) {
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     req.driverUid = decoded.uid;
+    // ⚠️ ده كان ناقص وهو سبب مشكلة "التطبيق فاضل يقول غير متصل" -
+    // كنا بنعرف الـ UID بس مش الإيميل، فمكانش فيه طريقة نربط حساب
+    // المندوب بالسجل اللي الأدمن عمله بالإيميل.
+    req.driverEmail = decoded.email || null;
     next();
   } catch (err) {
     return res.status(401).json({ message: 'جلسة الدخول منتهية' });

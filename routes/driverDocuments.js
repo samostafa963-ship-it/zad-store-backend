@@ -1,26 +1,15 @@
-// ملف جديد: routes/driverDocuments.js
-// محتاج ضبطه في ZAD_Backend وتركيبه في server.js:
-//   app.use('/api/driver', require('./routes/driverDocuments'));
-//
-// المتطلبات (لو مش مثبتة):
-//   npm install multer cloudinary firebase-admin
-//
-// ⚠️ ده بيفترض إن firebase-admin متهيأ في مكان تاني في المشروع
-// (زي admin.js) - لو مش متهيأ، شوف firebaseAdminAuth.js تحت أول.
-
+// ملف: routes/driverDocuments.js (نسخة مُصلَّحة)
 const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { verifyFirebaseToken } = require('../middleware/firebaseAdminAuth');
-const Driver = require('../models/Driver'); // عدّل المسار لو مختلف عندك
+const Driver = require('../models/Driver');
 
 const router = express.Router();
-
-// رفع مؤقت في الذاكرة قبل ما نبعته لـ Cloudinary
 const upload = multer({ storage: multer.memoryStorage() });
 
 cloudinary.config({
-  cloud_name: 'dchvb9n4n', // نفس حساب زورا
+  cloud_name: 'dchvb9n4n',
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -38,18 +27,39 @@ function uploadBufferToCloudinary(buffer, folder) {
   });
 }
 
+// بيدوّر على سجل المندوب فعليًا (مش بيعمل واحد جديد) - أول بالـ UID
+// لو مربوط قبل كده، وإلا بالإيميل مع ربط الـ UID فورًا. ⚠️ ده بيفترض
+// إن الأدمن عمل سجل المندوب من اللوحة الأول (بالإيميل) - لو محدش
+// عمل كده، الرفع هيفشل برسالة واضحة بدل ما يعمل سجل مكرر فاضي.
+async function findLinkedDriver(req) {
+  let driver = await Driver.findOne({ firebaseUid: req.driverUid });
+  if (!driver && req.driverEmail) {
+    driver = await Driver.findOne({ email: req.driverEmail });
+    if (driver) {
+      driver.firebaseUid = req.driverUid;
+      await driver.save();
+    }
+  }
+  return driver;
+}
+
 // ---------------- POST /api/driver/documents ----------------
-// بيستقبل مستند واحد (البطاقة/الرخصة/رخصة المركبة) ويحطه
-// "قيد المراجعة" لحد ما تراجعه من لوحة التحكم.
 router.post(
   '/documents',
   verifyFirebaseToken,
   upload.single('file'),
   async (req, res) => {
     try {
-      const { type } = req.body; // زي national_id_front, driving_license...
+      const { type } = req.body;
       if (!req.file || !type) {
         return res.status(400).json({ message: 'الملف والنوع مطلوبين' });
+      }
+
+      const driver = await findLinkedDriver(req);
+      if (!driver) {
+        return res.status(404).json({
+          message: 'حسابك مش مربوط بسجل مندوب - كلم الأدمن يتأكد إن إيميلك متسجل صح في اللوحة',
+        });
       }
 
       const result = await uploadBufferToCloudinary(
@@ -57,19 +67,14 @@ router.post(
         'zura/driver-documents'
       );
 
-      await Driver.findOneAndUpdate(
-        { firebaseUid: req.driverUid },
-        {
-          $set: {
-            [`documents.${type}`]: {
-              url: result.secure_url,
-              status: 'pending', // pending | approved | rejected
-              uploadedAt: new Date(),
-            },
-          },
-        },
-        { upsert: true }
-      );
+      driver.documents = driver.documents || {};
+      driver.documents[type] = {
+        url: result.secure_url,
+        status: 'pending',
+        uploadedAt: new Date(),
+      };
+      driver.markModified('documents');
+      await driver.save();
 
       res.json({ url: result.secure_url, status: 'pending' });
     } catch (err) {
@@ -102,11 +107,10 @@ router.post(
 );
 
 // ---------------- PATCH /api/driver/documents/:driverId/:type ----------------
-// ده للوحة التحكم (الأدمن) عشان توافق/ترفض مستند - مش بينادى من التطبيق.
 // TODO: احمي الراوت ده بصلاحية أدمن مش صلاحية سائق عادي.
 router.patch('/documents/:driverId/:type', async (req, res) => {
   try {
-    const { status } = req.body; // 'approved' | 'rejected'
+    const { status } = req.body;
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ message: 'حالة غير صحيحة' });
     }
