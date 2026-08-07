@@ -1,52 +1,56 @@
-// ملف: routes/driverShift.js (نسخة نهائية)
+// ملف: routes/driverShift.js (نسخة نهائية - تسجيل دخول برقم الهاتف
+// وكلمة مرور، مفيش جوجل ولا فايربيز توكن خالص - مقارنة بيانات مباشرة)
 const express = require('express');
 const router = express.Router();
-const { verifyFirebaseToken } = require('../middleware/firebaseAdminAuth');
 const Driver = require('../models/Driver');
 const Order = require('../models/Order'); // عدّل الاسم لو الموديل عندك اسمه مختلف
 
-// مطابقة الإيميل مرنة (بتتجاهل فرق حروف كبيرة/صغيرة والمسافات
-// الزيادة) عشان أي فرق بسيط زي مسافة أو حرف كابيتال متكسرش الربط.
-function emailRegex(email) {
-  const trimmed = (email || '').trim();
-  return new RegExp('^' + trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
-}
-
-// بيدوّر على المندوب: أول بالـ Firebase UID لو مربوط قبل كده (أسرع)،
-// وإلا بالإيميل (مرن) مع ربط الـ UID أوتوماتيك عشان المرة الجاية
-// تبقى مباشرة.
-async function findDriverByRequest(req) {
-  const email = req.query.email || req.driverEmail;
-  let driver = await Driver.findOne({ firebaseUid: req.driverUid });
-  if (!driver && email) {
-    driver = await Driver.findOne({ email: emailRegex(email) });
-    if (driver) {
-      driver.firebaseUid = req.driverUid;
-      await driver.save();
-      console.log('🔵 تم ربط UID بحساب:', driver.name);
+// ---------------- POST /api/driver/login ----------------
+// المندوب بيبعت رقم الهاتف وكلمة المرور اللي الأدمن سجّلهملوه في
+// اللوحة - مطابقة مباشرة، مفيش أي تعقيد.
+router.post('/driver/login', async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+    if (!phone || !password) {
+      return res.status(400).json({ message: 'رقم الهاتف وكلمة المرور مطلوبين' });
     }
+    const driver = await Driver.findOne({ phone: phone.trim(), password: password.trim() });
+    if (!driver) {
+      return res.status(401).json({ message: 'رقم الهاتف أو كلمة المرور غلط' });
+    }
+    res.json({
+      _id: driver._id,
+      name: driver.name,
+      phone: driver.phone,
+      avatar: driver.avatar,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
   }
-  return driver;
+});
+
+// بيدوّر على المندوب برقم الهاتف بس - ده كل حاجة، مفيش تعقيد إيميل
+// ولا توكن ولا حاجة.
+async function findDriverByPhone(req) {
+  const phone = req.query.phone;
+  if (!phone) return null;
+  return Driver.findOne({ phone: phone.trim() });
 }
 
 // ---------------- GET /api/driver/shift-status ----------------
-router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
+router.get('/driver/shift-status', async (req, res) => {
   try {
-    const email = req.query.email || req.driverEmail;
-    console.log('🔵 [shift-status] email:', email);
-
-    const driver = await findDriverByRequest(req);
+    const driver = await findDriverByPhone(req);
     if (!driver) {
-      console.log('🔵 [shift-status] مفيش مندوب بالإيميل ده متسجل في اللوحة');
+      console.log('🔵 [shift-status] مفيش مندوب برقم:', req.query.phone);
       return res.json({ isOnline: false, shiftStartTime: null });
     }
-    console.log('🔵 [shift-status] الحالة الحقيقية:', driver.status);
     res.json({
       isOnline: driver.status && driver.status !== 'offline',
       shiftStartTime: driver.shiftStartTime || null,
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: 'خطأ في الخادم' });
   }
 });
@@ -72,31 +76,10 @@ router.patch('/drivers/:id/shift', async (req, res) => {
   }
 });
 
-// ---------------- PATCH /api/drivers/:id/link-uid ----------------
-router.patch('/drivers/:id/link-uid', async (req, res) => {
-  try {
-    const { firebaseUid } = req.body;
-    if (!firebaseUid) {
-      return res.status(400).json({ message: 'firebaseUid مطلوب' });
-    }
-    const driver = await Driver.findByIdAndUpdate(
-      req.params.id,
-      { firebaseUid },
-      { new: true }
-    );
-    if (!driver) {
-      return res.status(404).json({ message: 'المندوب غير موجود' });
-    }
-    res.json(driver);
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم' });
-  }
-});
-
 // ---------------- GET /api/driver/current-order ----------------
-router.get('/driver/current-order', verifyFirebaseToken, async (req, res) => {
+router.get('/driver/current-order', async (req, res) => {
   try {
-    const driver = await findDriverByRequest(req);
+    const driver = await findDriverByPhone(req);
     if (!driver || !driver.currentOrderId) {
       return res.json({ order: null });
     }
@@ -109,16 +92,13 @@ router.get('/driver/current-order', verifyFirebaseToken, async (req, res) => {
 });
 
 // ---------------- PATCH /api/driver/location ----------------
-// ⚠️ جديد: بيبعته التطبيق أوتوماتيك أول ما المندوب يفتحه ويكون
-// متصل - بيحدّث موقعه الحقيقي عشان يظهر على خريطة لوحة التحكم
-// (نفس حقل location الموجود في موديل Driver).
-router.patch('/driver/location', verifyFirebaseToken, async (req, res) => {
+router.patch('/driver/location', async (req, res) => {
   try {
     const { lat, lng } = req.body;
     if (lat == null || lng == null) {
       return res.status(400).json({ message: 'lat/lng مطلوبين' });
     }
-    const driver = await findDriverByRequest(req);
+    const driver = await findDriverByPhone(req);
     if (!driver) {
       return res.status(404).json({ message: 'حسابك مش مربوط بسجل مندوب' });
     }
