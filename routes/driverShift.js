@@ -4,29 +4,41 @@ const router = express.Router();
 const { verifyFirebaseToken } = require('../middleware/firebaseAdminAuth');
 const Driver = require('../models/Driver');
 
+// ---------------- قايمة المندوبين المعروفين (ثابتة في الكود) ----------------
+// بدل الاعتماد على ربط الإيميل/UID جوه قاعدة البيانات (اللي كان بيفشل
+// بسبب مشاكل نشر ومزامنة)، بنحط هنا مباشرة إيميل كل مندوب مربوط برقم
+// موبايله (اللي إجباري وفريد أصلاً في قاعدة البيانات، فمضمون موجود).
+// لما مندوب جديد ينضم، ضيف سطر جديد هنا بس.
+const KNOWN_DRIVERS = {
+  'sasaelkaewan963@gmail.com': { name: 'مصطفى محمد', phone: '01129338238' },
+};
+
 // ---------------- GET /api/driver/shift-status ----------------
 router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
   try {
-    console.log('🔵 [shift-status] uid:', req.driverUid, '| email:', req.driverEmail);
+    console.log('🔵 [shift-status] email:', req.driverEmail);
 
-    let driver = await Driver.findOne({ firebaseUid: req.driverUid });
-    console.log('🔵 [shift-status] لقى بالـ UID؟', !!driver);
+    // أول حاجة: القايمة الثابتة في الكود - أسرع وأضمن، مفيش أي
+    // اعتماد على حفظ حقول في قاعدة البيانات.
+    const known = req.driverEmail ? KNOWN_DRIVERS[req.driverEmail] : null;
+    let driver = null;
 
-    if (!driver && req.driverEmail) {
-      driver = await Driver.findOne({ email: req.driverEmail });
-      console.log('🔵 [shift-status] لقى بالإيميل؟', !!driver);
-      if (driver) {
-        driver.firebaseUid = req.driverUid;
-        await driver.save();
-        console.log('🔵 [shift-status] تم ربط الـ UID بحساب:', driver.name);
+    if (known) {
+      driver = await Driver.findOne({ phone: known.phone });
+      console.log('🔵 [shift-status] لقى بالموبايل الثابت؟', !!driver);
+    } else {
+      // احتياطي: لو مش في القايمة الثابتة، نجرب الطريقة القديمة
+      driver = await Driver.findOne({ firebaseUid: req.driverUid });
+      if (!driver && req.driverEmail) {
+        driver = await Driver.findOne({ email: req.driverEmail });
       }
     }
 
     if (!driver) {
-      const allEmails = await Driver.find({}, 'name email');
-      console.log('🔵 [shift-status] مفيش تطابق. الإيميلات المسجلة عندنا:', JSON.stringify(allEmails));
+      console.log('🔵 [shift-status] مفيش تطابق خالص للإيميل ده');
       return res.json({ isOnline: false, shiftStartTime: null });
     }
+    console.log('🔵 [shift-status] الحالة الحقيقية:', driver.status);
     res.json({
       isOnline: driver.status && driver.status !== 'offline',
       shiftStartTime: driver.shiftStartTime || null,
