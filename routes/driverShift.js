@@ -10,7 +10,7 @@ const Driver = require('../models/Driver');
 // موبايله (اللي إجباري وفريد أصلاً في قاعدة البيانات، فمضمون موجود).
 // لما مندوب جديد ينضم، ضيف سطر جديد هنا بس.
 const KNOWN_DRIVERS = {
-  'sasaelkaewan963@gmail.com': { name: 'مصطفى محمد', phone: '01129338238' },
+  'sasaelkarwan963@gmail.com': { name: 'مصطفى محمد', phone: '01129338238' },
 };
 
 // ---------------- GET /api/driver/shift-status ----------------
