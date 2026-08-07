@@ -1502,10 +1502,15 @@ async function saveDriver(){
   const firebaseUid=document.getElementById('dm-uid').value.trim();
   if(!name||!phone){ toast('الاسم والموبايل مطلوبين','err'); return; }
   const body={name,phone,email,zone:document.getElementById('dm-zone').value,status:document.getElementById('dm-status').value};
-  if(firebaseUid) body.firebaseUid = firebaseUid;
   try{
     const url=editDrvId?`${API}/api/drivers/${editDrvId}`:`${API}/api/drivers`;
-    await fetch(url,{method:editDrvId?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const res = await fetch(url,{method:editDrvId?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const saved = await res.json();
+    const driverId = editDrvId || saved._id;
+    // بنبعت الـ UID لراوت مخصص منفصل تمامًا عشان نضمن إنه يتسجل فعليًا
+    if(firebaseUid && driverId){
+      await fetch(`${API}/api/drivers/${driverId}/link-uid`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({firebaseUid})});
+    }
     closeModal('driverModal'); toast('✅ تم الحفظ','ok'); await loadDrivers();
   } catch(e){ toast('❌ فشل','err'); }
 }
