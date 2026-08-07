@@ -683,6 +683,7 @@
     <div class="fg"><label>الاسم</label><input id="dm-name" class="fi" style="width:100%"></div>
     <div class="fg"><label>الموبايل</label><input id="dm-phone" class="fi" style="width:100%"></div>
     <div class="fg"><label>الإيميل (نفس حساب جوجل اللي هيسجل بيه دخول في التطبيق)</label><input id="dm-email" type="email" class="fi" style="width:100%" placeholder="driver@gmail.com"></div>
+    <div class="fg"><label>معرّف الحساب (Firebase UID) - الصقه من شاشة "الحساب" عند المندوب</label><input id="dm-uid" class="fi" style="width:100%" placeholder="اختياري - أضمن طريقة ربط"></div>
     <div class="fg"><label>المنطقة</label><input id="dm-zone" class="fi" style="width:100%"></div>
     <div class="fg"><label>الحالة</label>
       <select id="dm-status" class="fi" style="width:100%">
@@ -1490,16 +1491,18 @@ function fitAllDrivers(){
 function openDriverModal(id){
   editDrvId=id||null;
   document.getElementById('drvModalTitle').textContent=id?'تعديل مندوب':'مندوب جديد';
-  if(id){ const d=drivers.find(x=>x._id===id); if(d){ document.getElementById('dm-name').value=d.name||''; document.getElementById('dm-phone').value=d.phone||''; document.getElementById('dm-email').value=d.email||''; document.getElementById('dm-zone').value=d.zone||''; document.getElementById('dm-status').value=d.status||'offline'; } }
-  else { ['dm-name','dm-phone','dm-email','dm-zone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('dm-status').value='available'; }
+  if(id){ const d=drivers.find(x=>x._id===id); if(d){ document.getElementById('dm-name').value=d.name||''; document.getElementById('dm-phone').value=d.phone||''; document.getElementById('dm-email').value=d.email||''; document.getElementById('dm-uid').value=d.firebaseUid||''; document.getElementById('dm-zone').value=d.zone||''; document.getElementById('dm-status').value=d.status||'offline'; } }
+  else { ['dm-name','dm-phone','dm-email','dm-uid','dm-zone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('dm-status').value='available'; }
   document.getElementById('driverModal').classList.add('open');
 }
 async function saveDriver(){
   const name=document.getElementById('dm-name').value.trim();
   const phone=document.getElementById('dm-phone').value.trim();
   const email=document.getElementById('dm-email').value.trim();
+  const firebaseUid=document.getElementById('dm-uid').value.trim();
   if(!name||!phone){ toast('الاسم والموبايل مطلوبين','err'); return; }
   const body={name,phone,email,zone:document.getElementById('dm-zone').value,status:document.getElementById('dm-status').value};
+  if(firebaseUid) body.firebaseUid = firebaseUid;
   try{
     const url=editDrvId?`${API}/api/drivers/${editDrvId}`:`${API}/api/drivers`;
     await fetch(url,{method:editDrvId?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
