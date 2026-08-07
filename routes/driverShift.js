@@ -16,11 +16,15 @@ const KNOWN_DRIVERS = {
 // ---------------- GET /api/driver/shift-status ----------------
 router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
   try {
-    console.log('🔵 [shift-status] email:', req.driverEmail);
+    // بنفضّل الإيميل اللي جاي صراحة من التطبيق (query param) لو
+    // موجود، لأن إيميل التوكن ممكن يوصل فاضي أحيانًا لو الطلب اتبعت
+    // قبل ما بيانات حساب فايربيز تخلص مزامنة تمامًا.
+    const email = req.query.email || req.driverEmail;
+    console.log('🔵 [shift-status] email:', email, '(من query:', req.query.email, '| من التوكن:', req.driverEmail, ')');
 
     // أول حاجة: القايمة الثابتة في الكود - أسرع وأضمن، مفيش أي
     // اعتماد على حفظ حقول في قاعدة البيانات.
-    const known = req.driverEmail ? KNOWN_DRIVERS[req.driverEmail] : null;
+    const known = email ? KNOWN_DRIVERS[email] : null;
     let driver = null;
 
     if (known) {
@@ -29,8 +33,8 @@ router.get('/driver/shift-status', verifyFirebaseToken, async (req, res) => {
     } else {
       // احتياطي: لو مش في القايمة الثابتة، نجرب الطريقة القديمة
       driver = await Driver.findOne({ firebaseUid: req.driverUid });
-      if (!driver && req.driverEmail) {
-        driver = await Driver.findOne({ email: req.driverEmail });
+      if (!driver && email) {
+        driver = await Driver.findOne({ email });
       }
     }
 
