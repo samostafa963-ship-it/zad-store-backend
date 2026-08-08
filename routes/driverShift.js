@@ -2,8 +2,54 @@
 // وكلمة مرور، مفيش جوجل ولا فايربيز توكن خالص - مقارنة بيانات مباشرة)
 const express = require('express');
 const router = express.Router();
+const https = require('https');
 const Driver = require('../models/Driver');
 const Order = require('../models/Order'); // عدّل الاسم لو الموديل عندك اسمه مختلف
+
+// ⚠️ نفس مفتاح Google Maps المستخدم في orders.html - لازم يكون
+// مفعّل عليه "Geocoding API" كمان (مش بس Maps JavaScript API) من
+// Google Cloud Console عشان السطر ده يشتغل.
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAjQKtCMP3AvT7u5JY3FkdmGOPNA7sFlms';
+
+// بيحوّل عنوان نصي لإحداثيات (lat/lng) فعليًا عن طريق جوجل - بيتنادى
+// أول ما نحتاج نعرف موقع طلب مفيهوش إحداثيات محفوظة، وبيحفظهم في
+// الطلب نفسه بعد كده عشان منكررش النداء تاني لنفس الطلب.
+function geocodeAddress(address) {
+  return new Promise((resolve) => {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
+    https.get(url, (res) => {
+      let body = '';
+      res.on('data', (chunk) => (body += chunk));
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          const loc = data.results?.[0]?.geometry?.location;
+          if (loc) resolve({ lat: loc.lat, lng: loc.lng });
+          else resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }).on('error', () => resolve(null));
+  });
+}
+
+// بتاخد قايمة طلبات وترجعها بعد ما تتأكد إن كل واحد فيهم عنده
+// إحداثيات - لو ناقصة، بتحسبها من العنوان النصي وتحفظها في الطلب
+// نفسه في قاعدة البيانات عشان المرة الجاية تكون جاهزة على طول.
+async function ensureOrdersHaveCoords(orderList) {
+  for (const order of orderList) {
+    if ((order.lat == null || order.lng == null) && order.address) {
+      const coords = await geocodeAddress(order.address);
+      if (coords) {
+        order.lat = coords.lat;
+        order.lng = coords.lng;
+        await Order.findByIdAndUpdate(order._id, { lat: coords.lat, lng: coords.lng });
+      }
+    }
+  }
+  return orderList;
+}
 
 // ---------------- POST /api/driver/login ----------------
 // المندوب بيبعت رقم الهاتف وكلمة المرور اللي الأدمن سجّلهملوه في
@@ -87,10 +133,11 @@ router.get('/driver/orders', async (req, res) => {
     if (!driver) {
       return res.json({ orders: [] });
     }
-    const orders = await Order.find({
+    let orders = await Order.find({
       driverId: driver._id,
       status: 'delivering',
     }).sort({ createdAt: 1 });
+    orders = await ensureOrdersHaveCoords(orders);
     res.json({ orders });
   } catch (err) {
     console.error(err);
@@ -149,6 +196,21 @@ router.patch('/driver/orders/:orderId/complete', async (req, res) => {
 // شاشة "الطلبات" (السجل) عند المندوب - بترجع كل طلباته (أي حالة:
 // مكتملة، ملغية، جارية...) مرتبة الأحدث الأول، عشان الشاشة تفلترهم
 // بنفسها حسب التاب المختار (الكل/مكتمل/ملغي).
+// ---------------- GET /api/driver/active-orders-with-coords ----------------
+// بتنادى من لوحة التحكم (مش من التطبيق) عشان ترسم مسارات المندوبين -
+// بترجع كل الطلبات "جاري توصيلها" حاليًا بعد ما تتأكد إن كل واحد
+// فيهم عنده إحداثيات (بتحسبها لو ناقصة زي ما بيحصل مع التطبيق بالظبط).
+router.get('/driver/active-orders-with-coords', async (req, res) => {
+  try {
+    let orders = await Order.find({ status: 'delivering' });
+    orders = await ensureOrdersHaveCoords(orders);
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
+  }
+});
+
 router.get('/driver/orders-history', async (req, res) => {
   try {
     const driver = await findDriverByPhone(req);

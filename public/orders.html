@@ -1,4 +1,3 @@
-<!-- cache-bust-2026-08-09-v3 -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -263,8 +262,9 @@
   .stitle{font-size:14px;font-weight:900;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
   .srow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
   .srow:last-child{border-bottom:none;}
-  .drivers-layout{display:flex;gap:14px;height:calc(100vh - 160px);}
-  .drv-sidebar{width:290px;flex-shrink:0;background:var(--card-bg);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;}
+  .drivers-layout{display:flex;gap:14px;height:calc(100vh - 195px);}
+  .drv-sidebar{width:290px;flex-shrink:0;background:var(--card-bg);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;transition:width .25s,opacity .25s;}
+  .drv-sidebar.collapsed{width:0;opacity:0;pointer-events:none;}
   .drv-map-wrap{flex:1;position:relative;border-radius:16px;overflow:hidden;}
   #gmap{width:100%;height:100%;}
   .map-overlay{position:absolute;bottom:12px;right:12px;left:12px;display:flex;flex-direction:row;gap:8px;z-index:500;justify-content:center;flex-wrap:wrap;}
@@ -530,8 +530,12 @@
 
     <!-- ============ PAGE: DRIVERS ============ -->
     <div class="page" id="pg-drivers">
-      <div class="drivers-layout">
-        <div class="drv-sidebar">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px">
+        <button class="btn btn-outline btn-sm" onclick="nav('dashboard')">→ رجوع</button>
+        <button class="btn btn-outline btn-sm" id="drvSidebarToggleBtn" onclick="toggleDrvSidebar()">إخفاء القائمة ☰</button>
+      </div>
+      <div class="drivers-layout" id="driversLayout">
+        <div class="drv-sidebar" id="drvSidebar">
           <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
             <div style="padding:10px;text-align:center;border-left:1px solid var(--border)"><div style="font-size:20px;font-weight:900" id="ds-online">0</div><div style="font-size:10px;color:var(--text-gray)">📡 متصل</div></div>
             <div style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--orange)" id="ds-busy">0</div><div style="font-size:10px;color:var(--text-gray)">📦 في مهمة</div></div>
@@ -1278,6 +1282,16 @@ function exportCustomers(){
 
 // ===== DRIVERS =====
 let drvTabFilter='all';
+// إخفاء/إظهار قايمة المندوبين عشان الخريطة تاخد الشاشة كلها
+function toggleDrvSidebar(){
+  const sidebar = document.getElementById('drvSidebar');
+  const btn = document.getElementById('drvSidebarToggleBtn');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  btn.textContent = collapsed ? 'إظهار القائمة ☰' : 'إخفاء القائمة ☰';
+  // الخريطة محتاجة تعرف إن حجمها اتغيّر عشان ترندر صح
+  setTimeout(() => { if(mapInstance) google.maps.event.trigger(mapInstance, 'resize'); }, 260);
+}
+
 function setDrvTab(tab,el){
   drvTabFilter=tab;
   document.querySelectorAll('[onclick^="setDrvTab"]').forEach(e=>{ e.style.background='transparent'; e.style.color='var(--text-gray)'; });
@@ -1300,7 +1314,7 @@ function renderDriverCards(){
     const online = d.status && d.status!=='offline';
     return `
     <div class="dcard ${selDriverId===d._id?'sel':''}" onclick="selectDriver('${d._id}')">
-      <div class="dav">🛵<div class="sdot" style="background:${dotColor[d.status]||'#9ca3af'}"></div></div>
+      <div class="dav" style="${d.avatar?`background-image:url('${d.avatar}');background-size:cover;background-position:center`:''}">${d.avatar?'':'🛵'}<div class="sdot" style="background:${dotColor[d.status]||'#9ca3af'}"></div></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700">${esc(d.name)}</div>
         <div style="font-size:10px;color:var(--text-gray)">${esc(d.phone)}</div>
@@ -1457,6 +1471,69 @@ async function loadStaffLocations(){
   } catch(e){}
 }
 
+// كل مندوب بيستلم طلب بياخد لون مختلف عن الباقي، ومساره (من موقعه
+// الحالي لحد عنوان التسليم) بيتلوّن بنفس اللون طول ما الطلب شغال -
+// لحد ما يخلّص التوصيل ويرجع الوضع الطبيعي.
+const ROUTE_COLORS = ['#EC1C7A','#3B82F6','#22B573','#F5941F','#8B5CF6','#EF4444','#0EA5E9','#D946EF'];
+let driverRoutePolylines = {};
+
+function orderLatLng(order){
+  const candidates=[
+    order?.lat, order?.deliveryLat,
+    order?.location?.lat, order?.deliveryLocation?.lat,
+  ];
+  const lngCandidates=[
+    order?.lng, order?.deliveryLng,
+    order?.location?.lng, order?.deliveryLocation?.lng,
+  ];
+  for(let i=0;i<candidates.length;i++){
+    if(typeof candidates[i]==='number' && typeof lngCandidates[i]==='number'){
+      return {lat:candidates[i], lng:lngCandidates[i]};
+    }
+  }
+  return null;
+}
+
+let activeOrdersWithCoords = [];
+async function loadActiveOrdersWithCoords(){
+  try{
+    const r = await fetch(`${API}/api/driver/active-orders-with-coords`);
+    const d = await r.json();
+    activeOrdersWithCoords = d.orders || [];
+  } catch(e){ activeOrdersWithCoords = []; }
+}
+
+async function updateDriverRoutes(){
+  if(!mapInstance) return;
+  await loadActiveOrdersWithCoords();
+  const activeDriverIds = new Set();
+  drivers.forEach((d,idx)=>{
+    if(!d.location?.lat) return;
+    const activeOrder = activeOrdersWithCoords.find(o=>o.driverId===d._id);
+    if(!activeOrder) return;
+    const dest = orderLatLng(activeOrder);
+    if(!dest) return; // الطلب اتحاول يتحسبله إحداثيات ومقدرناش (عنوان غريب)
+    activeDriverIds.add(d._id);
+    const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
+    const path = [{lat:d.location.lat,lng:d.location.lng}, dest];
+    if(driverRoutePolylines[d._id]){
+      driverRoutePolylines[d._id].setPath(path);
+      driverRoutePolylines[d._id].setOptions({strokeColor:color});
+    } else {
+      driverRoutePolylines[d._id] = new google.maps.Polyline({
+        path, map: mapInstance, strokeColor: color, strokeWeight: 4, strokeOpacity: 0.85,
+      });
+    }
+  });
+  // نشيل خطوط أي مندوب خلّص طلبه أو بقى غير شغال
+  Object.keys(driverRoutePolylines).forEach(id=>{
+    if(!activeDriverIds.has(id)){
+      driverRoutePolylines[id].setMap(null);
+      delete driverRoutePolylines[id];
+    }
+  });
+}
+
 function updateMapMarkers(){
   if(!mapInstance) return;
   const existing=new Set(Object.keys(mapMarkers));
@@ -1483,6 +1560,7 @@ function updateMapMarkers(){
   });
   existing.forEach(id=>{ mapMarkers[id].setMap(null); delete mapMarkers[id]; });
   document.getElementById('mapEmpty').style.display=hasAny?'none':'block';
+  updateDriverRoutes();
 }
 function toggleFollow(){
   autoFollow=!autoFollow;
