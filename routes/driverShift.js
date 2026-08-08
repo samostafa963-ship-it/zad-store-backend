@@ -76,15 +76,22 @@ router.patch('/drivers/:id/shift', async (req, res) => {
   }
 });
 
-// ---------------- GET /api/driver/current-order ----------------
-router.get('/driver/current-order', async (req, res) => {
+// ---------------- GET /api/driver/orders ----------------
+// ⚠️ استبدلنا فكرة "طلب واحد بس" بقايمة كاملة - المندوب دلوقتي يقدر
+// ياخد أكتر من طلب في نفس الوقت. بندوّر مباشرة على أي طلب حالة
+// "delivering" ومسند لنفس المندوب ده (driverId)، مش على حقل
+// currentOrderId المفرد القديم.
+router.get('/driver/orders', async (req, res) => {
   try {
     const driver = await findDriverByPhone(req);
-    if (!driver || !driver.currentOrderId) {
-      return res.json({ order: null });
+    if (!driver) {
+      return res.json({ orders: [] });
     }
-    const order = await Order.findById(driver.currentOrderId);
-    res.json({ order: order || null });
+    const orders = await Order.find({
+      driverId: driver._id,
+      status: 'delivering',
+    }).sort({ createdAt: 1 });
+    res.json({ orders });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'خطأ في الخادم' });
@@ -111,18 +118,24 @@ router.patch('/driver/location', async (req, res) => {
   }
 });
 
-// ---------------- PATCH /api/driver/current-order/complete ----------------
-// المندوب بيدوس "تم التوصيل" - بيقفل الطلب فعليًا (completed) ويشيله
-// من "الطلب الحالي" بتاعه عشان يقدر يستقبل طلب جديد.
-router.patch('/driver/current-order/complete', async (req, res) => {
+// ---------------- PATCH /api/driver/orders/:orderId/complete ----------------
+// المندوب بيدوس "تم التوصيل" على طلب معيّن من قايمة طلباته - بيقفل
+// الطلب ده بس (completed)، وباقي طلباته يفضلوا زي ما هما.
+router.patch('/driver/orders/:orderId/complete', async (req, res) => {
   try {
     const driver = await findDriverByPhone(req);
-    if (!driver || !driver.currentOrderId) {
-      return res.status(404).json({ message: 'مفيش طلب حالي لقفله' });
+    if (!driver) {
+      return res.status(404).json({ message: 'حسابك مش مربوط بسجل مندوب' });
     }
-    const orderId = driver.currentOrderId;
-    await Order.findByIdAndUpdate(orderId, { status: 'completed' });
-    driver.currentOrderId = null;
+    const order = await Order.findOne({
+      _id: req.params.orderId,
+      driverId: driver._id,
+    });
+    if (!order) {
+      return res.status(404).json({ message: 'الطلب ده مش تابع لك' });
+    }
+    order.status = 'completed';
+    await order.save();
     driver.totalDeliveries = (driver.totalDeliveries || 0) + 1;
     await driver.save();
     res.json({ ok: true });
