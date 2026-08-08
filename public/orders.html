@@ -305,11 +305,11 @@
     <ul class="nav" style="margin-top:6px">
       <li><a onclick="nav('dashboard')" class="active" data-page="dashboard"><span class="left"><i class="fa-solid fa-house"></i> لوحة المعلومات</span></a></li>
       <li><a onclick="nav('orders')" data-page="orders"><span class="left"><i class="fa-solid fa-bag-shopping"></i> إدارة الطلبات</span> <span class="count-badge" id="sb-ord" style="display:none">0</span></a></li>
-      <li><a onclick="nav('drivers')" data-page="drivers"><span class="left"><i class="fa-solid fa-motorcycle"></i> إدارة الدليفري</span></a></li>
+      <li><a onclick="nav('drivers');setTimeout(()=>setDrvMode('manage'),250)" data-page="drivers"><span class="left"><i class="fa-solid fa-motorcycle"></i> إدارة الدليفري</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-user-check"></i> مراجعة طلبات الانضمام</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-store"></i> إدارة المتاجر</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-paper-plane"></i> توزيع الطلبات</span></a></li>
-      <li><a onclick="nav('drivers')" data-page="drivers"><span class="left"><i class="fa-solid fa-location-dot"></i> المتابعة المباشرة</span> <span class="live-badge">LIVE</span></a></li>
+      <li><a onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)" data-page="drivers"><span class="left"><i class="fa-solid fa-location-dot"></i> المتابعة المباشرة</span> <span class="live-badge">LIVE</span></a></li>
       <li><a onclick="nav('customers')" data-page="customers"><span class="left"><i class="fa-solid fa-users"></i> العملاء</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-box"></i> المنتجات</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-table-cells"></i> الأقسام</span></a></li>
@@ -369,7 +369,7 @@
       <!-- MID ROW: donut / line chart / map -->
       <div class="mid-grid" style="grid-template-columns:1.6fr 1.4fr 1.1fr">
         <div class="card map-card">
-          <div class="card-head"><div class="link" onclick="nav('drivers')">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
+          <div class="card-head"><div class="link" onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
           <div id="dashMapView" style="height:220px;border-radius:12px;overflow:hidden"></div>
         </div>
 
@@ -425,7 +425,7 @@
       <!-- FOOTER QUICK ACTIONS -->
       <div class="footer-actions">
         <div class="fa-card" onclick="toast('قريبًا 🚀','info')"><div class="fa-ic" style="background:var(--pink)"><i class="fa-solid fa-paper-plane"></i></div><div><div class="fa-title">إرسال إشعار</div><div class="fa-sub">إرسال إشعار جماعي للعملاء</div></div></div>
-        <div class="fa-card" onclick="nav('drivers')"><div class="fa-ic" style="background:var(--purple)"><i class="fa-solid fa-motorcycle"></i></div><div><div class="fa-title">متابعة الدليفري</div><div class="fa-sub">عرض حركة الدليفري الآن</div></div></div>
+        <div class="fa-card" onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)"><div class="fa-ic" style="background:var(--purple)"><i class="fa-solid fa-motorcycle"></i></div><div><div class="fa-title">متابعة الدليفري</div><div class="fa-sub">عرض حركة الدليفري الآن</div></div></div>
         <div class="fa-card" onclick="toast('قريبًا 🚀','info')"><div class="fa-ic" style="background:var(--gold)"><i class="fa-solid fa-gift"></i></div><div><div class="fa-title">إضافة رصيد مجاني</div><div class="fa-sub">إضافة رصيد لعميل أو مجموعة</div></div></div>
         <div class="fa-card" onclick="nav('reports')"><div class="fa-ic" style="background:var(--green)"><i class="fa-solid fa-chart-line"></i></div><div><div class="fa-title">تقرير المبيعات</div><div class="fa-sub">عرض تقرير المبيعات اليومي</div></div></div>
       </div>
@@ -536,6 +536,11 @@
       </div>
       <div class="drivers-layout" id="driversLayout">
         <div class="drv-sidebar" id="drvSidebar">
+          <div style="display:flex;padding:10px 12px 0;gap:6px">
+            <div id="drvModeManage" onclick="setDrvMode('manage')" style="flex:1;text-align:center;padding:8px;border-radius:10px 10px 0 0;font-size:12px;font-weight:800;cursor:pointer;background:var(--pink);color:#fff">إدارة المندوبين</div>
+            <div id="drvModeTracking" onclick="setDrvMode('tracking')" style="flex:1;text-align:center;padding:8px;border-radius:10px 10px 0 0;font-size:12px;font-weight:800;cursor:pointer;color:var(--text-gray);background:var(--bg)">تتبع الطلبات</div>
+          </div>
+          <div id="drvPanelManage">
           <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
             <div style="padding:10px;text-align:center;border-left:1px solid var(--border)"><div style="font-size:20px;font-weight:900" id="ds-online">0</div><div style="font-size:10px;color:var(--text-gray)">📡 متصل</div></div>
             <div style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--orange)" id="ds-busy">0</div><div style="font-size:10px;color:var(--text-gray)">📦 في مهمة</div></div>
@@ -556,6 +561,14 @@
             <div style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;color:var(--text-gray)" onclick="setDrvTab('offline',this)">غير متصل</div>
           </div>
           <div style="flex:1;overflow-y:auto" id="drvCards"></div>
+          </div>
+          <div id="drvPanelTracking" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+            <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:900;font-size:13px">الطلبات النشطة (<span id="tracking-count">0</span>)</span>
+              <i class="fa-solid fa-bag-shopping" style="color:var(--pink)"></i>
+            </div>
+            <div style="flex:1;overflow-y:auto" id="trackingCards"></div>
+          </div>
         </div>
         <div class="drv-map-wrap">
           <div id="gmap"></div>
@@ -1283,6 +1296,57 @@ function exportCustomers(){
 // ===== DRIVERS =====
 let drvTabFilter='all';
 // إخفاء/إظهار قايمة المندوبين عشان الخريطة تاخد الشاشة كلها
+// بدّل بين "إدارة المندوبين" و"تتبع الطلبات" في نفس الشريط الجانبي -
+// نفس الخريطة فاضلة زي ما هي، بس محتوى الشريط بيتغيّر.
+let drvMode = 'manage';
+function setDrvMode(mode){
+  drvMode = mode;
+  document.getElementById('drvPanelManage').style.display = mode==='manage' ? '' : 'none';
+  document.getElementById('drvPanelTracking').style.display = mode==='tracking' ? 'flex' : 'none';
+  document.getElementById('drvModeManage').style.background = mode==='manage' ? 'var(--pink)' : 'var(--bg)';
+  document.getElementById('drvModeManage').style.color = mode==='manage' ? '#fff' : 'var(--text-gray)';
+  document.getElementById('drvModeTracking').style.background = mode==='tracking' ? 'var(--pink)' : 'var(--bg)';
+  document.getElementById('drvModeTracking').style.color = mode==='tracking' ? '#fff' : 'var(--text-gray)';
+  if(mode==='tracking') renderTrackingCards();
+}
+
+// مسافة حقيقية بالكيلومتر بين نقطتين (معادلة Haversine) - مش رقم
+// وهمي، بتتحسب فعليًا من إحداثيات المندوب الحالية وعنوان التسليم.
+function distanceKm(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function renderTrackingCards(){
+  const list = activeOrdersWithCoords || [];
+  document.getElementById('tracking-count').textContent = list.length;
+  document.getElementById('trackingCards').innerHTML = list.map((o,idx) => {
+    const driver = drivers.find(d => d._id === o.driverId);
+    const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
+    const dest = orderLatLng(o);
+    let distText = '—';
+    if(driver?.location?.lat && dest){
+      distText = distanceKm(driver.location.lat, driver.location.lng, dest.lat, dest.lng).toFixed(1) + ' كم متبقية';
+    }
+    return `
+    <div class="dcard" style="border-right:4px solid ${color}" onclick="openOrderDetail('${o._id}')">
+      <div class="dav" style="${driver?.avatar?`background-image:url('${driver.avatar}');background-size:cover;background-position:center`:''}">${driver?.avatar?'':'🛵'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="badge rider" style="font-size:9px">جاري التوصيل</span>
+          <span class="oid" style="font-size:11px">#${o._id.slice(-6).toUpperCase()}</span>
+        </div>
+        <div style="font-size:12px;font-weight:800;margin-top:4px">${esc(driver?.name||'—')}</div>
+        <div style="font-size:10px;color:var(--text-gray)">إلى: ${esc((o.address||'').slice(0,28))}</div>
+        <div style="font-size:10px;color:${color};font-weight:700;margin-top:2px">${distText}</div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="padding:30px;text-align:center;color:var(--text-gray);font-size:12px">لا توجد طلبات جارية دلوقتي</div>';
+}
+
 function toggleDrvSidebar(){
   const sidebar = document.getElementById('drvSidebar');
   const btn = document.getElementById('drvSidebarToggleBtn');
@@ -1506,6 +1570,7 @@ async function loadActiveOrdersWithCoords(){
 async function updateDriverRoutes(){
   if(!mapInstance) return;
   await loadActiveOrdersWithCoords();
+  if(drvMode==='tracking') renderTrackingCards();
   const activeDriverIds = new Set();
   drivers.forEach((d,idx)=>{
     if(!d.location?.lat) return;
