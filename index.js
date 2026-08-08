@@ -50,6 +50,7 @@ app.use('/api/driver', require('./routes/driverDocuments'));
 app.use(express.static('public'));
 app.use('/api', require('./routes/driverShift'));
 app.use('/api/staff', require('./routes/staffLocation'));
+app.use('/api', require('./routes/pushNotifications'));
 
 app.use(express.static('public'));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
