@@ -1,8 +1,8 @@
-// ملف: routes/driverDocuments.js (نسخة مُصلَّحة)
+// ملف: routes/driverDocuments.js (نسخة نهائية - رفع صور وملفات
+// المندوب برقم الهاتف، مفيش فايربيز توكن خالص، زي باقي النظام دلوقتي)
 const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
-const { verifyFirebaseToken } = require('../middleware/firebaseAdminAuth');
 const Driver = require('../models/Driver');
 
 const router = express.Router();
@@ -27,84 +27,99 @@ function uploadBufferToCloudinary(buffer, folder) {
   });
 }
 
-// بيدوّر على سجل المندوب فعليًا (مش بيعمل واحد جديد) - أول بالـ UID
-// لو مربوط قبل كده، وإلا بالإيميل مع ربط الـ UID فورًا. ⚠️ ده بيفترض
-// إن الأدمن عمل سجل المندوب من اللوحة الأول (بالإيميل) - لو محدش
-// عمل كده، الرفع هيفشل برسالة واضحة بدل ما يعمل سجل مكرر فاضي.
-async function findLinkedDriver(req) {
-  let driver = await Driver.findOne({ firebaseUid: req.driverUid });
-  if (!driver && req.driverEmail) {
-    driver = await Driver.findOne({ email: req.driverEmail });
-    if (driver) {
-      driver.firebaseUid = req.driverUid;
-      await driver.save();
-    }
-  }
-  return driver;
+// بيدوّر على المندوب برقم الهاتف بس - نفس منطق driverShift.js.
+async function findDriverByPhone(req) {
+  const phone = req.query.phone || req.body.phone;
+  if (!phone) return null;
+  return Driver.findOne({ phone: phone.trim() });
 }
 
 // ---------------- POST /api/driver/documents ----------------
-router.post(
-  '/documents',
-  verifyFirebaseToken,
-  upload.single('file'),
-  async (req, res) => {
-    try {
-      const { type } = req.body;
-      if (!req.file || !type) {
-        return res.status(400).json({ message: 'الملف والنوع مطلوبين' });
-      }
-
-      const driver = await findLinkedDriver(req);
-      if (!driver) {
-        return res.status(404).json({
-          message: 'حسابك مش مربوط بسجل مندوب - كلم الأدمن يتأكد إن إيميلك متسجل صح في اللوحة',
-        });
-      }
-
-      const result = await uploadBufferToCloudinary(
-        req.file.buffer,
-        'zura/driver-documents'
-      );
-
-      driver.documents = driver.documents || {};
-      driver.documents[type] = {
-        url: result.secure_url,
-        status: 'pending',
-        uploadedAt: new Date(),
-      };
-      driver.markModified('documents');
-      await driver.save();
-
-      res.json({ url: result.secure_url, status: 'pending' });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'خطأ في رفع المستند' });
+router.post('/documents', upload.single('file'), async (req, res) => {
+  try {
+    const { type } = req.body;
+    if (!req.file || !type) {
+      return res.status(400).json({ message: 'الملف والنوع مطلوبين' });
     }
+    const driver = await findDriverByPhone(req);
+    if (!driver) {
+      return res.status(404).json({
+        message: 'حسابك مش مربوط بسجل مندوب - كلم الأدمن يتأكد إن رقمك متسجل صح في اللوحة',
+      });
+    }
+
+    const result = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'zura/driver-documents'
+    );
+
+    driver.documents = driver.documents || {};
+    driver.documents[type] = {
+      url: result.secure_url,
+      status: 'pending',
+      uploadedAt: new Date(),
+    };
+    driver.markModified('documents');
+    await driver.save();
+
+    res.json({ url: result.secure_url, status: 'pending' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في رفع المستند' });
   }
-);
+});
 
 // ---------------- POST /api/driver/profile-photo ----------------
-router.post(
-  '/profile-photo',
-  verifyFirebaseToken,
-  upload.single('file'),
-  async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'الملف مطلوب' });
-      }
-      const result = await uploadBufferToCloudinary(
-        req.file.buffer,
-        'zura/driver-profile-photos'
-      );
-      res.json({ url: result.secure_url });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'خطأ في رفع الصورة' });
+// ⚠️ ده اللي محتاجينه عشان صورة البروفايل - بيرفع الصورة فعليًا
+// ويحفظ رابطها في حقل avatar بتاع سجل المندوب نفسه (نفس الحقل اللي
+// اللوحة بتقراه)، مش بس بيرجعه للتطبيق.
+router.post('/profile-photo', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'الملف مطلوب' });
     }
+    const driver = await findDriverByPhone(req);
+    if (!driver) {
+      return res.status(404).json({
+        message: 'حسابك مش مربوط بسجل مندوب - كلم الأدمن يتأكد إن رقمك متسجل صح في اللوحة',
+      });
+    }
+    const result = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'zura/driver-profile-photos'
+    );
+    driver.avatar = result.secure_url;
+    await driver.save();
+    res.json({ url: result.secure_url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في رفع الصورة' });
   }
-);
+});
+
+// ---------------- PUT /api/driver/profile ----------------
+// المندوب بيعدّل اسمه من شاشة "المعلومات الشخصية" - بيحدّث سجله
+// مباشرة في قاعدة البيانات (نفس الاسم اللي هيظهر للأدمن في اللوحة).
+router.put('/profile', async (req, res) => {
+  try {
+    const { phone, name } = req.body;
+    if (!phone || !name) {
+      return res.status(400).json({ message: 'رقم الهاتف والاسم مطلوبين' });
+    }
+    const driver = await Driver.findOneAndUpdate(
+      { phone: phone.trim() },
+      { name: name.trim() },
+      { new: true }
+    );
+    if (!driver) {
+      return res.status(404).json({ message: 'المندوب غير موجود' });
+    }
+    res.json({ name: driver.name });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
+  }
+});
 
 // ---------------- PATCH /api/driver/documents/:driverId/:type ----------------
 // TODO: احمي الراوت ده بصلاحية أدمن مش صلاحية سائق عادي.
