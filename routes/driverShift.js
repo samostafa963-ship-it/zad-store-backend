@@ -145,4 +145,24 @@ router.patch('/driver/orders/:orderId/complete', async (req, res) => {
   }
 });
 
+// ---------------- GET /api/driver/orders-history ----------------
+// شاشة "الطلبات" (السجل) عند المندوب - بترجع كل طلباته (أي حالة:
+// مكتملة، ملغية، جارية...) مرتبة الأحدث الأول، عشان الشاشة تفلترهم
+// بنفسها حسب التاب المختار (الكل/مكتمل/ملغي).
+router.get('/driver/orders-history', async (req, res) => {
+  try {
+    const driver = await findDriverByPhone(req);
+    if (!driver) {
+      return res.json({ orders: [] });
+    }
+    const orders = await Order.find({ driverId: driver._id }).sort({
+      createdAt: -1,
+    });
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
+  }
+});
+
 module.exports = router;
