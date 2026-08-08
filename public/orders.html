@@ -1030,11 +1030,20 @@ let dashMapMarkersObj = {};
 // مكتبات إضافية.
 function svgMarkerIcon(color, emoji, size){
   size = size || 34;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2-2.5}" fill="${color}" stroke="white" stroke-width="3"/><text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" font-size="${Math.round(size*0.5)}">${emoji}</text></svg>`;
+  const emojiSize = Math.round(size*0.9);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size+6}">
+    <defs>
+      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-opacity="0.4"/>
+      </filter>
+    </defs>
+    <text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" font-size="${emojiSize}" filter="url(#shadow)">${emoji}</text>
+    <circle cx="${size/2}" cy="${size+1}" r="4" fill="${color}" stroke="white" stroke-width="1.5"/>
+  </svg>`;
   return {
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-    scaledSize: new google.maps.Size(size, size),
-    anchor: new google.maps.Point(size/2, size/2),
+    scaledSize: new google.maps.Size(size, size+6),
+    anchor: new google.maps.Point(size/2, size+1),
   };
 }
 
@@ -1066,7 +1075,7 @@ function updateDashMapPins(){
     } else {
       const m = new google.maps.Marker({
         position: pos, map: dashMap, title: d.name,
-        icon: svgMarkerIcon(color, '🛵', 28),
+        icon: svgMarkerIcon(color, '🏍️', 32),
         opacity: online?1:0.4,
       });
       m.addListener('click', () => nav('drivers'));
@@ -1188,7 +1197,7 @@ async function confirmAssign(){
     await fetch(`${API}/api/orders/${assignOrderId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'delivering',driverId})});
     const o=orders.find(x=>x._id===assignOrderId);
     // بيبعت إشعار حقيقي بصوت لجهاز المندوب حتى لو التطبيق مقفول
-    fetch(`${API}/api/driver/notify-new-order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({driverId,orderId:assignOrderId,customerName:o?.name,total:o?.total})}).catch(()=>{});
+    fetch(`${API}/api/driver/notify-new-order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({driverId,orderId:assignOrderId,customerName:o?.name,total:o?.total})}).then(r=>r.json()).then(d=>console.log('🔵 [notify] رد الإشعار:',d)).catch(e=>console.log('🔴 [notify] فشل:',e));
     if(o) waInvoice(o);
     closeModal('assignModal');
     toast('✅ تم الإسناد','ok');
@@ -1390,7 +1399,7 @@ function locateAdmin(targetMap){
     const matchedDriver = u ? drivers.find(d => d.email && d.email === u.email) : null;
     const posObj = { lat: latitude, lng: longitude };
     const icon = matchedDriver
-      ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🛵', 34)
+      ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 38)
       : personMarkerIcon(u?.avatar, 34);
     if(targetMap === mapInstance){
       if(adminMarker) adminMarker.setPosition(posObj);
@@ -1430,7 +1439,7 @@ async function loadStaffLocations(){
         const pos = { lat: s.lat, lng: s.lng };
         const matchedDriver = drivers.find(d => d.email && d.email === s.email);
         const icon = matchedDriver
-          ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🛵', 30)
+          ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 34)
           : personMarkerIcon(s.avatar, 30);
         if(store[s.email]){
           store[s.email].setPosition(pos);
@@ -1463,7 +1472,7 @@ function updateMapMarkers(){
     } else {
       const m = new google.maps.Marker({
         position: pos, map: mapInstance, title: d.name,
-        icon: svgMarkerIcon(color, '🛵', 40),
+        icon: svgMarkerIcon(color, '🏍️', 46),
         opacity: online?1:0.4,
       });
       m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
