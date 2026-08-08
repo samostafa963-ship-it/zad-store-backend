@@ -111,4 +111,25 @@ router.patch('/driver/location', async (req, res) => {
   }
 });
 
+// ---------------- PATCH /api/driver/current-order/complete ----------------
+// المندوب بيدوس "تم التوصيل" - بيقفل الطلب فعليًا (completed) ويشيله
+// من "الطلب الحالي" بتاعه عشان يقدر يستقبل طلب جديد.
+router.patch('/driver/current-order/complete', async (req, res) => {
+  try {
+    const driver = await findDriverByPhone(req);
+    if (!driver || !driver.currentOrderId) {
+      return res.status(404).json({ message: 'مفيش طلب حالي لقفله' });
+    }
+    const orderId = driver.currentOrderId;
+    await Order.findByIdAndUpdate(orderId, { status: 'completed' });
+    driver.currentOrderId = null;
+    driver.totalDeliveries = (driver.totalDeliveries || 0) + 1;
+    await driver.save();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
+  }
+});
+
 module.exports = router;
