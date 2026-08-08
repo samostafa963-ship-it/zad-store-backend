@@ -1187,6 +1187,8 @@ async function confirmAssign(){
     await fetch(`${API}/api/drivers/${driverId}/assign`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:assignOrderId})});
     await fetch(`${API}/api/orders/${assignOrderId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'delivering',driverId})});
     const o=orders.find(x=>x._id===assignOrderId);
+    // بيبعت إشعار حقيقي بصوت لجهاز المندوب حتى لو التطبيق مقفول
+    fetch(`${API}/api/driver/notify-new-order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({driverId,orderId:assignOrderId,customerName:o?.name,total:o?.total})}).catch(()=>{});
     if(o) waInvoice(o);
     closeModal('assignModal');
     toast('✅ تم الإسناد','ok');
