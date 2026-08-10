@@ -146,9 +146,13 @@ router.get('/driver/orders', async (req, res) => {
 });
 
 // ---------------- PATCH /api/driver/location ----------------
+// بيستقبل موقع المندوب الحقيقي + سرعته الحقيقية من GPS الجهاز
+// (Position.speed بالمتر/الثانية، جاية من Geolocator في تطبيق
+// المندوب) - مش محسوبة يدويًا من نقطتين، القيمة نفسها اللي الهاردوير
+// بيرجعها.
 router.patch('/driver/location', async (req, res) => {
   try {
-    const { lat, lng } = req.body;
+    const { lat, lng, speed } = req.body;
     if (lat == null || lng == null) {
       return res.status(400).json({ message: 'lat/lng مطلوبين' });
     }
@@ -156,7 +160,12 @@ router.patch('/driver/location', async (req, res) => {
     if (!driver) {
       return res.status(404).json({ message: 'حسابك مش مربوط بسجل مندوب' });
     }
-    driver.location = { lat, lng, updatedAt: new Date() };
+    driver.location = {
+      lat,
+      lng,
+      speed: typeof speed === 'number' ? speed : 0,
+      updatedAt: new Date(),
+    };
     await driver.save();
     res.json({ ok: true });
   } catch (err) {

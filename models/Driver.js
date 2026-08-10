@@ -16,6 +16,7 @@ const driverSchema = new mongoose.Schema({
   location: {
     lat: { type: Number, default: null },
     lng: { type: Number, default: null },
+    speed: { type: Number, default: 0 }, // م/ث - سرعة حقيقية من GPS الجهاز (Position.speed)
     updatedAt: { type: Date, default: null },
   },
   shiftStartTime: { type: Date, default: null },
