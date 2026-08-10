@@ -360,6 +360,9 @@
   .trk-rider-pulse{position:absolute;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
   .trk-rider-pulse .ring{position:absolute;inset:0;border-radius:50%;animation:pulse 1.6s ease-out infinite;}
   .trk-rider-pulse .core{position:relative;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 8px rgba(0,0,0,.3);border:2px solid #fff;}
+  .trk-order-label{position:absolute;bottom:46px;right:50%;transform:translateX(50%);background:#fff;border-radius:10px;padding:6px 10px;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.2);cursor:pointer;color:var(--text-dark);z-index:5;max-width:230px;overflow:hidden;text-overflow:ellipsis;}
+  .trk-order-label:hover{background:var(--pink-light);}
+  .trk-order-label .oid{color:var(--pink);font-weight:900;margin-left:4px;}
 </style>
 </head>
 <body>
@@ -1210,15 +1213,23 @@ function svgMarkerIcon(color, emoji, size, avatarUrl){
 // مستخدمة في خريطة "إدارة الدليفري" وخريطة "المتابعة المباشرة" مع
 // بعض عشان الشكل يبقى موحّد في كل مكان.
 class PulseOverlay extends google.maps.OverlayView{
-  constructor(pos,color,onClick,avatarUrl){ super(); this.pos=pos; this.color=color; this.div=null; this.onClick=onClick; this.avatarUrl=avatarUrl; }
+  constructor(pos,color,onClick,avatarUrl,orderLabelHtml,onLabelClick){
+    super(); this.pos=pos; this.color=color; this.div=null; this.onClick=onClick;
+    this.avatarUrl=avatarUrl; this.orderLabelHtml=orderLabelHtml; this.onLabelClick=onLabelClick;
+  }
   onAdd(){
     const div=document.createElement('div');
     div.className='trk-rider-pulse';
     const core = this.avatarUrl
       ? `<img src="${this.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
       : '🏍️';
-    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">${core}</div>`;
+    const label = this.orderLabelHtml ? `<div class="trk-order-label">${this.orderLabelHtml}</div>` : '';
+    div.innerHTML=`${label}<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">${core}</div>`;
     if(this.onClick){ div.style.cursor='pointer'; div.addEventListener('click', this.onClick); }
+    if(this.onLabelClick){
+      const lblEl = div.querySelector('.trk-order-label');
+      if(lblEl) lblEl.addEventListener('click', (e) => { e.stopPropagation(); this.onLabelClick(); });
+    }
     this.div=div;
     this.getPanes().overlayMouseTarget.appendChild(div);
   }
@@ -1625,8 +1636,11 @@ function initMap(){
 // بيه (من نفس بيانات تسجيل الدخول بجوجل - مش لازم يكون مندوب، ممكن
 // يكون موظف/أدمن). ده منفصل تمامًا عن مواقع المندوبين اللي بييجي من
 // الباك اند.
-let adminMarker = null;
-let adminMarkerDash = null;
+// ⚠️ Map حقيقي (مفتاح=object الخريطة، قيمة=العلامة) بدل متغيرين
+// ثابتين - عشان الزرار يشتغل صح على أي خريطة في اللوحة (خريطة إدارة
+// الدليفري، خريطة الداشبورد المصغرة، وخريطة المتابعة المباشرة) مش
+// بس اتنين منهم زي قبل كده.
+let adminMarkersByMap = new Map();
 // أيقونة موظف/أدمن نضيفة بنفس شكل دبابيس المندوبين - لو عنده صورة
 // بروفايل حقيقية (من جوجل) بتتحط جوه الدبوس، ولو مفيش بيرجع لإيموجي.
 function personMarkerIcon(avatarUrl, size){
@@ -1653,12 +1667,13 @@ function locateAdmin(targetMap){
     const icon = matchedDriver
       ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 38, matchedDriver.avatar)
       : personMarkerIcon(u?.avatar, 34);
-    if(targetMap === mapInstance){
-      if(adminMarker) adminMarker.setPosition(posObj);
-      else adminMarker = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
+    let marker = adminMarkersByMap.get(targetMap);
+    if(marker){
+      marker.setPosition(posObj);
+      marker.setIcon(icon);
     } else {
-      if(adminMarkerDash) adminMarkerDash.setPosition(posObj);
-      else adminMarkerDash = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
+      marker = new google.maps.Marker({ position: posObj, map: targetMap, title: `${label} (أنت)`, icon, zIndex: 1000 });
+      adminMarkersByMap.set(targetMap, marker);
     }
     targetMap.setCenter(posObj);
     targetMap.setZoom(14);
@@ -1676,6 +1691,7 @@ function locateAdmin(targetMap){
 // (مش بس جهازك إنت) ونعرضهم على الخريطتين كمان.
 let staffMarkersMain = {};
 let staffMarkersDash = {};
+let staffMarkersTrk = {};
 async function loadStaffLocations(){
   try{
     const r = await fetch(`${API}/api/staff/locations`);
@@ -1683,7 +1699,7 @@ async function loadStaffLocations(){
     const list = (d.staff || []);
     const myEmail = (() => { try{ return JSON.parse(localStorage.getItem('zu')||'{}').email; } catch(e){ return null; } })();
 
-    [{ map: mapInstance, store: staffMarkersMain }, { map: dashMap, store: staffMarkersDash }].forEach(({ map, store }) => {
+    [{ map: mapInstance, store: staffMarkersMain }, { map: dashMap, store: staffMarkersDash }, { map: trkMap, store: staffMarkersTrk }].forEach(({ map, store }) => {
       if(!map) return;
       const existing = new Set(Object.keys(store));
       list.forEach(s => {
@@ -1808,11 +1824,18 @@ function updateMapMarkers(){
     if(activeOrder){
       if(mapMarkers[d._id]){ mapMarkers[d._id].setMap(null); delete mapMarkers[d._id]; }
       const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
-      if(driverPulseOverlays[d._id]){
+      // لوحة صغيرة فوق الأيقونة فيها رقم الطلب والعنوان - دوسة عليها
+      // توديك مباشرة لتفاصيل الطلب ده.
+      const shortId = activeOrder._id.slice(-4).toUpperCase();
+      const labelHtml = `<span class="oid">#${shortId}</span>${esc((activeOrder.address||'').slice(0,30))}`;
+      if(driverPulseOverlays[d._id] && driverPulseOverlays[d._id]._orderId === activeOrder._id){
         driverPulseOverlays[d._id].setPos(pos);
       } else {
-        driverPulseOverlays[d._id] = new PulseOverlay(pos, color, () => { selDriverId=d._id; selectDriver(d._id); }, d.avatar);
-        driverPulseOverlays[d._id].setMap(mapInstance);
+        driverPulseOverlays[d._id]?.setMap(null);
+        const ov = new PulseOverlay(pos, color, () => { selDriverId=d._id; selectDriver(d._id); }, d.avatar, labelHtml, () => openOrderDetail(activeOrder._id));
+        ov._orderId = activeOrder._id;
+        ov.setMap(mapInstance);
+        driverPulseOverlays[d._id] = ov;
       }
       existingPulse.delete(d._id);
       existingPlain.delete(d._id);
@@ -1919,7 +1942,7 @@ async function refreshTrkMap(){
     if(!trkMarkers[o._id]){
       trkMarkers[o._id]={};
       if(dest) trkMarkers[o._id].destMarker=new google.maps.Marker({position:dest,map:trkMap,icon:trkSmallPin(color,'🏠'),zIndex:800});
-      trkMarkers[o._id].riderOverlay=new PulseOverlay(driver.location,color,null,driver.avatar);
+      trkMarkers[o._id].riderOverlay=new PulseOverlay(driver.location,color,null,driver.avatar,`<span class="oid">#${o._id.slice(-4).toUpperCase()}</span>${esc((o.address||'').slice(0,30))}`,()=>openOrderDetail(o._id));
       trkMarkers[o._id].riderOverlay.setMap(trkMap);
       // مسار حقيقي على الطرق (من المتجر للعنوان) - بيتطلب مرة واحدة
       // بس لكل طلب ويتخزن، عشان الموقع الثابت (المتجر والعنوان) مش
