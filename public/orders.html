@@ -284,6 +284,71 @@
   .ptag{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--pink-light);color:var(--pink);font-weight:700;}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:0}}
+
+  /* ===== SIDEBAR COLLAPSE (edge toggle) ===== */
+  .sidebar{
+    position:fixed;top:8px;right:8px;bottom:8px;
+    transform:translateX(110%);
+    transition:transform .28s ease;
+    z-index:2500;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:2400;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .sidebar-backdrop.show{opacity:1;pointer-events:all;}
+  .sidebar-edge-tab{
+    position:fixed;top:50%;right:0;transform:translateY(-50%);
+    width:26px;height:64px;background:var(--pink);
+    border-radius:12px 0 0 12px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:15px;cursor:pointer;z-index:2600;
+    box-shadow:-2px 0 10px rgba(0,0,0,.15);transition:.15s;
+  }
+  .sidebar-edge-tab:hover{width:30px;}
+
+  /* ===== TRACKING PAGE (تتبع الدليفري - full screen) ===== */
+  #pg-tracking{position:fixed;inset:0;background:#fff;z-index:2000;display:none;flex-direction:column;}
+  #pg-tracking.active{display:flex;}
+  .trk-topbar{height:64px;flex-shrink:0;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--border);}
+  .trk-logo{font-size:22px;font-weight:900;color:var(--pink);cursor:pointer;}
+  .trk-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--text-dark);}
+  .trk-title .pin-btn{width:26px;height:26px;border-radius:8px;background:var(--pink-light);color:var(--pink);display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .trk-filter{background:var(--pink-light);color:var(--text-dark);font-size:12px;font-weight:700;padding:8px 14px;border-radius:10px;border:none;appearance:none;font-family:inherit;direction:rtl;cursor:pointer;}
+  .trk-right{margin-right:auto;display:flex;align-items:center;gap:18px;}
+  .trk-body{flex:1;display:flex;overflow:hidden;}
+  .trk-sidebar{width:380px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .trk-sidebar-hd{padding:16px 18px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+  .trk-cards{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;}
+  .trk-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;border-right:4px solid var(--pink);cursor:pointer;}
+  .trk-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .trk-oid{font-size:12px;font-weight:900;color:var(--text-gray);}
+  .trk-status{font-size:10px;font-weight:800;padding:3px 9px;border-radius:8px;}
+  .trk-driver-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .trk-driver-row .av{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .trk-driver-name{font-size:13px;font-weight:800;}
+  .trk-driver-speed{font-size:11px;color:var(--text-gray);font-weight:700;}
+  .trk-route-row{display:flex;gap:8px;font-size:12px;margin-bottom:4px;color:var(--text-dark);}
+  .trk-route-row span.lbl{color:var(--text-gray);flex-shrink:0;}
+  .trk-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+  .trk-eta{font-size:11px;color:var(--text-gray);display:flex;align-items:center;gap:4px;}
+  .trk-detail-btn{font-size:11px;font-weight:700;color:var(--pink);background:var(--pink-light);padding:6px 12px;border-radius:8px;}
+  .trk-viewall{margin:12px;padding:12px;border-radius:12px;background:var(--pink-light);color:var(--pink);font-weight:800;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .trk-map-wrap{flex:1;position:relative;}
+  #trkMap{width:100%;height:100%;}
+  .trk-map-ctrl{position:absolute;top:16px;left:16px;display:flex;flex-direction:column;gap:8px;z-index:10;}
+  .trk-map-ctrl div{width:34px;height:34px;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-dark);cursor:pointer;}
+  .trk-stats-bar{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.12);display:flex;padding:14px 10px;z-index:10;}
+  .trk-stat{padding:0 22px;text-align:center;border-left:1px solid var(--border);}
+  .trk-stat:last-child{border-left:none;}
+  .trk-stat .n{font-size:20px;font-weight:900;color:var(--text-dark);}
+  .trk-stat .l{font-size:10px;color:var(--text-gray);font-weight:700;margin-top:2px;}
+  .trk-support-btn{position:absolute;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--pink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 8px 20px rgba(236,28,122,.4);cursor:pointer;z-index:10;}
+  .trk-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text-gray);background:#FBFAFD;}
+  .trk-rider-pulse{position:absolute;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
+  .trk-rider-pulse .ring{position:absolute;inset:0;border-radius:50%;animation:pulse 1.6s ease-out infinite;}
+  .trk-rider-pulse .core{position:relative;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 8px rgba(0,0,0,.3);border:2px solid #fff;}
 </style>
 </head>
 <body>
@@ -300,8 +365,9 @@
 
 <div class="app" id="mainApp" style="display:none">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+  <div class="sidebar-edge-tab" id="sidebarEdgeTab" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+  <aside class="sidebar" id="mainSidebar">
     <ul class="nav" style="margin-top:6px">
       <li><a onclick="nav('dashboard')" class="active" data-page="dashboard"><span class="left"><i class="fa-solid fa-house"></i> لوحة المعلومات</span></a></li>
       <li><a onclick="nav('orders')" data-page="orders"><span class="left"><i class="fa-solid fa-bag-shopping"></i> إدارة الطلبات</span> <span class="count-badge" id="sb-ord" style="display:none">0</span></a></li>
@@ -309,7 +375,7 @@
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-user-check"></i> مراجعة طلبات الانضمام</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-store"></i> إدارة المتاجر</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-paper-plane"></i> توزيع الطلبات</span></a></li>
-      <li><a onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)" data-page="drivers"><span class="left"><i class="fa-solid fa-location-dot"></i> المتابعة المباشرة</span> <span class="live-badge">LIVE</span></a></li>
+      <li><a onclick="nav('tracking')" data-page="tracking"><span class="left"><i class="fa-solid fa-location-dot"></i> المتابعة المباشرة</span> <span class="live-badge">LIVE</span></a></li>
       <li><a onclick="nav('customers')" data-page="customers"><span class="left"><i class="fa-solid fa-users"></i> العملاء</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-box"></i> المنتجات</span></a></li>
       <li><a class="disabled" onclick="toast('قريبًا 🚀','info')"><span class="left"><i class="fa-solid fa-table-cells"></i> الأقسام</span></a></li>
@@ -369,7 +435,7 @@
       <!-- MID ROW: donut / line chart / map -->
       <div class="mid-grid" style="grid-template-columns:1.6fr 1.4fr 1.1fr">
         <div class="card map-card">
-          <div class="card-head"><div class="link" onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
+          <div class="card-head"><div class="link" onclick="nav('tracking')">عرض الخريطة كاملة</div><h3><span class="live-tag">LIVE</span>المتابعة المباشرة</h3></div>
           <div id="dashMapView" style="height:220px;border-radius:12px;overflow:hidden"></div>
         </div>
 
@@ -425,7 +491,7 @@
       <!-- FOOTER QUICK ACTIONS -->
       <div class="footer-actions">
         <div class="fa-card" onclick="toast('قريبًا 🚀','info')"><div class="fa-ic" style="background:var(--pink)"><i class="fa-solid fa-paper-plane"></i></div><div><div class="fa-title">إرسال إشعار</div><div class="fa-sub">إرسال إشعار جماعي للعملاء</div></div></div>
-        <div class="fa-card" onclick="nav('drivers');setTimeout(()=>setDrvMode('tracking'),250)"><div class="fa-ic" style="background:var(--purple)"><i class="fa-solid fa-motorcycle"></i></div><div><div class="fa-title">متابعة الدليفري</div><div class="fa-sub">عرض حركة الدليفري الآن</div></div></div>
+        <div class="fa-card" onclick="nav('tracking')"><div class="fa-ic" style="background:var(--purple)"><i class="fa-solid fa-motorcycle"></i></div><div><div class="fa-title">متابعة الدليفري</div><div class="fa-sub">عرض حركة الدليفري الآن</div></div></div>
         <div class="fa-card" onclick="toast('قريبًا 🚀','info')"><div class="fa-ic" style="background:var(--gold)"><i class="fa-solid fa-gift"></i></div><div><div class="fa-title">إضافة رصيد مجاني</div><div class="fa-sub">إضافة رصيد لعميل أو مجموعة</div></div></div>
         <div class="fa-card" onclick="nav('reports')"><div class="fa-ic" style="background:var(--green)"><i class="fa-solid fa-chart-line"></i></div><div><div class="fa-title">تقرير المبيعات</div><div class="fa-sub">عرض تقرير المبيعات اليومي</div></div></div>
       </div>
@@ -601,6 +667,41 @@
       </div>
     </div>
 
+    <!-- ============ PAGE: TRACKING (تتبع الدليفري - full screen) ============ -->
+    <div class="page" id="pg-tracking">
+      <div class="trk-topbar">
+        <div class="trk-logo" onclick="nav('dashboard')">زورا</div>
+        <div class="trk-title"><div class="pin-btn"><i class="fa-solid fa-location-dot"></i></div> تتبع الدليفري</div>
+        <select class="trk-filter" id="trkStatusFilter" onchange="renderTrkCards()">
+          <option value="">كل الحالات</option>
+          <option value="delivering">جاري التوصيل</option>
+        </select>
+        <div class="trk-right">
+          <div class="icon-badge" onclick="toggleNotif()"><i class="fa-regular fa-bell"></i><span class="dot" id="trk-nbdg" style="display:none">0</span></div>
+          <div class="profile" id="trkProfileArea"></div>
+        </div>
+      </div>
+      <div class="trk-body">
+        <div class="trk-sidebar">
+          <div class="trk-sidebar-hd"><span>الطلبات النشطة (<span id="trk-count">0</span>)</span><i class="fa-solid fa-bag-shopping" style="color:var(--pink)"></i></div>
+          <div class="trk-cards" id="trkCards"></div>
+          <button class="trk-viewall" onclick="nav('orders');setFilter('delivering')"><i class="fa-solid fa-list"></i> عرض كل الطلبات</button>
+        </div>
+        <div class="trk-map-wrap">
+          <div id="trkMap"></div>
+          <div id="trkMapEmpty" class="trk-empty" style="display:none"><i class="fa-solid fa-motorcycle" style="font-size:36px"></i><div style="font-size:12px;font-weight:700">لا توجد طلبات جارية دلوقتي</div></div>
+          <div class="trk-map-ctrl">
+            <div onclick="document.getElementById('trkMap').requestFullscreen&&document.getElementById('trkMap').requestFullscreen()"><i class="fa-solid fa-expand"></i></div>
+            <div onclick="trkMap&&trkMap.setZoom(trkMap.getZoom()+1)"><i class="fa-solid fa-plus"></i></div>
+            <div onclick="trkMap&&trkMap.setZoom(trkMap.getZoom()-1)"><i class="fa-solid fa-minus"></i></div>
+            <div onclick="locateAdmin(trkMap)"><i class="fa-solid fa-location-crosshairs"></i></div>
+          </div>
+          <div class="trk-stats-bar" id="trkStatsBar"></div>
+          <div class="trk-support-btn" onclick="toast('قريبًا 🚀','info')"><i class="fa-solid fa-headset"></i></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ PAGE: NOTIFICATIONS ============ -->
     <div class="page" id="pg-notifications">
       <div class="tcard" style="margin-bottom:0">
@@ -759,12 +860,14 @@ function handleCredentialResponse(response){
 }
 
 function renderProfileArea(u){
-  document.getElementById('profileArea').innerHTML = `
+  const html = `
     ${u.avatar ? `<img src="${u.avatar}" alt="">` : `<div style="width:42px;height:42px;border-radius:50%;background:#FDEAF3;display:flex;align-items:center;justify-content:center;color:#EC1C7A"><i class="fa-solid fa-user"></i></div>`}
     <div>
       <div class="name">${esc(u.name)}</div>
       <div class="role" style="cursor:pointer;color:#EC1C7A" onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</div>
     </div>`;
+  document.getElementById('profileArea').innerHTML = html;
+  const t=document.getElementById('trkProfileArea'); if(t) t.innerHTML=html;
 }
 
 // ===== INIT =====
@@ -808,8 +911,28 @@ function doLogout(){
   location.reload();
 }
 
+// ===== MAIN SIDEBAR COLLAPSE =====
+let sidebarOpen=false, sidebarTimer=null;
+function openSidebar(){
+  sidebarOpen=true;
+  document.getElementById('mainSidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+  document.getElementById('sidebarEdgeTab').style.display='none';
+  clearTimeout(sidebarTimer);
+  sidebarTimer=setTimeout(closeSidebar,5000);
+}
+function closeSidebar(){
+  sidebarOpen=false;
+  document.getElementById('mainSidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+  document.getElementById('sidebarEdgeTab').style.display='flex';
+  clearTimeout(sidebarTimer);
+}
+function toggleSidebar(){ sidebarOpen?closeSidebar():openSidebar(); }
+
 // ===== NAV =====
 function nav(p){
+  closeSidebar();
   currentPage = p;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav li a').forEach(el=>el.classList.remove('active'));
@@ -818,6 +941,7 @@ function nav(p){
   document.querySelectorAll(`.nav li a[data-page="${p}"]`).forEach(el=>el.classList.add('active'));
   closeNotif();
   if(p==='drivers'){ setTimeout(()=>{ initMap(); renderDriverCards(); },200); clearInterval(mapTimer); mapTimer=setInterval(loadDrivers,5000); }
+  else if(p==='tracking'){ setTimeout(initTrkMap,200); clearInterval(mapTimer); mapTimer=setInterval(refreshTrkMap,5000); }
   else clearInterval(mapTimer);
   if(p==='reports') renderReports();
   if(p==='notifications') renderNotifPage();
@@ -1096,7 +1220,7 @@ function updateDashMapPins(){
         icon: svgMarkerIcon(color, '🏍️', 32),
         opacity: online?1:0.4,
       });
-      m.addListener('click', () => nav('drivers'));
+      m.addListener('click', () => nav('tracking'));
       dashMapMarkersObj[d._id] = m;
     }
     existing.delete(d._id);
@@ -1668,6 +1792,158 @@ async function deleteDriver(id){
   try{ await fetch(`${API}/api/drivers/${id}`,{method:'DELETE'}); toast('✅ تم الحذف','ok'); await loadDrivers(); } catch(e){ toast('❌ فشل','err'); }
 }
 
+// TODO: بدّل الإحداثيات دي بموقع متجرك الحقيقي (افتح Google Maps، دوس بالزر اليمين على المكان، وانسخ الإحداثيات)
+const STORE_LOCATION = { lat: 29.9737, lng: 30.9057 };
+const STORE_NAME = 'زورا';
+
+// ===== TRACKING PAGE (full-screen) =====
+let trkMap=null, trkMarkers={};
+// ⚠️ محتاج "Directions API" مفعّلة على نفس مفتاح Google Maps بتاعك
+// (Google Cloud Console) عشان المسارات ترسم على الطرق الحقيقية زي
+// اللي في التصميم، بدل خط مستقيم. لو مش مفعّلة، هيرجع تلقائيًا لخط
+// مستقيم بدل ما يبوّظ الصفحة.
+const trkDirService = new google.maps.DirectionsService();
+let trkRoutesCache = {}; // orderId -> true بعد ما نطلب المسار مرة، عشان منكررش الطلب كل تحديث
+class PulseOverlay extends google.maps.OverlayView{
+  constructor(pos,color){ super(); this.pos=pos; this.color=color; this.div=null; }
+  onAdd(){
+    const div=document.createElement('div');
+    div.className='trk-rider-pulse';
+    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">🏍️</div>`;
+    this.div=div;
+    this.getPanes().overlayMouseTarget.appendChild(div);
+  }
+  draw(){
+    const proj=this.getProjection(); if(!proj||!this.div) return;
+    const p=proj.fromLatLngToDivPixel(new google.maps.LatLng(this.pos.lat,this.pos.lng));
+    this.div.style.left=(p.x-20)+'px';
+    this.div.style.top=(p.y-20)+'px';
+  }
+  setPos(pos){ this.pos=pos; this.draw(); }
+  onRemove(){ if(this.div){ this.div.remove(); this.div=null; } }
+}
+function trkSmallPin(color, emoji){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="34" height="42"><path d="M17 0C8 0 0 7.3 0 16.3 0 27 17 42 17 42S34 27 34 16.3C34 7.3 26 0 17 0Z" fill="${color}"/><circle cx="17" cy="16" r="11" fill="white"/><text x="17" y="21" text-anchor="middle" font-size="14">${emoji}</text></svg>`;
+  return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(34,42),anchor:new google.maps.Point(17,42)};
+}
+function initTrkMap(){
+  if(trkMap) return;
+  const el=document.getElementById('trkMap');
+  if(!el) return;
+  trkMap=new google.maps.Map(el,{center:STORE_LOCATION,zoom:13,disableDefaultUI:true,zoomControl:false});
+  new google.maps.Marker({position:STORE_LOCATION,map:trkMap,icon:trkSmallPin('#8B5CF6','🏪'),title:STORE_NAME,zIndex:900});
+  refreshTrkMap();
+}
+async function refreshTrkMap(){
+  if(!trkMap) return;
+  await loadActiveOrdersWithCoords();
+  renderTrkCards();
+  updateTrkStats();
+  const activeIds=new Set();
+  activeOrdersWithCoords.forEach((o,idx)=>{
+    const driver=drivers.find(d=>d._id===o.driverId);
+    if(!driver||!driver.location?.lat) return;
+    const dest=orderLatLng(o);
+    const color=ROUTE_COLORS[idx%ROUTE_COLORS.length];
+    activeIds.add(o._id);
+    if(!trkMarkers[o._id]){
+      trkMarkers[o._id]={};
+      if(dest) trkMarkers[o._id].destMarker=new google.maps.Marker({position:dest,map:trkMap,icon:trkSmallPin(color,'🏠'),zIndex:800});
+      trkMarkers[o._id].riderOverlay=new PulseOverlay(driver.location,color);
+      trkMarkers[o._id].riderOverlay.setMap(trkMap);
+      // مسار حقيقي على الطرق (من المتجر للعنوان) - بيتطلب مرة واحدة
+      // بس لكل طلب ويتخزن، عشان الموقع الثابت (المتجر والعنوان) مش
+      // بيتغيّر؛ اللي بيتحرك فعليًا هو أيقونة المندوب النابضة بس.
+      if(dest && !trkRoutesCache[o._id]){
+        trkRoutesCache[o._id] = true;
+        const renderer = new google.maps.DirectionsRenderer({
+          map: trkMap, suppressMarkers: true, preserveViewport: true,
+          polylineOptions: { strokeColor: color, strokeWeight: 4, strokeOpacity: .85 },
+        });
+        trkDirService.route(
+          { origin: STORE_LOCATION, destination: dest, travelMode: 'DRIVING' },
+          (result, status) => {
+            if (status === 'OK') {
+              renderer.setDirections(result);
+            } else {
+              // فشل حساب المسار الحقيقي (مثلاً Directions API مش
+              // مفعّلة) - نرجع لخط مستقيم بدل ما نسيب الطلب من غير مسار خالص
+              renderer.setMap(null);
+              trkMarkers[o._id].fallbackLine = new google.maps.Polyline({
+                path: [STORE_LOCATION, dest], map: trkMap,
+                strokeColor: color, strokeWeight: 4, strokeOpacity: .85,
+              });
+            }
+          }
+        );
+        trkMarkers[o._id].dirRenderer = renderer;
+      }
+    } else {
+      trkMarkers[o._id].riderOverlay.setPos(driver.location);
+    }
+  });
+  Object.keys(trkMarkers).forEach(id=>{
+    if(!activeIds.has(id)){
+      trkMarkers[id].destMarker?.setMap(null);
+      trkMarkers[id].riderOverlay?.setMap(null);
+      trkMarkers[id].dirRenderer?.setMap(null);
+      trkMarkers[id].fallbackLine?.setMap(null);
+      delete trkMarkers[id];
+      delete trkRoutesCache[id];
+    }
+  });
+  document.getElementById('trkMapEmpty').style.display=activeOrdersWithCoords.length?'none':'flex';
+}
+function renderTrkCards(){
+  const sf=document.getElementById('trkStatusFilter')?.value||'';
+  let list=activeOrdersWithCoords;
+  if(sf) list=list.filter(o=>o.status===sf);
+  document.getElementById('trk-count').textContent=list.length;
+  document.getElementById('trkCards').innerHTML=list.map((o,idx)=>{
+    const driver=drivers.find(d=>d._id===o.driverId);
+    const color=ROUTE_COLORS[idx%ROUTE_COLORS.length];
+    const dest=orderLatLng(o);
+    const speedKmh=driver?.location?.speed?(driver.location.speed*3.6):0;
+    let eta='—';
+    if(dest && driver?.location?.lat){
+      const km=distanceKm(driver.location.lat,driver.location.lng,dest.lat,dest.lng);
+      eta = speedKmh>2 ? Math.max(1,Math.round(km/speedKmh*60))+' دقيقة' : 'متوقف حاليًا';
+    }
+    return `
+    <div class="trk-card" style="border-right-color:${color}" onclick="openOrderDetail('${o._id}')">
+      <div class="trk-card-top">
+        <span class="trk-oid">#${o._id.slice(-4).toUpperCase()}</span>
+        <span class="trk-status" style="background:${color}22;color:${color}">جاري التوصيل</span>
+      </div>
+      <div class="trk-driver-row">
+        <div class="av" style="${driver?.avatar?`background-image:url('${driver.avatar}');background-size:cover`:''}">${driver?.avatar?'':'🛵'}</div>
+        <div>
+          <div class="trk-driver-name">${esc(driver?.name||'—')}</div>
+          <div class="trk-driver-speed" style="color:${color}">${speedKmh>0?speedKmh.toFixed(0)+' كم/س':'واقف'}</div>
+        </div>
+      </div>
+      <div class="trk-route-row"><span class="lbl">من</span><span>${esc(STORE_NAME)}</span></div>
+      <div class="trk-route-row"><span class="lbl">إلى</span><span>${esc((o.address||'').slice(0,30))}</span></div>
+      <div class="trk-card-foot">
+        <span class="trk-eta"><i class="fa-regular fa-clock"></i> ${eta}</span>
+        <span class="trk-detail-btn">عرض التفاصيل</span>
+      </div>
+    </div>`;
+  }).join('') || '<div style="padding:40px 10px;text-align:center;color:var(--text-gray);font-size:12px">لا توجد طلبات جارية دلوقتي</div>';
+}
+function updateTrkStats(){
+  const tod=new Date().toDateString();
+  const active=activeOrdersWithCoords.length;
+  const waiting=orders.filter(o=>['pending','confirmed','preparing'].includes(o.status)).length;
+  const doneToday=orders.filter(o=>o.status==='completed'&&new Date(o.createdAt).toDateString()===tod).length;
+  const totalToday=orders.filter(o=>new Date(o.createdAt).toDateString()===tod).length;
+  document.getElementById('trkStatsBar').innerHTML=`
+    <div class="trk-stat"><div class="n" style="color:var(--pink)">${active}</div><div class="l">طلبات نشطة</div></div>
+    <div class="trk-stat"><div class="n" style="color:var(--orange)">${waiting}</div><div class="l">في الانتظار</div></div>
+    <div class="trk-stat"><div class="n" style="color:var(--green)">${doneToday}</div><div class="l">تم التوصيل</div></div>
+    <div class="trk-stat"><div class="n">${totalToday}</div><div class="l">إجمالي اليوم</div></div>`;
+}
+
 // ===== NOTIFICATIONS =====
 function loadNotifs(){ try{ const s=localStorage.getItem('z_notifs'); if(s) notifs=JSON.parse(s); } catch(e){ notifs=[]; } updateNotifBadge(); renderNotifPopup(); }
 function saveNotifs(){ try{ localStorage.setItem('z_notifs',JSON.stringify(notifs.slice(0,100))); } catch(e){} }
@@ -1681,8 +1957,9 @@ function addNotif(type,title,sub,orderId){
 function updateNotifBadge(){
   const n=notifs.filter(x=>!x.read).length;
   const el=document.getElementById('nbdg'); const sb=document.getElementById('sb-notif');
-  if(n>0){ el.textContent=n>99?'99+':n; el.style.display='flex'; sb.textContent=n; sb.style.display='inline'; }
-  else { el.style.display='none'; sb.style.display='none'; }
+  const trkEl=document.getElementById('trk-nbdg');
+  if(n>0){ el.textContent=n>99?'99+':n; el.style.display='flex'; sb.textContent=n; sb.style.display='inline'; if(trkEl){trkEl.textContent=el.textContent; trkEl.style.display='flex';} }
+  else { el.style.display='none'; sb.style.display='none'; if(trkEl) trkEl.style.display='none'; }
 }
 function markAllRead(){ notifs.forEach(n=>n.read=true); saveNotifs(); updateNotifBadge(); renderNotifPopup(); if(currentPage==='notifications') renderNotifPage(); }
 function clearNotifs(){ if(!confirm('مسح كل الإشعارات؟')) return; notifs=[]; saveNotifs(); updateNotifBadge(); renderNotifPopup(); renderNotifPage(); }
