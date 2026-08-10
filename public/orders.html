@@ -279,6 +279,17 @@
   .dcard.sel{background:var(--pink-light);border-right:3px solid var(--pink);}
   .dav{width:38px;height:38px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;position:relative;}
   .sdot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;}
+  /* ===== شريط مربعات المندوبين (كروت أكبر وأنضف من القايمة الرفيعة القديمة) ===== */
+  .drv-tiles{display:flex;flex-direction:column;gap:10px;padding:10px;}
+  .drv-tile{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:.15s;}
+  .drv-tile:hover{box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .drv-tile.sel{border-color:var(--pink);background:var(--pink-light);}
+  .drv-tile-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .drv-tile-av{width:44px;height:44px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;position:relative;background-size:cover;background-position:center;}
+  .drv-tile-name{font-size:13.5px;font-weight:800;color:var(--text-dark);}
+  .drv-tile-sub{font-size:10.5px;color:var(--text-gray);font-weight:600;margin-top:2px;}
+  .drv-tile-badge{margin-right:auto;font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:8px;}
+  .drv-tile-acts{display:flex;gap:6px;align-items:center;border-top:1px solid var(--border);padding-top:10px;}
   .prow{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);}
   .prow:last-child{border-bottom:none;}
   .ptag{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--pink-light);color:var(--pink);font-weight:700;}
@@ -1170,22 +1181,27 @@ let dashMapMarkersObj = {};
 // بيعمل أيقونة دايرة ملونة مع إيموجي جواها - بديل بسيط لأيقونات
 // Leaflet المخصصة، شغال مع Google Maps Marker العادي من غير أي
 // مكتبات إضافية.
-function svgMarkerIcon(color, emoji, size){
+// ⚠️ نفس شكل الدبوس النضيف (pin) المستخدم في صفحة "المتابعة
+// المباشرة" - بديل موحّد لأي أيقونة مندوب/موظف على أي خريطة في
+// اللوحة. لو فيه صورة بروفايل حقيقية بتتحط داخل الدبوس، ولو مفيش
+// بيرجع للإيموجي.
+function svgMarkerIcon(color, emoji, size, avatarUrl){
   size = size || 34;
-  const emojiSize = Math.round(size*0.9);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size+6}">
-    <defs>
-      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-opacity="0.4"/>
-      </filter>
-    </defs>
-    <text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" font-size="${emojiSize}" filter="url(#shadow)">${emoji}</text>
-    <circle cx="${size/2}" cy="${size+1}" r="4" fill="${color}" stroke="white" stroke-width="1.5"/>
+  const h = Math.round(size*1.24);
+  const r = size/2;
+  const innerR = Math.round(r*0.62);
+  const inner = avatarUrl
+    ? `<clipPath id="cp${Math.round(Math.random()*1e6)}"><circle cx="${r}" cy="${r-1}" r="${innerR}"/></clipPath><image href="${avatarUrl}" x="${r-innerR}" y="${r-1-innerR}" width="${innerR*2}" height="${innerR*2}" preserveAspectRatio="xMidYMid slice"/>`
+    : `<text x="${r}" y="${r+Math.round(innerR*0.35)}" text-anchor="middle" font-size="${Math.round(innerR*1.3)}">${emoji}</text>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${h}">
+    <path d="M${r} 0C${Math.round(r*0.45)} 0 0 ${Math.round(r*0.45)} 0 ${r} 0 ${Math.round(r*1.7)} ${r} ${h} ${r} ${h}S${size} ${Math.round(r*1.7)} ${size} ${r}C${size} ${Math.round(r*0.45)} ${Math.round(r*1.55)} 0 ${r} 0Z" fill="${color}"/>
+    <circle cx="${r}" cy="${r-1}" r="${innerR+2}" fill="white"/>
+    ${inner}
   </svg>`;
   return {
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-    scaledSize: new google.maps.Size(size, size+6),
-    anchor: new google.maps.Point(size/2, size+1),
+    scaledSize: new google.maps.Size(size, h),
+    anchor: new google.maps.Point(size/2, h),
   };
 }
 
@@ -1194,11 +1210,14 @@ function svgMarkerIcon(color, emoji, size){
 // مستخدمة في خريطة "إدارة الدليفري" وخريطة "المتابعة المباشرة" مع
 // بعض عشان الشكل يبقى موحّد في كل مكان.
 class PulseOverlay extends google.maps.OverlayView{
-  constructor(pos,color,onClick){ super(); this.pos=pos; this.color=color; this.div=null; this.onClick=onClick; }
+  constructor(pos,color,onClick,avatarUrl){ super(); this.pos=pos; this.color=color; this.div=null; this.onClick=onClick; this.avatarUrl=avatarUrl; }
   onAdd(){
     const div=document.createElement('div');
     div.className='trk-rider-pulse';
-    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">🏍️</div>`;
+    const core = this.avatarUrl
+      ? `<img src="${this.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+      : '🏍️';
+    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">${core}</div>`;
     if(this.onClick){ div.style.cursor='pointer'; div.addEventListener('click', this.onClick); }
     this.div=div;
     this.getPanes().overlayMouseTarget.appendChild(div);
@@ -1246,7 +1265,7 @@ function updateDashMapPins(){
     } else {
       const m = new google.maps.Marker({
         position: pos, map: dashMap, title: d.name,
-        icon: svgMarkerIcon(color, '🏍️', 32),
+        icon: svgMarkerIcon(color, '🏍️', 32, d.avatar),
         opacity: online?1:0.4,
       });
       m.addListener('click', () => nav('tracking'));
@@ -1526,30 +1545,33 @@ function renderDriverCards(){
   let f=drivers;
   if(drvTabFilter!=='all') f=f.filter(d=>d.status===drvTabFilter);
   if(srch) f=f.filter(d=>(d.name||'').toLowerCase().includes(srch)||(d.phone||'').includes(srch));
-  const dotColor={available:'#22B573',busy:'#F5941F',offline:'#9ca3af'};
-  document.getElementById('drvCards').innerHTML=f.map(d=>{
+  const statusLabel={available:'متاح',busy:'في مهمة',offline:'غير متصل'};
+  const statusColor={available:'#22B573',busy:'#F5941F',offline:'#9ca3af'};
+  document.getElementById('drvCards').innerHTML=`<div class="drv-tiles">${f.map(d=>{
     const online = d.status && d.status!=='offline';
     // لو المندوب شغال بطلب دلوقتي، الكارت بياخد لون مساره على الخريطة
-    // (نفس اللون بالظبط) - بدل الحد الرمادي العادي، زي تصميم صفحة
-    // "المتابعة المباشرة".
+    // (نفس اللون بالظبط) - زي تصميم صفحة "المتابعة المباشرة".
     const driverIdx = drivers.indexOf(d);
     const activeOrder = (activeOrdersWithCoords||[]).find(o=>o.driverId===d._id);
-    const routeColor = activeOrder ? ROUTE_COLORS[driverIdx % ROUTE_COLORS.length] : null;
+    const routeColor = activeOrder ? ROUTE_COLORS[driverIdx % ROUTE_COLORS.length] : statusColor[d.status]||'#9ca3af';
     return `
-    <div class="dcard ${selDriverId===d._id?'sel':''}" style="${routeColor?`border-right:4px solid ${routeColor}`:''}" onclick="selectDriver('${d._id}')">
-      <div class="dav" style="${d.avatar?`background-image:url('${d.avatar}');background-size:cover;background-position:center`:''}">${d.avatar?'':'🛵'}<div class="sdot" style="background:${dotColor[d.status]||'#9ca3af'}"></div></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700">${esc(d.name)}</div>
-        <div style="font-size:10px;color:var(--text-gray)">${activeOrder?`<span style="color:${routeColor};font-weight:700">🛵 جاري التوصيل الآن</span>`:esc(d.phone)}</div>
+    <div class="drv-tile ${selDriverId===d._id?'sel':''}" onclick="selectDriver('${d._id}')">
+      <div class="drv-tile-top">
+        <div class="drv-tile-av" style="${d.avatar?`background-image:url('${d.avatar}')`:''}">${d.avatar?'':'🛵'}<div class="sdot" style="background:${statusColor[d.status]||'#9ca3af'}"></div></div>
+        <div style="flex:1;min-width:0">
+          <div class="drv-tile-name">${esc(d.name)}</div>
+          <div class="drv-tile-sub">${esc(d.phone)}</div>
+        </div>
+        <span class="drv-tile-badge" style="background:${routeColor}22;color:${routeColor}">${activeOrder?'🛵 جاري التوصيل':statusLabel[d.status]||'—'}</span>
       </div>
-      <div class="acts">
+      <div class="drv-tile-acts">
         <div class="aic" onclick="event.stopPropagation();callCl('${d.phone}')"><i class="fa-solid fa-phone"></i></div>
         <button class="btn btn-sm ${online?'btn-red':'btn-pink'}" onclick="event.stopPropagation();toggleDriverShift('${d._id}',${online})" style="padding:4px 8px;font-size:10px">${online?'إنهاء الشيفت':'بدء الشيفت'}</button>
         <div class="aic" onclick="event.stopPropagation();openDriverModal('${d._id}')"><i class="fa-solid fa-pen"></i></div>
         <div class="aic r" onclick="event.stopPropagation();deleteDriver('${d._id}')"><i class="fa-solid fa-trash"></i></div>
       </div>
     </div>`;
-  }).join('') || '<div style="padding:30px;text-align:center;color:var(--text-gray)">لا يوجد مندوبين</div>';
+  }).join('') || '<div style="padding:30px;text-align:center;color:var(--text-gray)">لا يوجد مندوبين</div>'}</div>`;
 }
 
 // المندوب مالوش تحكم في الشيفت بتاعه من التطبيق - الأدمن بس هو اللي
@@ -1605,18 +1627,10 @@ function initMap(){
 // الباك اند.
 let adminMarker = null;
 let adminMarkerDash = null;
-// أيقونة مندوب/موظف - لو عنده صورة بروفايل حقيقية (من جوجل) بنستخدمها
-// هي نفسها كأيقونة على الخريطة، ولو مفيش بنرجع لدايرة+إيموجي زي قبل.
+// أيقونة موظف/أدمن نضيفة بنفس شكل دبابيس المندوبين - لو عنده صورة
+// بروفايل حقيقية (من جوجل) بتتحط جوه الدبوس، ولو مفيش بيرجع لإيموجي.
 function personMarkerIcon(avatarUrl, size){
-  size = size || 34;
-  if(avatarUrl){
-    return {
-      url: avatarUrl,
-      scaledSize: new google.maps.Size(size, size),
-      anchor: new google.maps.Point(size/2, size/2),
-    };
-  }
-  return svgMarkerIcon('#8B5CF6', '🧑‍💼', size);
+  return svgMarkerIcon('#8B5CF6', '🧑‍💼', size||34, avatarUrl);
 }
 
 function locateAdmin(targetMap){
@@ -1637,7 +1651,7 @@ function locateAdmin(targetMap){
     const matchedDriver = u ? drivers.find(d => d.email && d.email === u.email) : null;
     const posObj = { lat: latitude, lng: longitude };
     const icon = matchedDriver
-      ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 38)
+      ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 38, matchedDriver.avatar)
       : personMarkerIcon(u?.avatar, 34);
     if(targetMap === mapInstance){
       if(adminMarker) adminMarker.setPosition(posObj);
@@ -1677,7 +1691,7 @@ async function loadStaffLocations(){
         const pos = { lat: s.lat, lng: s.lng };
         const matchedDriver = drivers.find(d => d.email && d.email === s.email);
         const icon = matchedDriver
-          ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 34)
+          ? svgMarkerIcon(matchedDriver.status==='available'?'#EC1C7A':matchedDriver.status==='busy'?'#F5941F':'#9ca3af', '🏍️', 34, matchedDriver.avatar)
           : personMarkerIcon(s.avatar, 30);
         if(store[s.email]){
           store[s.email].setPosition(pos);
@@ -1797,7 +1811,7 @@ function updateMapMarkers(){
       if(driverPulseOverlays[d._id]){
         driverPulseOverlays[d._id].setPos(pos);
       } else {
-        driverPulseOverlays[d._id] = new PulseOverlay(pos, color, () => { selDriverId=d._id; selectDriver(d._id); });
+        driverPulseOverlays[d._id] = new PulseOverlay(pos, color, () => { selDriverId=d._id; selectDriver(d._id); }, d.avatar);
         driverPulseOverlays[d._id].setMap(mapInstance);
       }
       existingPulse.delete(d._id);
@@ -1811,7 +1825,7 @@ function updateMapMarkers(){
       } else {
         const m = new google.maps.Marker({
           position: pos, map: mapInstance, title: d.name,
-          icon: svgMarkerIcon(color, '🏍️', 46),
+          icon: svgMarkerIcon(color, '🏍️', 34, d.avatar),
           opacity: online?1:0.4,
         });
         m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
@@ -1905,7 +1919,7 @@ async function refreshTrkMap(){
     if(!trkMarkers[o._id]){
       trkMarkers[o._id]={};
       if(dest) trkMarkers[o._id].destMarker=new google.maps.Marker({position:dest,map:trkMap,icon:trkSmallPin(color,'🏠'),zIndex:800});
-      trkMarkers[o._id].riderOverlay=new PulseOverlay(driver.location,color);
+      trkMarkers[o._id].riderOverlay=new PulseOverlay(driver.location,color,null,driver.avatar);
       trkMarkers[o._id].riderOverlay.setMap(trkMap);
       // مسار حقيقي على الطرق (من المتجر للعنوان) - بيتطلب مرة واحدة
       // بس لكل طلب ويتخزن، عشان الموقع الثابت (المتجر والعنوان) مش
