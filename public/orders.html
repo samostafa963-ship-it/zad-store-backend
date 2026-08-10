@@ -823,7 +823,7 @@
 const API = 'https://zad-backend-production-39a3.up.railway.app';
 let orders=[], drivers=[], zones=[], notifs=[];
 let prevIds=new Set(), selOrderId=null, selDriverId=null;
-let mapInstance=null, mapMarkers={}, autoFollow=true;
+let mapInstance=null, mapMarkers={}, driverPulseOverlays={}, autoFollow=true;
 let editDrvId=null, assignOrderId=null, soundOn=true;
 let mainTimer=null, mapTimer=null, currentPage='dashboard';
 let donutChart=null, salesChart=null, ringChart=null;
@@ -1189,6 +1189,35 @@ function svgMarkerIcon(color, emoji, size){
   };
 }
 
+// ⚠️ أيقونة الموتوسيكل النابضة (المندوب وهو شغال بطلب) - Overlay
+// حقيقي (مش صورة SVG ثابتة) عشان النبض يبقى انيميشن CSS شغال فعليًا،
+// مستخدمة في خريطة "إدارة الدليفري" وخريطة "المتابعة المباشرة" مع
+// بعض عشان الشكل يبقى موحّد في كل مكان.
+class PulseOverlay extends google.maps.OverlayView{
+  constructor(pos,color,onClick){ super(); this.pos=pos; this.color=color; this.div=null; this.onClick=onClick; }
+  onAdd(){
+    const div=document.createElement('div');
+    div.className='trk-rider-pulse';
+    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">🏍️</div>`;
+    if(this.onClick){ div.style.cursor='pointer'; div.addEventListener('click', this.onClick); }
+    this.div=div;
+    this.getPanes().overlayMouseTarget.appendChild(div);
+  }
+  draw(){
+    const proj=this.getProjection(); if(!proj||!this.div) return;
+    const p=proj.fromLatLngToDivPixel(new google.maps.LatLng(this.pos.lat,this.pos.lng));
+    this.div.style.left=(p.x-20)+'px';
+    this.div.style.top=(p.y-20)+'px';
+  }
+  setPos(pos){ this.pos=pos; this.draw(); }
+  onRemove(){ if(this.div){ this.div.remove(); this.div=null; } }
+}
+// ⚠️ سيرفس واحد مشترك لحساب المسارات الحقيقية على الطرق (Directions
+// API) - نفس السيرفس يستخدمه خريطة إدارة الدليفري وخريطة المتابعة
+// المباشرة، بدل ما كل صفحة تعمل نسخة منفصلة.
+let _sharedDirService = null;
+function getDirService(){ return _sharedDirService || (_sharedDirService = new google.maps.DirectionsService()); }
+
 function initDashMap(){
   if(dashMap) return;
   const el = document.getElementById('dashMapView');
@@ -1500,12 +1529,18 @@ function renderDriverCards(){
   const dotColor={available:'#22B573',busy:'#F5941F',offline:'#9ca3af'};
   document.getElementById('drvCards').innerHTML=f.map(d=>{
     const online = d.status && d.status!=='offline';
+    // لو المندوب شغال بطلب دلوقتي، الكارت بياخد لون مساره على الخريطة
+    // (نفس اللون بالظبط) - بدل الحد الرمادي العادي، زي تصميم صفحة
+    // "المتابعة المباشرة".
+    const driverIdx = drivers.indexOf(d);
+    const activeOrder = (activeOrdersWithCoords||[]).find(o=>o.driverId===d._id);
+    const routeColor = activeOrder ? ROUTE_COLORS[driverIdx % ROUTE_COLORS.length] : null;
     return `
-    <div class="dcard ${selDriverId===d._id?'sel':''}" onclick="selectDriver('${d._id}')">
+    <div class="dcard ${selDriverId===d._id?'sel':''}" style="${routeColor?`border-right:4px solid ${routeColor}`:''}" onclick="selectDriver('${d._id}')">
       <div class="dav" style="${d.avatar?`background-image:url('${d.avatar}');background-size:cover;background-position:center`:''}">${d.avatar?'':'🛵'}<div class="sdot" style="background:${dotColor[d.status]||'#9ca3af'}"></div></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700">${esc(d.name)}</div>
-        <div style="font-size:10px;color:var(--text-gray)">${esc(d.phone)}</div>
+        <div style="font-size:10px;color:var(--text-gray)">${activeOrder?`<span style="color:${routeColor};font-weight:700">🛵 جاري التوصيل الآن</span>`:esc(d.phone)}</div>
       </div>
       <div class="acts">
         <div class="aic" onclick="event.stopPropagation();callCl('${d.phone}')"><i class="fa-solid fa-phone"></i></div>
@@ -1659,11 +1694,11 @@ async function loadStaffLocations(){
   } catch(e){}
 }
 
-// كل مندوب بيستلم طلب بياخد لون مختلف عن الباقي، ومساره (من موقعه
-// الحالي لحد عنوان التسليم) بيتلوّن بنفس اللون طول ما الطلب شغال -
-// لحد ما يخلّص التوصيل ويرجع الوضع الطبيعي.
+// كل مندوب بيستلم طلب بياخد لون مختلف عن الباقي، ومساره الحقيقي على
+// الطرق (من المتجر لعنوان التسليم) بيتلوّن بنفس اللون طول ما الطلب
+// شغال - لحد ما يخلّص التوصيل ويرجع الوضع الطبيعي.
 const ROUTE_COLORS = ['#EC1C7A','#3B82F6','#22B573','#F5941F','#8B5CF6','#EF4444','#0EA5E9','#D946EF'];
-let driverRoutePolylines = {};
+let driverRouteRenderers = {}; // driverId -> {renderer, fallbackLine, cacheKey}
 
 function orderLatLng(order){
   const candidates=[
@@ -1695,6 +1730,7 @@ async function updateDriverRoutes(){
   if(!mapInstance) return;
   await loadActiveOrdersWithCoords();
   if(drvMode==='tracking') renderTrackingCards();
+  renderDriverCards(); // عشان الألوان على كروت المندوبين تتزامن مع ألوان مساراتهم
   const activeDriverIds = new Set();
   drivers.forEach((d,idx)=>{
     if(!d.location?.lat) return;
@@ -1704,50 +1740,89 @@ async function updateDriverRoutes(){
     if(!dest) return; // الطلب اتحاول يتحسبله إحداثيات ومقدرناش (عنوان غريب)
     activeDriverIds.add(d._id);
     const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
-    const path = [{lat:d.location.lat,lng:d.location.lng}, dest];
-    if(driverRoutePolylines[d._id]){
-      driverRoutePolylines[d._id].setPath(path);
-      driverRoutePolylines[d._id].setOptions({strokeColor:color});
-    } else {
-      driverRoutePolylines[d._id] = new google.maps.Polyline({
-        path, map: mapInstance, strokeColor: color, strokeWeight: 4, strokeOpacity: 0.85,
+    const cacheKey = activeOrder._id; // المسار (متجر → عنوان) ثابت طول ما الطلب هو نفسه
+    const current = driverRouteRenderers[d._id];
+    if(!current || current.cacheKey !== cacheKey){
+      current?.renderer?.setMap(null);
+      current?.fallbackLine?.setMap(null);
+      const renderer = new google.maps.DirectionsRenderer({
+        map: mapInstance, suppressMarkers: true, preserveViewport: true,
+        polylineOptions: { strokeColor: color, strokeWeight: 4, strokeOpacity: 0.85 },
       });
+      const entry = { renderer, fallbackLine: null, cacheKey };
+      driverRouteRenderers[d._id] = entry;
+      getDirService().route(
+        { origin: STORE_LOCATION, destination: dest, travelMode: 'DRIVING' },
+        (result, status) => {
+          if (status === 'OK') {
+            renderer.setDirections(result);
+          } else {
+            renderer.setMap(null);
+            entry.fallbackLine = new google.maps.Polyline({
+              path: [STORE_LOCATION, dest], map: mapInstance,
+              strokeColor: color, strokeWeight: 4, strokeOpacity: 0.85,
+            });
+          }
+        }
+      );
     }
   });
-  // نشيل خطوط أي مندوب خلّص طلبه أو بقى غير شغال
-  Object.keys(driverRoutePolylines).forEach(id=>{
+  // نشيل مسار أي مندوب خلّص طلبه أو بقى غير شغال
+  Object.keys(driverRouteRenderers).forEach(id=>{
     if(!activeDriverIds.has(id)){
-      driverRoutePolylines[id].setMap(null);
-      delete driverRoutePolylines[id];
+      driverRouteRenderers[id].renderer?.setMap(null);
+      driverRouteRenderers[id].fallbackLine?.setMap(null);
+      delete driverRouteRenderers[id];
     }
   });
 }
 
 function updateMapMarkers(){
   if(!mapInstance) return;
-  const existing=new Set(Object.keys(mapMarkers));
+  const existingPlain=new Set(Object.keys(mapMarkers));
+  const existingPulse=new Set(Object.keys(driverPulseOverlays));
   let hasAny=false;
-  drivers.forEach(d=>{
+  drivers.forEach((d,idx)=>{
     if(!d.location?.lat) return;
     hasAny=true;
-    const color=d.status==='available'?'#EC1C7A':d.status==='busy'?'#F5941F':'#9ca3af';
-    const online = d.status && d.status!=='offline';
     const pos = { lat: d.location.lat, lng: d.location.lng };
-    if(mapMarkers[d._id]){
-      mapMarkers[d._id].setPosition(pos);
-      mapMarkers[d._id].setOpacity(online?1:0.4);
+    const online = d.status && d.status!=='offline';
+    // مندوب شغال بطلب دلوقتي (delivering) بياخد أيقونة نابضة بلون
+    // مساره - نفس شكل صفحة "المتابعة المباشرة" بالظبط. مندوب من غير
+    // طلب حالي بياخد الأيقونة العادية.
+    const activeOrder = activeOrdersWithCoords.find(o=>o.driverId===d._id);
+    if(activeOrder){
+      if(mapMarkers[d._id]){ mapMarkers[d._id].setMap(null); delete mapMarkers[d._id]; }
+      const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
+      if(driverPulseOverlays[d._id]){
+        driverPulseOverlays[d._id].setPos(pos);
+      } else {
+        driverPulseOverlays[d._id] = new PulseOverlay(pos, color, () => { selDriverId=d._id; selectDriver(d._id); });
+        driverPulseOverlays[d._id].setMap(mapInstance);
+      }
+      existingPulse.delete(d._id);
+      existingPlain.delete(d._id);
     } else {
-      const m = new google.maps.Marker({
-        position: pos, map: mapInstance, title: d.name,
-        icon: svgMarkerIcon(color, '🏍️', 46),
-        opacity: online?1:0.4,
-      });
-      m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
-      mapMarkers[d._id] = m;
+      if(driverPulseOverlays[d._id]){ driverPulseOverlays[d._id].setMap(null); delete driverPulseOverlays[d._id]; }
+      const color=d.status==='available'?'#EC1C7A':d.status==='busy'?'#F5941F':'#9ca3af';
+      if(mapMarkers[d._id]){
+        mapMarkers[d._id].setPosition(pos);
+        mapMarkers[d._id].setOpacity(online?1:0.4);
+      } else {
+        const m = new google.maps.Marker({
+          position: pos, map: mapInstance, title: d.name,
+          icon: svgMarkerIcon(color, '🏍️', 46),
+          opacity: online?1:0.4,
+        });
+        m.addListener('click', () => { selDriverId=d._id; selectDriver(d._id); });
+        mapMarkers[d._id] = m;
+      }
+      existingPlain.delete(d._id);
+      existingPulse.delete(d._id);
     }
-    existing.delete(d._id);
   });
-  existing.forEach(id=>{ mapMarkers[id].setMap(null); delete mapMarkers[id]; });
+  existingPlain.forEach(id=>{ mapMarkers[id]?.setMap(null); delete mapMarkers[id]; });
+  existingPulse.forEach(id=>{ driverPulseOverlays[id]?.setMap(null); delete driverPulseOverlays[id]; });
   document.getElementById('mapEmpty').style.display=hasAny?'none':'block';
   updateDriverRoutes();
 }
@@ -1802,26 +1877,7 @@ let trkMap=null, trkMarkers={};
 // (Google Cloud Console) عشان المسارات ترسم على الطرق الحقيقية زي
 // اللي في التصميم، بدل خط مستقيم. لو مش مفعّلة، هيرجع تلقائيًا لخط
 // مستقيم بدل ما يبوّظ الصفحة.
-const trkDirService = new google.maps.DirectionsService();
 let trkRoutesCache = {}; // orderId -> true بعد ما نطلب المسار مرة، عشان منكررش الطلب كل تحديث
-class PulseOverlay extends google.maps.OverlayView{
-  constructor(pos,color){ super(); this.pos=pos; this.color=color; this.div=null; }
-  onAdd(){
-    const div=document.createElement('div');
-    div.className='trk-rider-pulse';
-    div.innerHTML=`<div class="ring" style="background:${this.color}33"></div><div class="core" style="background:${this.color}">🏍️</div>`;
-    this.div=div;
-    this.getPanes().overlayMouseTarget.appendChild(div);
-  }
-  draw(){
-    const proj=this.getProjection(); if(!proj||!this.div) return;
-    const p=proj.fromLatLngToDivPixel(new google.maps.LatLng(this.pos.lat,this.pos.lng));
-    this.div.style.left=(p.x-20)+'px';
-    this.div.style.top=(p.y-20)+'px';
-  }
-  setPos(pos){ this.pos=pos; this.draw(); }
-  onRemove(){ if(this.div){ this.div.remove(); this.div=null; } }
-}
 function trkSmallPin(color, emoji){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="34" height="42"><path d="M17 0C8 0 0 7.3 0 16.3 0 27 17 42 17 42S34 27 34 16.3C34 7.3 26 0 17 0Z" fill="${color}"/><circle cx="17" cy="16" r="11" fill="white"/><text x="17" y="21" text-anchor="middle" font-size="14">${emoji}</text></svg>`;
   return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(34,42),anchor:new google.maps.Point(17,42)};
@@ -1860,7 +1916,7 @@ async function refreshTrkMap(){
           map: trkMap, suppressMarkers: true, preserveViewport: true,
           polylineOptions: { strokeColor: color, strokeWeight: 4, strokeOpacity: .85 },
         });
-        trkDirService.route(
+        getDirService().route(
           { origin: STORE_LOCATION, destination: dest, travelMode: 'DRIVING' },
           (result, status) => {
             if (status === 'OK') {
